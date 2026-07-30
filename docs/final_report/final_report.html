@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<style>
+@page { size: A4; margin: 18mm 16mm 18mm 16mm; @bottom-center { content: counter(page); font-size: 9pt; } }
+body { font-family: 'Noto Sans Arabic', 'DejaVu Sans', sans-serif; direction: rtl; color:#172033; line-height:1.75; font-size:10.5pt; }
+h1,h2,h3 { color:#123b5d; page-break-after: avoid; }
+h1 { font-size:23pt; text-align:center; margin-top:45mm; }
+h2 { font-size:16pt; border-bottom:1px solid #cbd7e1; padding-bottom:3px; margin-top:18px; }
+h3 { font-size:12.5pt; }
+p { text-align:justify; }
+.cover { page-break-after: always; text-align:center; }
+.meta { margin:28mm auto 0; width:82%; border:1px solid #b8c6d2; border-radius:8px; padding:18px; background:#f6f9fb; }
+.meta p { text-align:center; margin:8px; }
+table { width:100%; border-collapse:collapse; margin:12px 0; font-size:9pt; direction:ltr; }
+th,td { border:1px solid #9fb1c1; padding:6px; text-align:center; }
+th { background:#e8f0f6; color:#123b5d; }
+figure { page-break-inside:avoid; margin:14px auto; text-align:center; }
+figure img { max-width:95%; max-height:95mm; }
+figcaption { font-size:9pt; color:#566; margin-top:4px; }
+.callout { background:#eef6fb; border-right:4px solid #1f76b4; padding:9px 12px; margin:12px 0; }
+.code { direction:ltr; text-align:left; font-family:monospace; background:#f2f4f6; padding:8px; }
+ul { margin-right:20px; }
+.small { font-size:9pt; color:#526273; }
+</style>
+</head>
+<body>
+<section class="cover">
+<h1>گزارش نهایی پروژه Wumpus World</h1>
+<h2 style="border:0;text-align:center">نسخه 8 - مقایسه A-Star، عامل قاعده‌محور و عامل ژنتیکی ترکیبی</h2>
+<div class="meta">
+<p><b>نام دانشجو:</b> Mahan</p>
+<p><b>شماره دانشجویی:</b> [شماره دانشجویی]</p>
+<p><b>درس:</b> هوش مصنوعی</p>
+<p><b>استاد:</b> [نام استاد]</p>
+<p><b>دانشگاه:</b> [نام دانشگاه]</p>
+<p><b>تاریخ:</b> 1405/05/08</p>
+</div>
+</section>
+
+<h2>چکیده</h2>
+<p>در این پروژه محیط Wumpus World روی گرید 8×8 پیاده‌سازی شد و سه روش متفاوت روی یک محیط و مجموعه معیار مشترک مقایسه شدند. A-Star به کل نقشه دسترسی دارد و نقش Oracle را ایفا می‌کند. عامل قاعده‌محور و عامل ژنتیکی ترکیبی فقط از ادراک‌های محلی، حافظه و مختصات عمومی خروج استفاده می‌کنند. وزن‌های روش ژنتیکی روی 12 نقشه آموزش تکامل یافتند و ارزیابی نهایی روی 30 نقشه تست جداگانه و 90 اپیزود انجام شد.</p>
+<div class="callout">نتیجه اصلی: A-Star به 100٪، Rule-Based به 90٪ و Hybrid Genetic به 83.33٪ موفقیت رسید. در میان عامل‌های آنلاین، Rule-Based مطمئن‌تر و Hybrid Genetic در اپیزودهای موفق کوتاه‌مسیرتر بود.</div>
+
+<h2>۱. تعریف مسئله و قوانین</h2>
+<p>عامل از خانه (1,1) شروع می‌کند، باید حداقل یک طلا جمع‌آوری کند و پیش از تمام‌شدن جان به خروج برسد. هر تلاش برای حرکت یک واحد جان کم می‌کند. دیوار حرکت را مسدود می‌کند، چاه پس از هزینه حرکت جان را نصف می‌کند، غول مرگ فوری ایجاد می‌کند و خروج بدون طلا شکست است.</p>
+<ul><li>Breeze: وجود چاه در همسایگی چهارجهته</li><li>Stench: وجود غول در همسایگی چهارجهته</li><li>Pit here: تشخیص چاه پس از زنده‌ماندن و ورود</li><li>حرکت‌های معتبر، جان، داشتن طلا و مختصات خروج</li></ul>
+
+<h2>۲. معماری</h2>
+<p>parser، محیط، عامل‌ها، پایگاه دانش، آموزش ژنتیک، مولد نقشه و benchmark در ماژول‌های مستقل قرار گرفته‌اند. تمام عامل‌ها از تابع اجرای مشترک استفاده می‌کنند. نسخه 8 باگ پایان max_steps، برنامه‌ریزی دوباره A-Star، تشخیص نادرست چاه بازدیدشده، fallback بی‌صدای وزن‌های ژنتیکی و اعتبارسنجی ناقص نقشه را اصلاح می‌کند.</p>
+
+<h2>۳. روش A-Star</h2>
+<p>حالت جست‌وجو شامل موقعیت، جان باقی‌مانده و داشتن طلاست. دیوار و غول از فضای حالت حذف می‌شوند. ورود به چاه در صورت زنده‌ماندن مجاز است، اما کاهش واقعی جان و جریمه چاه در هزینه مسیر لحاظ می‌شود. heuristic فاصله منهتن یک lower bound معتبر است.</p>
+
+<h2>۴. عامل قاعده‌محور</h2>
+<p>این عامل از Breeze و Stench پایگاه دانش می‌سازد. نبود ادراک خطر، همسایه‌ها را از همان خطر مبرا می‌کند. clause تک‌عضوی محل خطر قطعی را مشخص می‌کند. عامل خانه امن بازدیدنشده را ترجیح می‌دهد، در بن‌بست backtracking می‌کند و در نبود گزینه امن، کم‌خطرترین frontier را انتخاب می‌کند.</p>
+
+<h2>۵. عامل ژنتیکی ترکیبی</h2>
+<p>روش سوم یک عامل ترکیبی است. پایگاه دانش محلی شواهد خطر را فراهم می‌کند؛ یک سیاست خطی با 10 وزن تکامل‌یافته، حرکت‌های مرحله اکتشاف را امتیازدهی می‌کند؛ و پس از گرفتن طلا، عامل از کوتاه‌ترین مسیر شناخته‌شده امن به خروج بازمی‌گردد.</p>
+<p class="code">score(action) = Σ weight_i × feature_i(action)</p>
+
+<h2>۶. آموزش الگوریتم ژنتیک</h2>
+<ul><li>12 نقشه آموزش جدا</li><li>Population = 24</li><li>Maximum generations = 24</li><li>Elitism = 2</li><li>Tournament size = 3</li><li>Mutation rate = 0.10</li><li>Seed = 17</li><li>Best fitness = 1840.67</li></ul>
+<figure><img src="../assets/genetic_fitness.png"><figcaption>روند بهترین و میانگین Fitness در طول آموزش</figcaption></figure>
+
+<h2>۷. طراحی آزمایش</h2>
+<p>30 نقشه تست دیده‌نشده شامل 10 نقشه آسان، 10 متوسط و 10 سخت با seed ثابت تولید شدند. خروج، محل طلا و طول مسیرها متنوع است. جان اولیه همه سطوح برابر 120 است تا امتیاز بین دشواری‌ها قابل مقایسه باشد. زمان اجرا median سه اجرای کامل است و تعداد حرکت موفق جداگانه گزارش می‌شود.</p>
+
+<h2>۸. نتایج کلی</h2>
+<table><thead><tr><th>Agent</th><th>Success</th><th>Score all</th><th>Steps all</th><th>Steps success</th><th>Health</th><th>Pit entries</th><th>Wumpus deaths</th></tr></thead><tbody><tr><td>astar</td><td>100.0%</td><td>157.6</td><td>12.4</td><td>12.4</td><td>107.6</td><td>0.0</td><td>0</td></tr><tr><td>rule</td><td>90.0%</td><td>117.93</td><td>32.9</td><td>32.3</td><td>73.93</td><td>0.267</td><td>1</td></tr><tr><td>genetic</td><td>83.33%</td><td>120.97</td><td>31.8</td><td>24.6</td><td>75.63</td><td>0.133</td><td>2</td></tr></tbody></table>
+<figure><img src="../assets/success_rate.png"><figcaption>نرخ موفقیت سه روش</figcaption></figure>
+<figure><img src="../assets/average_steps_success.png"><figcaption>میانگین حرکت فقط در اپیزودهای موفق</figcaption></figure>
+
+<h2>۹. تحلیل مقایسه‌ای</h2>
+<p>A-Star به دلیل اطلاعات کامل و وجود حداقل یک مسیر امن، کران بالای عملکرد است. Rule-Based در میان عامل‌های آنلاین نرخ موفقیت بالاتری دارد و محافظه‌کارتر است. Hybrid Genetic در اپیزودهای موفق حرکت کمتری مصرف می‌کند و امتیاز موفقیت بالاتری دارد، اما ریسک مرگ با غول بیشتر است. بنابراین نتیجه علمی، برتری مطلق یک روش نیست؛ بلکه تفاوت در trade-off میان اطمینان، توضیح‌پذیری و سرعت موفقیت است.</p>
+<figure><img src="../assets/success_by_difficulty.png"><figcaption>نرخ موفقیت بر اساس سطح دشواری</figcaption></figure>
+<figure><img src="../assets/failure_reasons.png"><figcaption>دلایل شکست</figcaption></figure>
+
+<h2>۱۰. محدودیت‌ها</h2>
+<ul><li>A-Star سطح اطلاعات متفاوتی دارد.</li><li>نتایج برای seed و مجموعه تست ثبت‌شده معتبرند.</li><li>عامل ژنتیکی تضمین بهینگی یا موفقیت ندارد.</li><li>زمان اجرا به سخت‌افزار وابسته است.</li><li>برای استنباط آماری قوی‌تر، چند seed و confidence interval لازم است.</li></ul>
+
+<h2>۱۱. نتیجه‌گیری</h2>
+<p>نسخه 8 یک pipeline قابل‌بازتولید از تولید نقشه و آموزش تا تست، ارزیابی، گزارش و ارائه فراهم می‌کند. A-Star بهترین عملکرد را در محیط کاملاً شناخته‌شده دارد. در محیط ناشناخته، Rule-Based مطمئن‌تر و توضیح‌پذیرتر است، در حالی که Hybrid Genetic در موفقیت‌ها کوتاه‌مسیرتر اما ریسک‌پذیرتر عمل می‌کند.</p>
+
+<h2>۱۲. منابع</h2>
+<ol><li>Russell, S. J., & Norvig, P. Artificial Intelligence: A Modern Approach.</li><li>Hart, P. E., Nilsson, N. J., & Raphael, B. (1968). A Formal Basis for the Heuristic Determination of Minimum Cost Paths.</li><li>Holland, J. H. (1975). Adaptation in Natural and Artificial Systems.</li><li>Goldberg, D. E. (1989). Genetic Algorithms in Search, Optimization, and Machine Learning.</li></ol>
+</body></html>

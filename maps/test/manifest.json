@@ -1,0 +1,632 @@
+[
+  {
+    "map_id": "test_001_easy",
+    "difficulty": "easy",
+    "seed": 1503191042,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      5
+    ],
+    "gold_position": [
+      6,
+      4
+    ],
+    "walls": 4,
+    "pits": 2,
+    "wumpus": 1,
+    "protected_path_length": 16,
+    "astar_plan_length": 12
+  },
+  {
+    "map_id": "test_002_easy",
+    "difficulty": "easy",
+    "seed": 1284006632,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      6,
+      7
+    ],
+    "gold_position": [
+      5,
+      5
+    ],
+    "walls": 6,
+    "pits": 2,
+    "wumpus": 1,
+    "protected_path_length": 13,
+    "astar_plan_length": 13
+  },
+  {
+    "map_id": "test_003_easy",
+    "difficulty": "easy",
+    "seed": 2049683099,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      1
+    ],
+    "gold_position": [
+      4,
+      1
+    ],
+    "walls": 7,
+    "pits": 1,
+    "wumpus": 1,
+    "protected_path_length": 8,
+    "astar_plan_length": 8
+  },
+  {
+    "map_id": "test_004_easy",
+    "difficulty": "easy",
+    "seed": 375449128,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      4,
+      7
+    ],
+    "gold_position": [
+      4,
+      6
+    ],
+    "walls": 7,
+    "pits": 1,
+    "wumpus": 1,
+    "protected_path_length": 15,
+    "astar_plan_length": 11
+  },
+  {
+    "map_id": "test_005_easy",
+    "difficulty": "easy",
+    "seed": 545955441,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      6,
+      0
+    ],
+    "gold_position": [
+      6,
+      2
+    ],
+    "walls": 4,
+    "pits": 2,
+    "wumpus": 1,
+    "protected_path_length": 10,
+    "astar_plan_length": 10
+  },
+  {
+    "map_id": "test_006_easy",
+    "difficulty": "easy",
+    "seed": 1146320228,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      1
+    ],
+    "gold_position": [
+      3,
+      5
+    ],
+    "walls": 5,
+    "pits": 2,
+    "wumpus": 1,
+    "protected_path_length": 16,
+    "astar_plan_length": 16
+  },
+  {
+    "map_id": "test_007_easy",
+    "difficulty": "easy",
+    "seed": 362306333,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      5,
+      7
+    ],
+    "gold_position": [
+      4,
+      5
+    ],
+    "walls": 6,
+    "pits": 2,
+    "wumpus": 1,
+    "protected_path_length": 12,
+    "astar_plan_length": 12
+  },
+  {
+    "map_id": "test_008_easy",
+    "difficulty": "easy",
+    "seed": 72732712,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      6,
+      0
+    ],
+    "gold_position": [
+      2,
+      6
+    ],
+    "walls": 7,
+    "pits": 1,
+    "wumpus": 1,
+    "protected_path_length": 22,
+    "astar_plan_length": 18
+  },
+  {
+    "map_id": "test_009_easy",
+    "difficulty": "easy",
+    "seed": 1575629454,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      0
+    ],
+    "gold_position": [
+      3,
+      1
+    ],
+    "walls": 4,
+    "pits": 1,
+    "wumpus": 1,
+    "protected_path_length": 9,
+    "astar_plan_length": 9
+  },
+  {
+    "map_id": "test_010_easy",
+    "difficulty": "easy",
+    "seed": 1208088724,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      4,
+      7
+    ],
+    "gold_position": [
+      5,
+      4
+    ],
+    "walls": 7,
+    "pits": 1,
+    "wumpus": 1,
+    "protected_path_length": 13,
+    "astar_plan_length": 13
+  },
+  {
+    "map_id": "test_011_medium",
+    "difficulty": "medium",
+    "seed": 857188605,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      1
+    ],
+    "gold_position": [
+      3,
+      3
+    ],
+    "walls": 8,
+    "pits": 4,
+    "wumpus": 2,
+    "protected_path_length": 16,
+    "astar_plan_length": 12
+  },
+  {
+    "map_id": "test_012_medium",
+    "difficulty": "medium",
+    "seed": 1207586330,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      0,
+      6
+    ],
+    "gold_position": [
+      6,
+      1
+    ],
+    "walls": 8,
+    "pits": 3,
+    "wumpus": 2,
+    "protected_path_length": 22,
+    "astar_plan_length": 18
+  },
+  {
+    "map_id": "test_013_medium",
+    "difficulty": "medium",
+    "seed": 1272969334,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      4
+    ],
+    "gold_position": [
+      6,
+      2
+    ],
+    "walls": 12,
+    "pits": 5,
+    "wumpus": 1,
+    "protected_path_length": 15,
+    "astar_plan_length": 11
+  },
+  {
+    "map_id": "test_014_medium",
+    "difficulty": "medium",
+    "seed": 127472459,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      6,
+      7
+    ],
+    "gold_position": [
+      1,
+      4
+    ],
+    "walls": 10,
+    "pits": 5,
+    "wumpus": 2,
+    "protected_path_length": 21,
+    "astar_plan_length": 13
+  },
+  {
+    "map_id": "test_015_medium",
+    "difficulty": "medium",
+    "seed": 369934243,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      4
+    ],
+    "gold_position": [
+      3,
+      3
+    ],
+    "walls": 10,
+    "pits": 5,
+    "wumpus": 1,
+    "protected_path_length": 19,
+    "astar_plan_length": 11
+  },
+  {
+    "map_id": "test_016_medium",
+    "difficulty": "medium",
+    "seed": 1158169993,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      6
+    ],
+    "gold_position": [
+      2,
+      4
+    ],
+    "walls": 11,
+    "pits": 4,
+    "wumpus": 1,
+    "protected_path_length": 21,
+    "astar_plan_length": 13
+  },
+  {
+    "map_id": "test_017_medium",
+    "difficulty": "medium",
+    "seed": 708806961,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      1,
+      7
+    ],
+    "gold_position": [
+      2,
+      3
+    ],
+    "walls": 11,
+    "pits": 5,
+    "wumpus": 1,
+    "protected_path_length": 18,
+    "astar_plan_length": 10
+  },
+  {
+    "map_id": "test_018_medium",
+    "difficulty": "medium",
+    "seed": 1224171452,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      4
+    ],
+    "gold_position": [
+      6,
+      6
+    ],
+    "walls": 8,
+    "pits": 4,
+    "wumpus": 2,
+    "protected_path_length": 23,
+    "astar_plan_length": 15
+  },
+  {
+    "map_id": "test_019_medium",
+    "difficulty": "medium",
+    "seed": 1271726072,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      6
+    ],
+    "gold_position": [
+      2,
+      4
+    ],
+    "walls": 11,
+    "pits": 5,
+    "wumpus": 2,
+    "protected_path_length": 17,
+    "astar_plan_length": 13
+  },
+  {
+    "map_id": "test_020_medium",
+    "difficulty": "medium",
+    "seed": 1075483359,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      7
+    ],
+    "gold_position": [
+      4,
+      6
+    ],
+    "walls": 11,
+    "pits": 4,
+    "wumpus": 2,
+    "protected_path_length": 22,
+    "astar_plan_length": 14
+  },
+  {
+    "map_id": "test_021_hard",
+    "difficulty": "hard",
+    "seed": 1004956546,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      0,
+      7
+    ],
+    "gold_position": [
+      1,
+      6
+    ],
+    "walls": 14,
+    "pits": 8,
+    "wumpus": 2,
+    "protected_path_length": 17,
+    "astar_plan_length": 9
+  },
+  {
+    "map_id": "test_022_hard",
+    "difficulty": "hard",
+    "seed": 1753720951,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      6,
+      7
+    ],
+    "gold_position": [
+      3,
+      3
+    ],
+    "walls": 13,
+    "pits": 6,
+    "wumpus": 3,
+    "protected_path_length": 21,
+    "astar_plan_length": 13
+  },
+  {
+    "map_id": "test_023_hard",
+    "difficulty": "hard",
+    "seed": 764237336,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      6
+    ],
+    "gold_position": [
+      3,
+      2
+    ],
+    "walls": 16,
+    "pits": 6,
+    "wumpus": 2,
+    "protected_path_length": 29,
+    "astar_plan_length": 13
+  },
+  {
+    "map_id": "test_024_hard",
+    "difficulty": "hard",
+    "seed": 152710851,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      1,
+      7
+    ],
+    "gold_position": [
+      1,
+      4
+    ],
+    "walls": 13,
+    "pits": 5,
+    "wumpus": 2,
+    "protected_path_length": 16,
+    "astar_plan_length": 8
+  },
+  {
+    "map_id": "test_025_hard",
+    "difficulty": "hard",
+    "seed": 1644186190,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      5
+    ],
+    "gold_position": [
+      3,
+      2
+    ],
+    "walls": 14,
+    "pits": 6,
+    "wumpus": 2,
+    "protected_path_length": 24,
+    "astar_plan_length": 12
+  },
+  {
+    "map_id": "test_026_hard",
+    "difficulty": "hard",
+    "seed": 1112794565,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      0
+    ],
+    "gold_position": [
+      6,
+      1
+    ],
+    "walls": 17,
+    "pits": 6,
+    "wumpus": 3,
+    "protected_path_length": 17,
+    "astar_plan_length": 9
+  },
+  {
+    "map_id": "test_027_hard",
+    "difficulty": "hard",
+    "seed": 530968735,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      7,
+      3
+    ],
+    "gold_position": [
+      5,
+      6
+    ],
+    "walls": 13,
+    "pits": 6,
+    "wumpus": 2,
+    "protected_path_length": 32,
+    "astar_plan_length": 16
+  },
+  {
+    "map_id": "test_028_hard",
+    "difficulty": "hard",
+    "seed": 1624912103,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      6,
+      7
+    ],
+    "gold_position": [
+      2,
+      2
+    ],
+    "walls": 12,
+    "pits": 5,
+    "wumpus": 3,
+    "protected_path_length": 21,
+    "astar_plan_length": 13
+  },
+  {
+    "map_id": "test_029_hard",
+    "difficulty": "hard",
+    "seed": 633463074,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      0,
+      7
+    ],
+    "gold_position": [
+      4,
+      1
+    ],
+    "walls": 13,
+    "pits": 5,
+    "wumpus": 2,
+    "protected_path_length": 27,
+    "astar_plan_length": 15
+  },
+  {
+    "map_id": "test_030_hard",
+    "difficulty": "hard",
+    "seed": 2036570905,
+    "initial_health": 120,
+    "gold_score": 50,
+    "pit_penalty": 10,
+    "exit_position": [
+      6,
+      0
+    ],
+    "gold_position": [
+      3,
+      3
+    ],
+    "walls": 12,
+    "pits": 5,
+    "wumpus": 3,
+    "protected_path_length": 28,
+    "astar_plan_length": 12
+  }
+]

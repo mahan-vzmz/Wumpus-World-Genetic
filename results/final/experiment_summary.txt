@@ -1,0 +1,28 @@
+WUMPUS WORLD VERSION 8 - FINAL EXPERIMENT SUMMARY
+========================================================
+
+Episodes per agent: 30
+Best overall success rate: astar (100.00%)
+Best online agent: rule (90.00%)
+
+OVERALL RESULTS
+--------------------------------------------------------
+astar    | success=100.00% | score_all= 157.60 | steps_all=  12.40 | steps_success=  12.40 | runtime=  0.2870 ms
+rule     | success= 90.00% | score_all= 117.93 | steps_all=  32.90 | steps_success=  32.30 | runtime=  1.2501 ms
+genetic  | success= 83.33% | score_all= 120.97 | steps_all=  31.80 | steps_success=  24.60 | runtime=  1.4247 ms
+
+INTERPRETATION AND LIMITATIONS
+--------------------------------------------------------
+1. A* has full map information and is an oracle/upper-bound baseline.
+2. Rule-based and genetic agents receive the same local observations.
+3. The genetic method is hybrid: GA weights guide exploration, while a knowledge base and safe-return policy are shared components.
+4. Initial health is identical across difficulty levels, so score comparison is not biased by starting health.
+5. Average successful steps is reported separately; failed early episodes no longer make an agent look artificially faster.
+6. Runtime is the median of repeated complete episodes, not a single noisy measurement.
+7. Test maps are deterministic and separate from the training maps.
+
+FAILURE COUNTS
+--------------------------------------------------------
+health_depleted: 4
+wumpus: 3
+escaped_without_gold: 1

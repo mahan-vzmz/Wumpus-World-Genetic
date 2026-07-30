@@ -1,0 +1,10 @@
+[project]
+name = "wumpus-world-genetic"
+version = "8.0.0"
+description = "Wumpus World comparison of A*, rule-based, and hybrid genetic agents"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-ra"

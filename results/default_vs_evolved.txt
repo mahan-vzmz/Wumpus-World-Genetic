@@ -1,0 +1,32 @@
+
+Default hand-written weights
+map,success,fitness,steps,health,pits,reason
+training_001_easy.txt,True,1910.00,20,100,0,escaped_with_gold
+training_002_easy.txt,True,1854.00,34,86,0,escaped_with_gold
+training_003_easy.txt,True,1870.00,30,90,0,escaped_with_gold
+training_004_easy.txt,True,1890.00,25,95,0,escaped_with_gold
+training_005_medium.txt,True,1854.00,34,86,0,escaped_with_gold
+training_006_medium.txt,True,1918.00,18,102,0,escaped_with_gold
+training_007_medium.txt,True,1814.00,44,76,0,escaped_with_gold
+training_008_medium.txt,True,1942.00,12,108,0,escaped_with_gold
+training_009_hard.txt,False,-1116.00,68,0,1,health_depleted
+training_010_hard.txt,True,1774.00,54,66,0,escaped_with_gold
+training_011_hard.txt,True,1562.00,32,28,1,escaped_with_gold
+training_012_hard.txt,True,1878.00,28,92,0,escaped_with_gold
+summary: success_rate=91.7% average_fitness=1595.83 average_steps=33.25
+
+Evolved weights
+map,success,fitness,steps,health,pits,reason
+training_001_easy.txt,True,1910.00,20,100,0,escaped_with_gold
+training_002_easy.txt,True,1854.00,34,86,0,escaped_with_gold
+training_003_easy.txt,True,1870.00,30,90,0,escaped_with_gold
+training_004_easy.txt,True,1890.00,25,95,0,escaped_with_gold
+training_005_medium.txt,True,1854.00,34,86,0,escaped_with_gold
+training_006_medium.txt,True,1918.00,18,102,0,escaped_with_gold
+training_007_medium.txt,True,1814.00,44,76,0,escaped_with_gold
+training_008_medium.txt,True,1942.00,12,108,0,escaped_with_gold
+training_009_hard.txt,True,1822.00,42,78,0,escaped_with_gold
+training_010_hard.txt,True,1774.00,54,66,0,escaped_with_gold
+training_011_hard.txt,True,1562.00,32,28,1,escaped_with_gold
+training_012_hard.txt,True,1878.00,28,92,0,escaped_with_gold
+summary: success_rate=100.0% average_fitness=1840.67 average_steps=31.08
