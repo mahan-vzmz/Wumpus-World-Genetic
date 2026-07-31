@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import argparse
 import csv
 import json
@@ -8,7 +7,6 @@ import time
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
-
 import matplotlib
 
 matplotlib.use("Agg")

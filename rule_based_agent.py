@@ -1,16 +1,13 @@
 from __future__ import annotations
-
 from collections import deque
 from dataclasses import dataclass
 from typing import Any, Callable, Iterable
-
 from base_agent import BaseAgent
 from environment import ACTION_DELTAS, Action
 from knowledge_base import KnowledgeBase, Position
 from map_parser import MapConfig
 
 ACTION_ORDER = (Action.RIGHT, Action.DOWN, Action.LEFT, Action.UP)
-
 
 @dataclass(frozen=True)
 class DecisionTrace:
@@ -22,8 +19,6 @@ class DecisionTrace:
 
 
 class RuleBasedAgent(BaseAgent):
-    """Online knowledge-based agent using local percepts and safe backtracking."""
-
     def __init__(self, config: MapConfig):
         self.rows = len(config.grid)
         self.cols = len(config.grid[0])

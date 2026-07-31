@@ -4,6 +4,10 @@ version = "8.0.0"
 description = "Wumpus World comparison of A*, rule-based, and hybrid genetic agents"
 requires-python = ">=3.10"
 
+[[project.authors]]
+name = "ماهان ورمزیار"
+email = "mahan.varmazyar@gmail.com"
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]

@@ -1,15 +1,12 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from heapq import heappop, heappush
 from itertools import count
 from math import inf
 from typing import Any
-
 from base_agent import BaseAgent
 from environment import ACTION_DELTAS, Action
 from map_parser import MapConfig
-
 
 @dataclass(frozen=True)
 class SearchState:
@@ -32,8 +29,6 @@ class NoPathError(RuntimeError):
 
 
 class AStarAgent(BaseAgent):
-    """Full-information, risk-aware A* baseline."""
-
     def __init__(self, config: MapConfig):
         self.config = config
         self.rows = len(config.grid)

@@ -1,11 +1,8 @@
 from __future__ import annotations
-
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
-
 from map_parser import MapConfig
-
 
 class Action(str, Enum):
     UP = "UP"
@@ -38,7 +35,6 @@ class GameState:
 
 
 class WumpusEnvironment:
-    """Deterministic 8x8 Wumpus World shared by all agents."""
 
     def __init__(self, config: MapConfig):
         self.config = config
@@ -145,7 +141,6 @@ class WumpusEnvironment:
             self._inside(candidate) and self.cell_at(candidate) == "D"
         )
 
-        # Every attempted move, including blocked moves, costs one health point.
         self.state.health -= 1
         self.state.steps += 1
 

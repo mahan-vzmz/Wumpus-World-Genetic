@@ -56,8 +56,6 @@ def main() -> None:
 
     required = [
         ROOT / "docs" / "final_report" / "final_report.pdf",
-        ROOT / "docs" / "presentation" / "wumpus_world_presentation.pptx",
-        ROOT / "docs" / "presentation" / "wumpus_world_presentation.pdf",
         ROOT / "results" / "final" / "summary_results.csv",
         ROOT / "results" / "genetic_fitness.png",
     ]

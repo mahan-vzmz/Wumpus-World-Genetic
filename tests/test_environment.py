@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from environment import Action, WumpusEnvironment
 from map_parser import MapConfig, load_map
 

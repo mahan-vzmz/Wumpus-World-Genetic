@@ -1,9 +1,7 @@
 from __future__ import annotations
-
 import argparse
 from pathlib import Path
 from typing import Any
-
 from astar_agent import AStarAgent, NoPathError
 from base_agent import BaseAgent
 from environment import WumpusEnvironment

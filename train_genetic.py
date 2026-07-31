@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 import argparse
 from pathlib import Path
-
 from genetic_algorithm import (
     GeneticTrainer,
     load_training_configs,

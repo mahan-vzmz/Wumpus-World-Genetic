@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import csv
 import json
 import math
@@ -8,7 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean
 from typing import Iterable, Sequence
-
 from environment import WumpusEnvironment
 from genetic_agent import GENE_BOUNDS, GENE_NAMES, GeneticAgent, GeneticWeights
 from map_parser import MapConfig, load_map
@@ -46,8 +44,6 @@ class TrainingResult:
 
 
 class GeneticTrainer:
-    """Reproducible real-valued genetic algorithm for policy weights."""
-
     def __init__(
         self,
         configs: Sequence[MapConfig],
@@ -275,7 +271,6 @@ def episode_fitness(
     pit_entries: int,
     termination_reason: str,
 ) -> float:
-    """Training objective without double-counting the environment score."""
 
     value = 1500.0 if success else 0.0
     value += 250.0 * collected_gold

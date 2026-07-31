@@ -62,13 +62,3 @@ python train_genetic.py --regenerate-training-maps
 pip install -r requirements-docs.txt
 python docs/build_artifacts.py
 ```
-
-## خطاهای متداول
-
-| خطا | راه‌حل |
-|---|---|
-| `ModuleNotFoundError` | دستور را از ریشه پروژه اجرا کن |
-| نبود وزن | مطمئن شو `best_weights.json` موجود است |
-| نقشه نامعتبر | فایل باید دقیقاً 8 سطر گرید و 4 خط تنظیمات داشته باشد |
-| نتیجه متفاوت runtime | زمان به سیستم وابسته است؛ معیار اصلی نرخ موفقیت و score است |
-| PDF قدیمی | پس از تغییر اطلاعات یا نتایج، `docs/build_artifacts.py` را اجرا کن |

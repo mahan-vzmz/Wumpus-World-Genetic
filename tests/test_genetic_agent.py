@@ -1,10 +1,7 @@
 from __future__ import annotations
-
 import json
 from pathlib import Path
-
 import pytest
-
 from environment import Action, WumpusEnvironment
 from genetic_agent import GENE_BOUNDS, GENE_NAMES, GeneticAgent, GeneticWeights
 from genetic_algorithm import GeneticTrainer, evaluate_episode

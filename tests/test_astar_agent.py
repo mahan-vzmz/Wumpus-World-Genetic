@@ -1,7 +1,5 @@
 from __future__ import annotations
-
 import pytest
-
 from astar_agent import AStarAgent, NoPathError
 from environment import Action, WumpusEnvironment
 from map_parser import MapConfig

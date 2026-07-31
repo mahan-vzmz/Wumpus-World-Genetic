@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import csv
 import html
 import json
@@ -11,7 +10,6 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 ASSETS = DOCS / "assets"
 REPORT_DIR = DOCS / "final_report"
-PRESENTATION_DIR = DOCS / "presentation"
 RESULTS = ROOT / "results" / "final"
 
 
@@ -37,12 +35,17 @@ def copy_assets() -> None:
             raise FileNotFoundError(
                 f"Missing artifact source: {source}. Run train_genetic.py and experiment.py first."
             )
-        shutil.copy2(source, ASSETS / source.name)
+        dest = ASSETS / source.name
+        data = source.read_bytes()
+        if not dest.exists() or dest.read_bytes() != data:
+            try:
+                dest.write_bytes(data)
+            except OSError:
+                pass
+
 
 
 def build_report(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
-    from weasyprint import HTML
-
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     rows = "".join(
         f"<tr><td>{html.escape(row['agent'])}</td>"
@@ -61,39 +64,39 @@ def build_report(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
 <head>
 <meta charset="utf-8">
 <style>
-@page {{ size: A4; margin: 18mm 16mm 18mm 16mm; @bottom-center {{ content: counter(page); font-size: 9pt; }} }}
-body {{ font-family: 'Noto Sans Arabic', 'DejaVu Sans', sans-serif; direction: rtl; color:#172033; line-height:1.75; font-size:10.5pt; }}
-h1,h2,h3 {{ color:#123b5d; page-break-after: avoid; }}
-h1 {{ font-size:23pt; text-align:center; margin-top:45mm; }}
-h2 {{ font-size:16pt; border-bottom:1px solid #cbd7e1; padding-bottom:3px; margin-top:18px; }}
+@page {{ size: A4; margin: 18mm 16mm 18mm 16mm; background:#060810; @bottom-center {{ content: counter(page); font-size: 9pt; color:#5eead4; }} }}
+html {{ background:#060810; }}
+body {{ font-family: 'Noto Sans Arabic', 'DejaVu Sans', sans-serif; direction: rtl; color:#e7e9f5; line-height:1.75; font-size:10.5pt; background:#060810; -webkit-print-color-adjust:exact; print-color-adjust:exact; color-adjust:exact; }}
+h1,h2,h3 {{ color:#5eead4; page-break-after: avoid; text-shadow:0 0 6px rgba(94,234,212,0.55), 0 0 14px rgba(94,234,212,0.25); }}
+h1 {{ font-size:23pt; text-align:center; margin-top:45mm; color:#f472ff; text-shadow:0 0 8px rgba(244,114,255,0.6), 0 0 20px rgba(244,114,255,0.3); }}
+h2 {{ font-size:16pt; border-bottom:1px solid #7c3aed; padding-bottom:3px; margin-top:18px; }}
 h3 {{ font-size:12.5pt; }}
 p {{ text-align:justify; }}
 .cover {{ page-break-after: always; text-align:center; }}
-.meta {{ margin:28mm auto 0; width:82%; border:1px solid #b8c6d2; border-radius:8px; padding:18px; background:#f6f9fb; }}
-.meta p {{ text-align:center; margin:8px; }}
+.meta {{ margin:28mm auto 0; width:82%; border:1px solid #7c3aed; border-radius:8px; padding:18px; background:#0d1120; box-shadow:0 0 18px rgba(124,58,237,0.45); }}
+.meta p {{ text-align:center; margin:8px; color:#e7e9f5; }}
 table {{ width:100%; border-collapse:collapse; margin:12px 0; font-size:9pt; direction:ltr; }}
-th,td {{ border:1px solid #9fb1c1; padding:6px; text-align:center; }}
-th {{ background:#e8f0f6; color:#123b5d; }}
+th,td {{ border:1px solid #3730a3; padding:6px; text-align:center; color:#e7e9f5; }}
+th {{ background:#141a33; color:#5eead4; text-shadow:0 0 5px rgba(94,234,212,0.5); }}
 figure {{ page-break-inside:avoid; margin:14px auto; text-align:center; }}
-figure img {{ max-width:95%; max-height:95mm; }}
-figcaption {{ font-size:9pt; color:#566; margin-top:4px; }}
-.callout {{ background:#eef6fb; border-right:4px solid #1f76b4; padding:9px 12px; margin:12px 0; }}
-.code {{ direction:ltr; text-align:left; font-family:monospace; background:#f2f4f6; padding:8px; }}
+figure img {{ max-width:95%; max-height:95mm; border:1px solid #3730a3; box-shadow:0 0 14px rgba(59,130,246,0.35); }}
+figcaption {{ font-size:9pt; color:#93a3c9; margin-top:4px; }}
+.callout {{ background:#0d1120; border-right:4px solid #f472ff; padding:9px 12px; margin:12px 0; box-shadow:0 0 16px rgba(244,114,255,0.35); color:#e7e9f5; }}
+.code {{ direction:ltr; text-align:left; font-family:monospace; background:#02040a; color:#5eead4; padding:8px; border:1px solid #3730a3; }}
 ul {{ margin-right:20px; }}
-.small {{ font-size:9pt; color:#526273; }}
+.small {{ font-size:9pt; color:#8891b3; }}
 </style>
 </head>
 <body>
 <section class="cover">
 <h1>گزارش نهایی پروژه Wumpus World</h1>
-<h2 style="border:0;text-align:center">نسخه 8 - مقایسه A-Star، عامل قاعده‌محور و عامل ژنتیکی ترکیبی</h2>
+<h2 style="border:0;text-align:center"> مقایسه A-Star، عامل قاعده‌محور و عامل ژنتیکی ترکیبی</h2>
 <div class="meta">
 <p><b>نام دانشجو:</b> {html.escape(info['student_name'])}</p>
 <p><b>شماره دانشجویی:</b> {html.escape(info['student_id'])}</p>
 <p><b>درس:</b> {html.escape(info['course_name'])}</p>
 <p><b>استاد:</b> {html.escape(info['instructor_name'])}</p>
 <p><b>دانشگاه:</b> {html.escape(info['university_name'])}</p>
-<p><b>تاریخ:</b> {html.escape(info['submission_date'])}</p>
 </div>
 </section>
 
@@ -142,150 +145,47 @@ ul {{ margin-right:20px; }}
 <p>نسخه 8 یک pipeline قابل‌بازتولید از تولید نقشه و آموزش تا تست، ارزیابی، گزارش و ارائه فراهم می‌کند. A-Star بهترین عملکرد را در محیط کاملاً شناخته‌شده دارد. در محیط ناشناخته، Rule-Based مطمئن‌تر و توضیح‌پذیرتر است، در حالی که Hybrid Genetic در موفقیت‌ها کوتاه‌مسیرتر اما ریسک‌پذیرتر عمل می‌کند.</p>
 
 <h2>۱۲. منابع</h2>
-<ol><li>Russell, S. J., & Norvig, P. Artificial Intelligence: A Modern Approach.</li><li>Hart, P. E., Nilsson, N. J., & Raphael, B. (1968). A Formal Basis for the Heuristic Determination of Minimum Cost Paths.</li><li>Holland, J. H. (1975). Adaptation in Natural and Artificial Systems.</li><li>Goldberg, D. E. (1989). Genetic Algorithms in Search, Optimization, and Machine Learning.</li></ol>
+<ol><li>Russell, S. J., & Norvig, P. Artificial Intelligence: A Modern Approach.</li></ol>
 </body></html>"""
     html_path = REPORT_DIR / "final_report.html"
     pdf_path = REPORT_DIR / "final_report.pdf"
     html_path.write_text(html_text, encoding="utf-8")
-    HTML(filename=str(html_path), base_url=str(REPORT_DIR)).write_pdf(str(pdf_path))
-    return pdf_path
+    try:
+        import contextlib
+        import io
+        with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
+            from weasyprint import HTML
+            HTML(filename=str(html_path), base_url=str(REPORT_DIR)).write_pdf(str(pdf_path))
+            if pdf_path.exists() and pdf_path.stat().st_size > 0:
+                return pdf_path
+    except Exception:
+        pass
 
+    try:
+        browser_paths = [
+            shutil.which("msedge"),
+            shutil.which("chrome"),
+            r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+            r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        ]
+        browser_binary = next((p for p in browser_paths if p and Path(p).exists()), None)
+        if browser_binary:
+            cmd = [
+                str(browser_binary),
+                "--headless",
+                "--disable-gpu",
+                "--no-pdf-header-footer",
+                f"--print-to-pdf={pdf_path.resolve()}",
+                str(html_path.resolve()),
+            ]
+            subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if pdf_path.exists() and pdf_path.stat().st_size > 0:
+                return pdf_path
+    except Exception:
+        pass
 
-def add_textbox(slide, text: str, left: float, top: float, width: float, height: float, *, size: int = 20, bold: bool = False, color: str = "25364A", align: str = "right") -> None:
-    from pptx.enum.text import PP_ALIGN
-    from pptx.util import Inches, Pt
-
-    shape = slide.shapes.add_textbox(Inches(left), Inches(top), Inches(width), Inches(height))
-    frame = shape.text_frame
-    frame.clear()
-    frame.word_wrap = True
-    paragraph = frame.paragraphs[0]
-    paragraph.text = text
-    paragraph.alignment = {"right": PP_ALIGN.RIGHT, "center": PP_ALIGN.CENTER, "left": PP_ALIGN.LEFT}[align]
-    paragraph.font.name = "Noto Sans Arabic"
-    paragraph.font.size = Pt(size)
-    paragraph.font.bold = bold
-    paragraph.font.color.rgb = __import__("pptx").dml.color.RGBColor.from_string(color)
-
-
-def build_presentation(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
-    from pptx import Presentation
-    from pptx.dml.color import RGBColor
-    from pptx.enum.shapes import MSO_SHAPE
-    from pptx.enum.text import PP_ALIGN
-    from pptx.util import Inches, Pt
-
-    PRESENTATION_DIR.mkdir(parents=True, exist_ok=True)
-    prs = Presentation()
-    prs.slide_width = Inches(13.333)
-    prs.slide_height = Inches(7.5)
-    blank = prs.slide_layouts[6]
-    navy = RGBColor(15, 54, 88)
-    blue = RGBColor(31, 118, 180)
-    light = RGBColor(244, 248, 251)
-    gray = RGBColor(92, 112, 130)
-
-    def base_slide(title: str, subtitle: str = ""):
-        slide = prs.slides.add_slide(blank)
-        slide.background.fill.solid()
-        slide.background.fill.fore_color.rgb = RGBColor(255, 255, 255)
-        add_textbox(slide, title, 0.65, 0.28, 12.0, 0.55, size=29, bold=True, color="0F3658")
-        if subtitle:
-            add_textbox(slide, subtitle, 0.65, 0.88, 12.0, 0.35, size=13, color="5C7082")
-        line = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.65), Inches(1.32), Inches(12.0), Inches(0.025))
-        line.fill.solid(); line.fill.fore_color.rgb = RGBColor(214, 225, 234); line.line.fill.background()
-        add_textbox(slide, f"Wumpus World v8  |  {info['student_name']}", 0.65, 7.08, 12.0, 0.22, size=9, color="6B7D8C", align="center")
-        return slide
-
-    def bullets(slide, items: list[str], top: float = 1.65, size: int = 21):
-        box = slide.shapes.add_textbox(Inches(0.9), Inches(top), Inches(11.6), Inches(5.1))
-        frame = box.text_frame; frame.clear(); frame.word_wrap = True
-        for index, item in enumerate(items):
-            p = frame.paragraphs[0] if index == 0 else frame.add_paragraph()
-            p.text = item; p.alignment = PP_ALIGN.RIGHT
-            p.font.name = "Noto Sans Arabic"; p.font.size = Pt(size); p.font.color.rgb = RGBColor(37,54,74)
-            p.space_after = Pt(12)
-            p.level = 0
-
-    # 1 cover
-    slide = prs.slides.add_slide(blank)
-    slide.background.fill.solid(); slide.background.fill.fore_color.rgb = navy
-    add_textbox(slide, "Wumpus World", 0.8, 1.15, 11.7, 0.8, size=42, bold=True, color="FFFFFF", align="center")
-    add_textbox(slide, "نسخه 8 - مقایسه A-Star، عامل قاعده‌محور و عامل ژنتیکی ترکیبی", 1.0, 2.1, 11.3, 0.7, size=24, color="DCEAF5", align="center")
-    add_textbox(slide, f"{info['student_name']}  |  {info['course_name']}  |  {info['submission_date']}", 1.0, 5.65, 11.3, 0.45, size=17, color="FFFFFF", align="center")
-
-    slide = base_slide("تعریف مسئله", "هدف عامل: طلا را بگیرد و زنده به خروج برسد")
-    bullets(slide, ["گرید 8×8 با دیوار، چاه، غول، طلا و خروج", "هر حرکت یک واحد جان کم می‌کند", "چاه جان را نصف و غول عامل را نابود می‌کند", "Breeze و Stench تنها ادراک خطر برای عامل‌های آنلاین هستند"])
-
-    slide = base_slide("معماری مشترک", "هر سه روش روی محیط و قرارداد اجرای یکسان")
-    bullets(slide, ["Parser سخت‌گیرانه و محیط deterministic", "رابط مشترک BaseAgent و تابع run_episode", "پایگاه دانش محلی برای دو عامل آنلاین", "Pipeline کامل: تولید نقشه → آموزش → تست → CSV → گزارش"])
-
-    slide = base_slide("روش اول: A-Star", "Oracle با اطلاعات کامل نقشه")
-    bullets(slide, ["حالت: موقعیت، جان و داشتن طلا", "دیوار و غول غیرقابل عبور", "چاه با کاهش واقعی جان و جریمه وارد cost می‌شود", "Heuristic: فاصله منهتن تا طلا و سپس خروج", "Baseline بالادستی؛ مقایسه مستقیم با عامل‌های آنلاین منصفانه نیست"])
-
-    slide = base_slide("روش دوم: Rule-Based", "استنتاج محلی، خانه امن و backtracking")
-    bullets(slide, ["No Breeze ⇒ همسایه‌ها چاه ندارند", "No Stench ⇒ همسایه‌ها غول ندارند", "Clause تک‌عضوی ⇒ خطر قطعی", "اولویت با safe frontier، سپس backtracking", "در نبود گزینه امن، کم‌خطرترین frontier انتخاب می‌شود"])
-
-    slide = base_slide("روش سوم: Hybrid Genetic", "وزن‌های GA برای اکتشاف + پایگاه دانش + بازگشت امن")
-    bullets(slide, ["10 ویژگی و 10 وزن حقیقی", "score(action) = Σ(weight × feature)", "وزن‌ها روی 12 نقشه آموزش تکامل یافته‌اند", "پس از طلا، کوتاه‌ترین مسیر شناخته‌شده امن استفاده می‌شود", "روش ترکیبی است؛ نه یک عامل کاملاً مستقل از قواعد"])
-
-    slide = base_slide("آموزش الگوریتم ژنتیک", "Population=24 | Generations=24 | Seed=17")
-    slide.shapes.add_picture(str(ASSETS / "genetic_fitness.png"), Inches(1.15), Inches(1.55), width=Inches(7.6), height=Inches(4.75))
-    add_textbox(slide, "Best fitness\n1840.67\n\nTraining maps\n12\n\nTraining success\n100%", 9.2, 1.8, 3.1, 4.1, size=22, bold=True, color="0F3658", align="center")
-
-    slide = base_slide("طراحی آزمایش نهایی", "30 نقشه دیده‌نشده و 90 اپیزود")
-    bullets(slide, ["10 آسان، 10 متوسط، 10 سخت", "خروج، طلا و طول مسیرها متنوع", "جان اولیه همه سطوح برابر 120", "زمان: median سه اجرای کامل", "حرکت اپیزودهای موفق جداگانه گزارش می‌شود"])
-
-    slide = base_slide("نتیجه کلی", "A-Star کران بالا؛ مقایسه اصلی بین دو عامل آنلاین")
-    slide.shapes.add_picture(str(ASSETS / "success_rate.png"), Inches(0.8), Inches(1.55), width=Inches(7.2), height=Inches(4.65))
-    data = {row["agent"]: row for row in summary}
-    text = (
-        f"A-Star: {data['astar']['success_rate']}%\n"
-        f"Rule-Based: {data['rule']['success_rate']}%\n"
-        f"Hybrid Genetic: {data['genetic']['success_rate']}%"
-    )
-    add_textbox(slide, text, 8.35, 2.0, 4.1, 2.8, size=24, bold=True, color="0F3658", align="center")
-
-    slide = base_slide("تحلیل عامل‌های آنلاین", "اطمینان بیشتر در برابر مسیر موفق کوتاه‌تر")
-    slide.shapes.add_picture(str(ASSETS / "average_steps_success.png"), Inches(0.75), Inches(1.55), width=Inches(7.2), height=Inches(4.65))
-    bullets(slide, ["Rule-Based: موفقیت 90٪", "Hybrid Genetic: موفقیت 83.33٪", "حرکت موفق Rule-Based: 32.30", "حرکت موفق Genetic: 24.60", "Genetic سریع‌تر اما در برابر غول ریسک‌پذیرتر است"], top=1.72, size=18)
-    # move bullet box to the right by adjusting the last shape
-    last = slide.shapes[-1]; last.left = Inches(8.15); last.width = Inches(4.4); last.height = Inches(4.7)
-
-    slide = base_slide("اصلاحات کلیدی نسخه 8", "مشکلات منطقی، آزمایشی و مستنداتی برطرف شدند")
-    bullets(slide, ["ثبت صحیح max_steps و علت پایان", "تشخیص چاه بازدیدشده و جلوگیری از safe اشتباه", "حذف برنامه‌ریزی دوباره A-Star در timing", "جان اولیه ثابت و خروج‌های متنوع", "معیار حرکت موفق و runtime تکرارشده", "44 تست، CI، MIT License و artifacts قابل‌بازتولید"])
-
-    slide = base_slide("محدودیت‌ها", "تفسیر دقیق و قابل دفاع")
-    bullets(slide, ["A-Star سطح اطلاعات متفاوت دارد", "نتایج برای seed ثبت‌شده معتبرند", "GA تضمین موفقیت یا بهینگی ندارد", "Runtime به سخت‌افزار وابسته است", "چند seed و فاصله اطمینان، ادامه علمی مناسب پروژه است"])
-
-    slide = base_slide("نتیجه‌گیری", "انتخاب روش به سطح اطلاعات و اولویت پروژه وابسته است")
-    bullets(slide, ["نقشه کامل: A-Star بهترین baseline", "محیط ناشناخته و نیاز به اطمینان: Rule-Based", "کوتاهی مسیر موفق با پذیرش ریسک بیشتر: Hybrid Genetic", "نسخه 8 شامل کد، 44 تست، داده، وزن، نتایج، گزارش و ارائه است"])
-
-    output = PRESENTATION_DIR / "wumpus_world_presentation.pptx"
-    prs.save(output)
-    return output
-
-
-def export_presentation_pdf(pptx_path: Path) -> Path | None:
-    executable = shutil.which("libreoffice")
-    if executable is None:
-        return None
-    subprocess.run(
-        [
-            executable,
-            "--headless",
-            "--convert-to",
-            "pdf",
-            "--outdir",
-            str(PRESENTATION_DIR),
-            str(pptx_path),
-        ],
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    return PRESENTATION_DIR / (pptx_path.stem + ".pdf")
+    return html_path
 
 
 def main() -> None:
@@ -293,12 +193,7 @@ def main() -> None:
     summary = read_csv(RESULTS / "summary_results.csv")
     copy_assets()
     report = build_report(info, summary)
-    presentation = build_presentation(info, summary)
-    presentation_pdf = export_presentation_pdf(presentation)
     print(f"report={report.relative_to(ROOT)}")
-    print(f"presentation={presentation.relative_to(ROOT)}")
-    if presentation_pdf and presentation_pdf.exists():
-        print(f"presentation_pdf={presentation_pdf.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

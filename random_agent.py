@@ -1,15 +1,10 @@
 from __future__ import annotations
-
 import random
 from typing import Any
-
 from base_agent import BaseAgent
 from environment import Action
 
-
 class RandomAgent(BaseAgent):
-    """Simple deterministic-seed baseline used only for environment checks."""
-
     def __init__(self, seed: int = 42):
         self.seed = seed
         self.random = random.Random(seed)

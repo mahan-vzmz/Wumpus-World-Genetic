@@ -1,12 +1,9 @@
 from __future__ import annotations
-
 from dataclasses import dataclass, field
 from typing import Iterable
-
 from environment import ACTION_DELTAS, Action
 
 Position = tuple[int, int]
-
 
 @dataclass(frozen=True)
 class PerceptRecord:
@@ -17,8 +14,6 @@ class PerceptRecord:
 
 @dataclass
 class KnowledgeBase:
-    """Propositional-style memory built only from local observations."""
-
     rows: int
     cols: int
     visited: set[Position] = field(default_factory=set)

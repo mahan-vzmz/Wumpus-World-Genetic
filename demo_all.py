@@ -1,9 +1,6 @@
 from __future__ import annotations
-
 import argparse
-
 from main import run_episode
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run all three final agents on one map.")

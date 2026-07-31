@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-
 from astar_agent import AStarAgent
 from map_generator import generate_map, generate_test_suite
 from map_parser import load_map

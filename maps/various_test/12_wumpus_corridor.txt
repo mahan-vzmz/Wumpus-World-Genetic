@@ -1,0 +1,12 @@
+********
+W*WWWWW*
+W*W***W*
+W*W*G*W*
+W*W***W*
+W*WWWWW*
+W*******
+WWWWWWW*
+120
+50
+10
+8 8

@@ -1,11 +1,9 @@
 from __future__ import annotations
-
 import json
 from collections import deque
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable
-
 from base_agent import BaseAgent
 from environment import ACTION_DELTAS, Action
 from knowledge_base import KnowledgeBase, Position
@@ -109,13 +107,6 @@ class GeneticDecisionTrace:
 
 
 class GeneticAgent(BaseAgent):
-    """Hybrid online agent with a GA-evolved weighted exploration policy.
-
-    The agent uses the same local knowledge base as the rule-based method. The
-    genetic weights control exploration and risk trade-offs. After collecting
-    gold, a deterministic shortest known-safe return policy is used.
-    """
-
     def __init__(self, config: MapConfig, weights: GeneticWeights | None = None):
         self.rows = len(config.grid)
         self.cols = len(config.grid[0])
@@ -270,7 +261,6 @@ class GeneticAgent(BaseAgent):
         if start == goal:
             return [start]
         allowed = set(self.kb.safe) | {start}
-        # Exit itself may be unvisited; it may only be the final step from a safe cell.
         allowed.add(goal)
         queue: deque[Position] = deque([start])
         parent: dict[Position, Position | None] = {start: None}

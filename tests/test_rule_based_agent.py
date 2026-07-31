@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from environment import Action, WumpusEnvironment
 from knowledge_base import KnowledgeBase
 from map_parser import load_map

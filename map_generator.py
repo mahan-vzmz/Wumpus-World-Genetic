@@ -1,11 +1,9 @@
 from __future__ import annotations
-
 import argparse
 import json
 import random
 from dataclasses import asdict, dataclass
 from pathlib import Path
-
 from astar_agent import AStarAgent
 from map_parser import GRID_SIZE, load_map
 
@@ -188,7 +186,6 @@ def generate_map(
         grid[row][col] = "W"
     grid[gold_position[0]][gold_position[1]] = "G"
 
-    # Equal initial health makes cross-difficulty score comparison meaningful.
     initial_health = 120
     gold_score = 50
     pit_penalty = 10
