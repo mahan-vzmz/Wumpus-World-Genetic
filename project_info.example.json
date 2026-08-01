@@ -1,0 +1,8 @@
+{
+  "student_name": "Your Name",
+  "student_id": "Your Student ID",
+  "course_name": "Artificial Intelligence",
+  "instructor_name": "Instructor Name",
+  "university_name": "University Name",
+  "submission_date": "YYYY-MM-DD"
+}

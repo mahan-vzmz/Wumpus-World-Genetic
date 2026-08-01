@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import csv
 import html
 import json
@@ -93,7 +94,6 @@ ul {{ margin-right:20px; }}
 <h2 style="border:0;text-align:center"> مقایسه A-Star، عامل قاعده‌محور و عامل ژنتیکی ترکیبی</h2>
 <div class="meta">
 <p><b>نام دانشجو:</b> {html.escape(info['student_name'])}</p>
-<p><b>شماره دانشجویی:</b> {html.escape(info['student_id'])}</p>
 <p><b>درس:</b> {html.escape(info['course_name'])}</p>
 <p><b>استاد:</b> {html.escape(info['instructor_name'])}</p>
 <p><b>دانشگاه:</b> {html.escape(info['university_name'])}</p>
