@@ -18,5 +18,9 @@ jobs:
           cache: pip
       - run: python -m pip install --upgrade pip
       - run: pip install -r requirements.txt
+      - run: pip install ruff
+      - run: ruff check .
+      - run: ruff format --check .
       - run: pytest -q
       - run: python -m compileall -q .
+      - run: python demo_all.py --map maps/sample_01.txt
