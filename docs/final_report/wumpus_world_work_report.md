@@ -2,7 +2,7 @@
 
 > **ریپازیتوری:** `https://github.com/mahan-vzmz/Wumpus-World-Genetic`  
 > **commit بررسی‌شده:** `07348f15251e939a1c8255150d2077a96b904784` با پیام `Update project to latest version`  
-> **نسخه نرم‌افزار:** `8.0.0`  
+> **نسخه نرم‌افزار:** `8.1.0`  
 > **زبان پیاده‌سازی:** Python 3.10+  
 > **تاریخ تهیه گزارش:** ۱۴۰۵/۰۵/۰۸  
 > **مبنای گزارش:** سورس واقعی ریپو، `FILE_MANIFEST.sha256`، خروجی اجرای واقعی تست‌ها، نقشه‌ها، JSONها، CSVها و مستندات پوشه `docs`
@@ -58,7 +58,7 @@ Wumpus World یک محیط شبکه‌ای برای بررسی تصمیم‌گی
 
 | شاخص | مقدار واقعی |
 |---|---:|
-| نسخه | `8.0.0` |
+| نسخه | `8.1.0` |
 | تست‌های پاس‌شده | `44 passed` |
 | فایل نقشه معتبر | 46 |
 | نقشه آموزش GA | 12 |
@@ -117,10 +117,10 @@ wumpus-world-8
 │   │   ├── final_report.html
 │   │   ├── final_report.md
 │   │   └── final_report.pdf
-│   ├── presentation
-│   │   ├── presentation_notes.md
-│   │   ├── wumpus_world_presentation.pdf
-│   │   └── wumpus_world_presentation.pptx
+│   ├── PDF
+│   │   ├── 
+│   │   ├── 
+│   │   └── 
 │   ├── 01-problem-and-assumptions.md
 │   ├── 02-architecture.md
 │   ├── 03-methods.md
@@ -213,7 +213,7 @@ wumpus-world-8
 ├── CHANGELOG.md
 ├── compare_genetic_weights.py
 ├── DELIVERY_CHECKLIST_FA.md
-├── demo_all.py
+├── demo.py
 ├── environment.py
 ├── experiment.py
 ├── FILE_MANIFEST.sha256
@@ -221,7 +221,7 @@ wumpus-world-8
 ├── genetic_algorithm.py
 ├── knowledge_base.py
 ├── LICENSE
-├── main.py
+├── runner.py
 ├── map_generator.py
 ├── map_parser.py
 ├── PROJECT_AUDIT.md
@@ -242,7 +242,7 @@ wumpus-world-8
 flowchart TD
     MAP[فایل نقشه] --> PARSER[map_parser.py]
     PARSER --> ENV[environment.py]
-    ENV --> MAIN[main.py / run_episode]
+    ENV --> MAIN[runner.py / run_episode]
     BASE[base_agent.py] --> ASTAR[astar_agent.py]
     BASE --> RULE[rule_based_agent.py]
     BASE --> GEN[genetic_agent.py]
@@ -272,7 +272,7 @@ flowchart TD
 |---|---|---|---:|
 | `.github/workflows/tests.yml` | اجرای CI برای Python 3.10 تا 3.13؛ pytest و compileall | requirements.txt، tests/، همه فایل‌های Python | 22 |
 | `.gitignore` | حذف محیط مجازی، cache، تنظیمات IDE و فایل‌های سیستم‌عامل از Git | — | 22 |
-| `CHANGELOG.md` | ثبت تغییرات نسخه 8.0.0 | — | 14 |
+| `CHANGELOG.md` | ثبت تغییرات نسخه 8.1.0 | — | 14 |
 | `DELIVERY_CHECKLIST_FA.md` | چک‌لیست فارسی پیش از تحویل | — | 37 |
 | `FILE_MANIFEST.sha256` | هش SHA-256 فایل‌های بسته تحویل برای کنترل یکپارچگی | تمام فایل‌های تحویل به‌جز خود manifest | 121 |
 | `LICENSE` | متن MIT License | — | 21 |
@@ -280,15 +280,15 @@ flowchart TD
 | `README.md` | راهنمای اصلی پروژه، نتایج، اجرا و محدودیت‌ها | — | 167 |
 | `astar_agent.py` | عامل A* آگاه از نقشه و برنامه‌ریزی risk-aware | base_agent, environment, map_parser | 200 |
 | `base_agent.py` | رابط انتزاعی مشترک عامل‌ها | environment | 16 |
-| `best_weights.json` | وزن‌های تکامل‌یافته و metadata آموزش GA | genetic_agent.py، train_genetic.py، main.py | 21 |
+| `best_weights.json` | وزن‌های تکامل‌یافته و metadata آموزش GA | genetic_agent.py، train_genetic.py، runner.py | 21 |
 | `compare_genetic_weights.py` | مقایسه وزن‌های دستی و تکامل‌یافته روی نقشه‌های آموزش | genetic_agent, genetic_algorithm, map_parser | 41 |
-| `demo_all.py` | اجرای خلاصه هر سه عامل روی یک نقشه | main | 32 |
+| `demo.py` | اجرای خلاصه هر سه عامل روی یک نقشه | main | 32 |
 | `environment.py` | محیط قطعی بازی، state، perception، score و termination | map_parser | 232 |
 | `experiment.py` | اجرای benchmark، تجمیع، CSV و نمودارها | main, map_generator | 414 |
 | `genetic_agent.py` | عامل ژنتیکی ترکیبی، ویژگی‌ها و سیاست وزن‌دار | base_agent, environment, knowledge_base, map_parser | 355 |
 | `genetic_algorithm.py` | آموزش GA، Fitness و ذخیره خروجی‌ها | environment, genetic_agent, map_parser | 378 |
 | `knowledge_base.py` | پایگاه دانش ادراکی و استنتاج خطر/امنیت | environment | 234 |
-| `main.py` | ساخت عامل و حلقه اجرای استاندارد اپیزود | astar_agent, base_agent, environment, genetic_agent, map_parser, random_agent, rule_based_agent | 214 |
+| `runner.py` | ساخت عامل و حلقه اجرای استاندارد اپیزود | astar_agent, base_agent, environment, genetic_agent, map_parser, random_agent, rule_based_agent | 214 |
 | `map_generator.py` | تولید قطعی نقشه‌های آموزش و آزمون | astar_agent, map_parser | 314 |
 | `map_parser.py` | خواندن و اعتبارسنجی سخت‌گیرانه نقشه | کتابخانه استاندارد/وابستگی خارجی | 99 |
 | `project_info.json` | اطلاعات صفحه عنوان گزارش و ارائه | docs/build_artifacts.py | 8 |
@@ -324,18 +324,18 @@ flowchart TD
 | `docs/final_report/final_report.html` | نسخه HTML گزارش نهایی | تولید: docs/build_artifacts.py؛ وابسته به project_info.json و results | 88 |
 | `docs/final_report/final_report.md` | مستند فنی: final_report | تولید: docs/build_artifacts.py؛ وابسته به project_info.json و results | 74 |
 | `docs/final_report/final_report.pdf` | گزارش نهایی PDF | تولید: docs/build_artifacts.py؛ وابسته به project_info.json و results | binary |
-| `docs/presentation/presentation_notes.md` | مستند فنی: presentation_notes | تولید: docs/build_artifacts.py؛ وابسته به project_info.json و results | 59 |
-| `docs/presentation/wumpus_world_presentation.pdf` | PDF ارائه نهایی | تولید: docs/build_artifacts.py؛ وابسته به project_info.json و results | binary |
-| `docs/presentation/wumpus_world_presentation.pptx` | فایل ارائه نهایی PowerPoint | تولید: docs/build_artifacts.py؛ وابسته به project_info.json و results | binary |
+| `docs/PDF/` | مستند فنی: PDF_notes | تولید: docs/build_artifacts.py؛ وابسته به project_info.json و results | 59 |
+| `docs/PDF/` | PDF ارائه نهایی | تولید: docs/build_artifacts.py؛ وابسته به project_info.json و results | binary |
+| `docs/PDF/` | فایل ارائه نهایی PowerPoint | تولید: docs/build_artifacts.py؛ وابسته به project_info.json و results | binary |
 
 #### نقشه‌ها
 
 | نام فایل | مسئولیت/نقش | وابستگی به فایل‌های دیگر | تعداد خط تقریبی |
 |---|---|---|---:|
-| `maps/sample_01.txt` | نقشه نمونه برای اجرا/ارائه/تست | map_parser.py، main.py، demo_all.py، تست‌ها | 12 |
-| `maps/sample_astar_pit.txt` | نقشه نمونه برای اجرا/ارائه/تست | map_parser.py، main.py، demo_all.py، تست‌ها | 12 |
-| `maps/sample_rule_reasoning.txt` | نقشه نمونه برای اجرا/ارائه/تست | map_parser.py، main.py، demo_all.py، تست‌ها | 12 |
-| `maps/sample_rule_safe.txt` | نقشه نمونه برای اجرا/ارائه/تست | map_parser.py، main.py، demo_all.py، تست‌ها | 12 |
+| `maps/sample_01.txt` | نقشه نمونه برای اجرا/ارائه/تست | map_parser.py، runner.py، demo.py، تست‌ها | 12 |
+| `maps/sample_astar_pit.txt` | نقشه نمونه برای اجرا/ارائه/تست | map_parser.py، runner.py، demo.py، تست‌ها | 12 |
+| `maps/sample_rule_reasoning.txt` | نقشه نمونه برای اجرا/ارائه/تست | map_parser.py، runner.py، demo.py، تست‌ها | 12 |
+| `maps/sample_rule_safe.txt` | نقشه نمونه برای اجرا/ارائه/تست | map_parser.py، runner.py، demo.py، تست‌ها | 12 |
 | `maps/test/manifest.json` | metadata سی نقشه آزمون نهایی | map_generator.py، map_parser.py، experiment.py | 632 |
 | `maps/test/test_001_easy.txt` | نقشه آزمون دیده‌نشده برای benchmark | map_generator.py، map_parser.py، experiment.py | 12 |
 | `maps/test/test_002_easy.txt` | نقشه آزمون دیده‌نشده برای benchmark | map_generator.py، map_parser.py، experiment.py | 12 |
@@ -449,30 +449,31 @@ Observation واقعی شامل `position`، `health`، `breeze`، `stench`، `p
 ### قطعه‌کد شاخص: observation و score
 
 ```python
-    def observe(self) -> dict[str, Any]:
-        position = self.state.position
-        nearby_cells = [self.cell_at(p) for p in self.neighbors(position)]
-        current_cell = self.cell_at(position)
-        return {
-            "position": position,
-            "position_one_based": (position[0] + 1, position[1] + 1),
-            "health": self.state.health,
-            "breeze": "P" in nearby_cells,
-            "stench": "W" in nearby_cells,
-            "pit_here": current_cell == "P",
-            "gold_here": position in self.remaining_gold,
-            "has_gold": self.state.collected_gold > 0,
-            "at_exit": position == self.config.exit_position,
-            "valid_actions": [action.value for action in self.valid_actions()],
-            "visited": set(self.state.visited),
-        }
+def observe(self) -> dict[str, Any]:
+    position = self.state.position
+    nearby_cells = [self.cell_at(p) for p in self.neighbors(position)]
+    current_cell = self.cell_at(position)
+    return {
+        "position": position,
+        "position_one_based": (position[0] + 1, position[1] + 1),
+        "health": self.state.health,
+        "breeze": "P" in nearby_cells,
+        "stench": "W" in nearby_cells,
+        "pit_here": current_cell == "P",
+        "gold_here": position in self.remaining_gold,
+        "has_gold": self.state.collected_gold > 0,
+        "at_exit": position == self.config.exit_position,
+        "valid_actions": [action.value for action in self.valid_actions()],
+        "visited": set(self.state.visited),
+    }
 
-    def _calculate_score(self) -> int:
-        return (
-            self.state.health
-            + self.state.collected_gold * self.config.gold_score
-            - self.state.pit_entries * self.config.pit_penalty
-        )
+
+def _calculate_score(self) -> int:
+    return (
+        self.state.health
+        + self.state.collected_gold * self.config.gold_score
+        - self.state.pit_entries * self.config.pit_penalty
+    )
 ```
 
 امتیاز یک مقدار تجمعی مستقل نیست؛ در هر لحظه دوباره از فرمول زیر محاسبه می‌شود:
@@ -486,67 +487,59 @@ score = health + collected_gold * gold_score - pit_entries * pit_penalty
 ### قطعه‌کد شاخص: اعمال اکشن
 
 ```python
-    def step(
-        self, action: Action | str
-    ) -> tuple[dict[str, Any], int, bool, dict[str, Any]]:
-        if self.state.done:
-            raise RuntimeError("Episode is finished. Call reset() before taking another action.")
+def step(self, action: Action | str) -> tuple[dict[str, Any], int, bool, dict[str, Any]]:
+    if self.state.done:
+        raise RuntimeError("Episode is finished. Call reset() before taking another action.")
 
-        try:
-            action = Action(action)
-        except ValueError as exc:
-            raise ValueError(f"Unknown action: {action!r}") from exc
+    try:
+        action = Action(action)
+    except ValueError as exc:
+        raise ValueError(f"Unknown action: {action!r}") from exc
 
-        old_score = self.state.score
-        old_position = self.state.position
-        dr, dc = ACTION_DELTAS[action]
-        candidate = (old_position[0] + dr, old_position[1] + dc)
-        blocked = not self._inside(candidate) or (
-            self._inside(candidate) and self.cell_at(candidate) == "D"
-        )
+    old_score = self.state.score
+    old_position = self.state.position
+    dr, dc = ACTION_DELTAS[action]
+    candidate = (old_position[0] + dr, old_position[1] + dc)
+    blocked = not self._inside(candidate) or (self._inside(candidate) and self.cell_at(candidate) == "D")
 
-        # Every attempted move, including blocked moves, costs one health point.
-        self.state.health -= 1
-        self.state.steps += 1
+    # Every attempted move, including blocked moves, costs one health point.
+    self.state.health -= 1
+    self.state.steps += 1
 
-        if not blocked:
-            self.state.position = candidate
-            self.state.visited.add(candidate)
-            cell = self.cell_at(candidate)
+    if not blocked:
+        self.state.position = candidate
+        self.state.visited.add(candidate)
+        cell = self.cell_at(candidate)
 
-            if cell == "W":
-                self.state.health = 0
-                self.state.done = True
-                self.state.success = False
-                self.state.termination_reason = "wumpus"
-            elif cell == "P":
-                self.state.pit_entries += 1
-                self.state.health //= 2
-
-            if candidate in self.remaining_gold and not self.state.done:
-                self.remaining_gold.remove(candidate)
-                self.state.collected_gold += 1
-
-            if candidate == self.config.exit_position and not self.state.done:
-                self.state.done = True
-                self.state.success = self.state.collected_gold > 0
-                self.state.termination_reason = (
-                    "escaped_with_gold"
-                    if self.state.success
-                    else "escaped_without_gold"
-                )
-
-        if self.state.health <= 0 and not self.state.done:
+        if cell == "W":
             self.state.health = 0
             self.state.done = True
             self.state.success = False
-            self.state.termination_reason = "health_depleted"
+            self.state.termination_reason = "wumpus"
+        elif cell == "P":
+            self.state.pit_entries += 1
+            self.state.health //= 2
 
-        self.state.score = self._calculate_score()
-        reward = self.state.score - old_score
+        if candidate in self.remaining_gold and not self.state.done:
+            self.remaining_gold.remove(candidate)
+            self.state.collected_gold += 1
+
+        if candidate == self.config.exit_position and not self.state.done:
+            self.state.done = True
+            self.state.success = self.state.collected_gold > 0
+            self.state.termination_reason = "escaped_with_gold" if self.state.success else "escaped_without_gold"
+
+    if self.state.health <= 0 and not self.state.done:
+        self.state.health = 0
+        self.state.done = True
+        self.state.success = False
+        self.state.termination_reason = "health_depleted"
+
+    self.state.score = self._calculate_score()
+    reward = self.state.score - old_score
 ```
 
-**ارتباط ماژولی:** `environment.py` از `MapConfig` استفاده می‌کند و توسط `main.py`، عامل‌ها، GA و تست‌ها فراخوانی می‌شود.
+**ارتباط ماژولی:** `environment.py` از `MapConfig` استفاده می‌کند و توسط `runner.py`، عامل‌ها، GA و تست‌ها فراخوانی می‌شود.
 
 ## ۳.۲ `base_agent.py` — قرارداد مشترک عامل‌ها
 
@@ -580,7 +573,6 @@ class BaseAgent(ABC):
 ### مدل حالت واقعی
 
 ```python
-
 @dataclass(frozen=True)
 class SearchState:
     position: tuple[int, int]
@@ -646,17 +638,16 @@ class PlanResult:
 ### heuristic واقعی
 
 ```python
-    def _heuristic(self, state: SearchState) -> int:
-        if state.has_gold:
-            return self._manhattan(state.position, self.config.exit_position)
-        return min(
-            self._manhattan(state.position, gold)
-            + self._manhattan(gold, self.config.exit_position)
-            for gold in self.gold_positions
-        )
+def _heuristic(self, state: SearchState) -> int:
+    if state.has_gold:
+        return self._manhattan(state.position, self.config.exit_position)
+    return min(
+        self._manhattan(state.position, gold) + self._manhattan(gold, self.config.exit_position)
+        for gold in self.gold_positions
+    )
 ```
 
-**ارتباط ماژولی:** نقشه کامل از `MapConfig` خوانده می‌شود؛ قواعد حرکت از `ACTION_DELTAS` می‌آیند؛ خروجی `PlanResult` در `main.py` و `experiment.py` استفاده می‌شود.
+**ارتباط ماژولی:** نقشه کامل از `MapConfig` خوانده می‌شود؛ قواعد حرکت از `ACTION_DELTAS` می‌آیند؛ خروجی `PlanResult` در `runner.py` و `experiment.py` استفاده می‌شود.
 
 ## ۳.۴ `knowledge_base.py` — پایگاه دانش محلی
 
@@ -675,80 +666,69 @@ class PlanResult:
 ### ثبت observation
 
 ```python
-    def observe(
-        self,
-        *,
-        position: Position,
-        breeze: bool,
-        stench: bool,
-        pit_here: bool,
-        valid_actions: Iterable[str],
-    ) -> list[str]:
-        self.last_inferences = []
-        valid = {Action(action) for action in valid_actions}
-        self.visited.add(position)
-        self.no_wumpus.add(position)
-        if pit_here:
-            self.definite_pits.add(position)
-            self.safe.discard(position)
-            self.last_inferences.append(
-                f"{self._fmt(position)} is a confirmed pit because the agent entered it."
-            )
+def observe(
+    self,
+    *,
+    position: Position,
+    breeze: bool,
+    stench: bool,
+    pit_here: bool,
+    valid_actions: Iterable[str],
+) -> list[str]:
+    self.last_inferences = []
+    valid = {Action(action) for action in valid_actions}
+    self.visited.add(position)
+    self.no_wumpus.add(position)
+    if pit_here:
+        self.definite_pits.add(position)
+        self.safe.discard(position)
+        self.last_inferences.append(f"{self._fmt(position)} is a confirmed pit because the agent entered it.")
+    else:
+        self.no_pit.add(position)
+        self.safe.add(position)
+    self.percepts[position] = PerceptRecord(
+        breeze=breeze,
+        stench=stench,
+        pit_here=pit_here,
+    )
+
+    row, col = position
+    traversable_neighbors: set[Position] = set()
+    for action, (dr, dc) in ACTION_DELTAS.items():
+        nxt = (row + dr, col + dc)
+        if not self.inside(nxt):
+            continue
+        if action in valid:
+            traversable_neighbors.add(nxt)
         else:
-            self.no_pit.add(position)
-            self.safe.add(position)
-        self.percepts[position] = PerceptRecord(
-            breeze=breeze,
-            stench=stench,
-            pit_here=pit_here,
-        )
+            self.walls.add(nxt)
+            self.last_inferences.append(f"{self._fmt(nxt)} is a wall because movement is blocked.")
 
-        row, col = position
-        traversable_neighbors: set[Position] = set()
-        for action, (dr, dc) in ACTION_DELTAS.items():
-            nxt = (row + dr, col + dc)
-            if not self.inside(nxt):
-                continue
-            if action in valid:
-                traversable_neighbors.add(nxt)
-            else:
-                self.walls.add(nxt)
-                self.last_inferences.append(
-                    f"{self._fmt(nxt)} is a wall because movement is blocked."
-                )
-
-        if breeze:
-            self.pit_clauses[position] = set(traversable_neighbors)
+    if breeze:
+        self.pit_clauses[position] = set(traversable_neighbors)
+        self.last_inferences.append("Breeze detected: at least one traversable neighbor may contain a pit.")
+    else:
+        self.pit_clauses.pop(position, None)
+        newly_safe_from_pit = traversable_neighbors - self.no_pit
+        self.no_pit.update(traversable_neighbors)
+        if newly_safe_from_pit:
             self.last_inferences.append(
-                "Breeze detected: at least one traversable neighbor may contain a pit."
+                "No breeze: " + ", ".join(self._fmt(p) for p in sorted(newly_safe_from_pit)) + " cannot contain a pit."
             )
-        else:
-            self.pit_clauses.pop(position, None)
-            newly_safe_from_pit = traversable_neighbors - self.no_pit
-            self.no_pit.update(traversable_neighbors)
-            if newly_safe_from_pit:
-                self.last_inferences.append(
-                    "No breeze: "
-                    + ", ".join(self._fmt(p) for p in sorted(newly_safe_from_pit))
-                    + " cannot contain a pit."
-                )
 
-        if stench:
-            self.wumpus_clauses[position] = set(traversable_neighbors)
+    if stench:
+        self.wumpus_clauses[position] = set(traversable_neighbors)
+        self.last_inferences.append("Stench detected: at least one traversable neighbor may contain a Wumpus.")
+    else:
+        self.wumpus_clauses.pop(position, None)
+        newly_safe_from_wumpus = traversable_neighbors - self.no_wumpus
+        self.no_wumpus.update(traversable_neighbors)
+        if newly_safe_from_wumpus:
             self.last_inferences.append(
-                "Stench detected: at least one traversable neighbor may contain a Wumpus."
+                "No stench: "
+                + ", ".join(self._fmt(p) for p in sorted(newly_safe_from_wumpus))
+                + " cannot contain a Wumpus."
             )
-        else:
-            self.wumpus_clauses.pop(position, None)
-            newly_safe_from_wumpus = traversable_neighbors - self.no_wumpus
-            self.no_wumpus.update(traversable_neighbors)
-            if newly_safe_from_wumpus:
-                self.last_inferences.append(
-                    "No stench: "
-                    + ", ".join(self._fmt(p) for p in sorted(newly_safe_from_wumpus))
-                    + " cannot contain a Wumpus."
-                )
-
 ```
 
 اگر عامل وارد چاه شود و زنده بماند، همان خانه در `definite_pits` ثبت و از `safe` حذف می‌شود. نبود Breeze یا Stench به‌ترتیب شواهد منفی قطعی برای همسایه‌ها ایجاد می‌کند.
@@ -902,7 +882,6 @@ class PlanResult:
 ### ژن‌ها و bounds
 
 ```python
-
 ACTION_ORDER = (Action.RIGHT, Action.DOWN, Action.LEFT, Action.UP)
 GENE_NAMES = (
     "safe_bonus",
@@ -928,8 +907,6 @@ GENE_BOUNDS: dict[str, tuple[float, float]] = {
     "frontier_bonus": (0.0, 12.0),
     "health_caution_penalty": (-20.0, 0.0),
 }
-
-
 ```
 
 `GeneticWeights` ذخیره، بارگذاری، clip و تبدیل genome را انجام می‌دهد. نبود فایل وزن خطای صریح `FileNotFoundError` تولید می‌کند و fallback بی‌صدا وجود ندارد.
@@ -937,67 +914,72 @@ GENE_BOUNDS: dict[str, tuple[float, float]] = {
 ### استخراج ویژگی و امتیاز حرکت
 
 ```python
-    def _features(
-        self,
-        *,
-        current: Position,
-        target: Position,
-        health: int,
-        has_gold: bool,
-    ) -> dict[str, float]:
-        status = self.kb.status(target)
-        safe = 1.0 if target in self.kb.safe else 0.0
-        unvisited = 1.0 if self.visit_counts.get(target, 0) == 0 else 0.0
-        revisit_count = float(self.visit_counts.get(target, 0))
-        reverse = 1.0 if target == self.previous_position else 0.0
-        unknown = 1.0 if status in {
+def _features(
+    self,
+    *,
+    current: Position,
+    target: Position,
+    health: int,
+    has_gold: bool,
+) -> dict[str, float]:
+    status = self.kb.status(target)
+    safe = 1.0 if target in self.kb.safe else 0.0
+    unvisited = 1.0 if self.visit_counts.get(target, 0) == 0 else 0.0
+    revisit_count = float(self.visit_counts.get(target, 0))
+    reverse = 1.0 if target == self.previous_position else 0.0
+    unknown = (
+        1.0
+        if status
+        in {
             "UNKNOWN",
             "POSSIBLE_PIT",
             "POSSIBLE_WUMPUS",
             "POSSIBLE_WUMPUS_OR_PIT",
-        } else 0.0
+        }
+        else 0.0
+    )
 
-        pit_evidence = float(self.kb.evidence_pit.get(target, 0))
-        if target in self.kb.definite_pits:
-            pit_evidence += 5.0
-        wumpus_evidence = float(self.kb.evidence_wumpus.get(target, 0))
-        if target in self.kb.definite_wumpus:
-            wumpus_evidence += 12.0
+    pit_evidence = float(self.kb.evidence_pit.get(target, 0))
+    if target in self.kb.definite_pits:
+        pit_evidence += 5.0
+    wumpus_evidence = float(self.kb.evidence_wumpus.get(target, 0))
+    if target in self.kb.definite_wumpus:
+        wumpus_evidence += 12.0
 
-        exit_progress = 0.0
-        if has_gold:
-            exit_progress = float(
-                self._manhattan(current, self.exit_position)
-                - self._manhattan(target, self.exit_position)
-            )
+    exit_progress = 0.0
+    if has_gold:
+        exit_progress = float(
+            self._manhattan(current, self.exit_position) - self._manhattan(target, self.exit_position)
+        )
 
-        frontier = sum(
+    frontier = (
+        sum(
             1
             for neighbor in self.kb.neighbors(target)
             if neighbor not in self.kb.visited and neighbor not in self.kb.walls
-        ) / 4.0
-        uncertainty = pit_evidence + 2.0 * wumpus_evidence + unknown
-        health_ratio = max(0.0, min(1.0, health / max(1, self.initial_health)))
-        low_health_risk = (1.0 - health_ratio) * uncertainty
-
-        return {
-            "safe_bonus": safe,
-            "unvisited_bonus": unvisited,
-            "exit_progress_weight": exit_progress,
-            "pit_risk_penalty": pit_evidence,
-            "wumpus_risk_penalty": wumpus_evidence,
-            "unknown_weight": unknown,
-            "revisit_penalty": revisit_count,
-            "reverse_penalty": reverse,
-            "frontier_bonus": float(frontier),
-            "health_caution_penalty": low_health_risk,
-        }
-
-    def _weighted_score(self, features: dict[str, float]) -> float:
-        return sum(
-            float(getattr(self.weights, name)) * float(features[name])
-            for name in GENE_NAMES
         )
+        / 4.0
+    )
+    uncertainty = pit_evidence + 2.0 * wumpus_evidence + unknown
+    health_ratio = max(0.0, min(1.0, health / max(1, self.initial_health)))
+    low_health_risk = (1.0 - health_ratio) * uncertainty
+
+    return {
+        "safe_bonus": safe,
+        "unvisited_bonus": unvisited,
+        "exit_progress_weight": exit_progress,
+        "pit_risk_penalty": pit_evidence,
+        "wumpus_risk_penalty": wumpus_evidence,
+        "unknown_weight": unknown,
+        "revisit_penalty": revisit_count,
+        "reverse_penalty": reverse,
+        "frontier_bonus": float(frontier),
+        "health_caution_penalty": low_health_risk,
+    }
+
+
+def _weighted_score(self, features: dict[str, float]) -> float:
+    return sum(float(getattr(self.weights, name)) * float(features[name]) for name in GENE_NAMES)
 ```
 
 در تساوی score، ترتیب ثابت اکشن‌ها tie-break می‌کند. ورود به خروج بدون طلا با score برابر `-1_000_000` عملاً رد می‌شود. پس از طلا، `_shortest_known_safe_path()` از BFS استفاده می‌کند.
@@ -1034,68 +1016,62 @@ class GeneticTrainer:
 ### حلقه نسل‌ها
 
 ```python
-    def train(self, verbose: bool = True) -> TrainingResult:
-        population = self._initial_population()
-        history: list[GenerationRecord] = []
-        global_best: Genome | None = None
-        global_best_fitness = -math.inf
-        stale_generations = 0
+def train(self, verbose: bool = True) -> TrainingResult:
+    population = self._initial_population()
+    history: list[GenerationRecord] = []
+    global_best: Genome | None = None
+    global_best_fitness = -math.inf
+    stale_generations = 0
 
-        for generation in range(self.generations):
-            fitnesses = [self.evaluate_genome(genome) for genome in population]
-            ranked = sorted(
-                zip(population, fitnesses), key=lambda item: item[1], reverse=True
-            )
-            generation_best_genome, generation_best = ranked[0]
-            record = GenerationRecord(
-                generation=generation,
-                best_fitness=generation_best,
-                average_fitness=mean(fitnesses),
-                worst_fitness=min(fitnesses),
-            )
-            history.append(record)
-
-            if verbose:
-                print(
-                    f"generation={generation:02d} best={record.best_fitness:.2f} "
-                    f"average={record.average_fitness:.2f} worst={record.worst_fitness:.2f}"
-                )
-
-            if generation_best > global_best_fitness + 1e-9:
-                global_best = list(generation_best_genome)
-                global_best_fitness = generation_best
-                stale_generations = 0
-            else:
-                stale_generations += 1
-
-            if self.patience is not None and stale_generations >= self.patience:
-                if verbose:
-                    print(
-                        f"early_stop=True reason=no_improvement_for_{self.patience}_generations"
-                    )
-                break
-
-            next_population = [
-                list(genome) for genome, _ in ranked[: self.elite_count]
-            ]
-            while len(next_population) < self.population_size:
-                parent1 = self._tournament_select(population, fitnesses)
-                parent2 = self._tournament_select(population, fitnesses)
-                child1, child2 = self._crossover(parent1, parent2)
-                next_population.append(self._mutate(child1))
-                if len(next_population) < self.population_size:
-                    next_population.append(self._mutate(child2))
-            population = next_population
-
-        if global_best is None:
-            raise RuntimeError("Genetic training produced no candidate.")
-        return TrainingResult(
-            best_weights=GeneticWeights.from_genome(global_best).clipped(),
-            best_fitness=global_best_fitness,
-            history=tuple(history),
-            seed=self.seed,
-            map_count=len(self.configs),
+    for generation in range(self.generations):
+        fitnesses = [self.evaluate_genome(genome) for genome in population]
+        ranked = sorted(zip(population, fitnesses), key=lambda item: item[1], reverse=True)
+        generation_best_genome, generation_best = ranked[0]
+        record = GenerationRecord(
+            generation=generation,
+            best_fitness=generation_best,
+            average_fitness=mean(fitnesses),
+            worst_fitness=min(fitnesses),
         )
+        history.append(record)
+
+        if verbose:
+            print(
+                f"generation={generation:02d} best={record.best_fitness:.2f} "
+                f"average={record.average_fitness:.2f} worst={record.worst_fitness:.2f}"
+            )
+
+        if generation_best > global_best_fitness + 1e-9:
+            global_best = list(generation_best_genome)
+            global_best_fitness = generation_best
+            stale_generations = 0
+        else:
+            stale_generations += 1
+
+        if self.patience is not None and stale_generations >= self.patience:
+            if verbose:
+                print(f"early_stop=True reason=no_improvement_for_{self.patience}_generations")
+            break
+
+        next_population = [list(genome) for genome, _ in ranked[: self.elite_count]]
+        while len(next_population) < self.population_size:
+            parent1 = self._tournament_select(population, fitnesses)
+            parent2 = self._tournament_select(population, fitnesses)
+            child1, child2 = self._crossover(parent1, parent2)
+            next_population.append(self._mutate(child1))
+            if len(next_population) < self.population_size:
+                next_population.append(self._mutate(child2))
+        population = next_population
+
+    if global_best is None:
+        raise RuntimeError("Genetic training produced no candidate.")
+    return TrainingResult(
+        best_weights=GeneticWeights.from_genome(global_best).clipped(),
+        best_fitness=global_best_fitness,
+        history=tuple(history),
+        seed=self.seed,
+        map_count=len(self.configs),
+    )
 ```
 
 ### Fitness واقعی نسخه ۸
@@ -1138,57 +1114,50 @@ def load_training_configs(paths: Sequence[str | Path]) -> list[MapConfig]:
 **هدف یک‌خطی:** تبدیل فایل ۱۲خطی نقشه به `MapConfig` فقط در صورت رعایت تمام invariantها.
 
 ```python
-
-    lines = [
-        line.strip()
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
-    expected = GRID_SIZE + CONFIG_LINE_COUNT
-    if len(lines) != expected:
-        raise ValueError(
-            f"Map file must contain exactly {GRID_SIZE} grid rows and "
-            f"{CONFIG_LINE_COUNT} configuration lines; got {len(lines)} non-empty lines."
-        )
-
-    grid_lines = lines[:GRID_SIZE]
-    if any(len(row) != GRID_SIZE for row in grid_lines):
-        raise ValueError("Every grid row must contain exactly 8 characters.")
-
-    invalid = sorted(
-        {char for row in grid_lines for char in row if char not in ALLOWED_SYMBOLS}
+lines = [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+expected = GRID_SIZE + CONFIG_LINE_COUNT
+if len(lines) != expected:
+    raise ValueError(
+        f"Map file must contain exactly {GRID_SIZE} grid rows and "
+        f"{CONFIG_LINE_COUNT} configuration lines; got {len(lines)} non-empty lines."
     )
-    if invalid:
-        raise ValueError(f"Invalid map symbols: {invalid}")
 
-    initial_health = _parse_int_line(lines[8], "initial health")
-    gold_score = _parse_int_line(lines[9], "gold score")
-    pit_penalty = _parse_int_line(lines[10], "pit penalty")
-    exit_position = _parse_exit(lines[11])
+grid_lines = lines[:GRID_SIZE]
+if any(len(row) != GRID_SIZE for row in grid_lines):
+    raise ValueError("Every grid row must contain exactly 8 characters.")
 
-    if initial_health <= 0:
-        raise ValueError("Initial health must be positive.")
-    if gold_score < 0 or pit_penalty < 0:
-        raise ValueError("Gold score and pit penalty cannot be negative.")
+invalid = sorted({char for row in grid_lines for char in row if char not in ALLOWED_SYMBOLS})
+if invalid:
+    raise ValueError(f"Invalid map symbols: {invalid}")
 
-    grid = tuple(tuple(row) for row in grid_lines)
-    start = (0, 0)
-    if grid[start[0]][start[1]] != "*":
-        raise ValueError("Start cell (1,1) must be an empty and safe cell.")
-    if exit_position == start:
-        raise ValueError("Exit position must be different from the start cell.")
-    if grid[exit_position[0]][exit_position[1]] != "*":
-        raise ValueError("Exit cell must be empty and safe.")
-    if not any("G" in row for row in grid_lines):
-        raise ValueError("Map must contain at least one gold cell.")
+initial_health = _parse_int_line(lines[8], "initial health")
+gold_score = _parse_int_line(lines[9], "gold score")
+pit_penalty = _parse_int_line(lines[10], "pit penalty")
+exit_position = _parse_exit(lines[11])
 
-    return MapConfig(
-        grid=grid,
-        initial_health=initial_health,
-        gold_score=gold_score,
-        pit_penalty=pit_penalty,
-        exit_position=exit_position,
-    )
+if initial_health <= 0:
+    raise ValueError("Initial health must be positive.")
+if gold_score < 0 or pit_penalty < 0:
+    raise ValueError("Gold score and pit penalty cannot be negative.")
+
+grid = tuple(tuple(row) for row in grid_lines)
+start = (0, 0)
+if grid[start[0]][start[1]] != "*":
+    raise ValueError("Start cell (1,1) must be an empty and safe cell.")
+if exit_position == start:
+    raise ValueError("Exit position must be different from the start cell.")
+if grid[exit_position[0]][exit_position[1]] != "*":
+    raise ValueError("Exit cell must be empty and safe.")
+if not any("G" in row for row in grid_lines):
+    raise ValueError("Map must contain at least one gold cell.")
+
+return MapConfig(
+    grid=grid,
+    initial_health=initial_health,
+    gold_score=gold_score,
+    pit_penalty=pit_penalty,
+    exit_position=exit_position,
+)
 ```
 
 Parser هم قالب عددی ساده و هم `key=value` را برای چهار خط تنظیمات می‌پذیرد. مختصات خروج در ورودی one-based و داخل برنامه zero-based است.
@@ -1211,9 +1180,7 @@ def _choose_exit(rng: random.Random) -> Position:
     return rng.choice(candidates)
 
 
-def _difficulty_counts(
-    difficulty: str, rng: random.Random
-) -> tuple[int, int, int, int]:
+def _difficulty_counts(difficulty: str, rng: random.Random) -> tuple[int, int, int, int]:
     if difficulty == "easy":
         return rng.randint(4, 7), rng.randint(1, 2), 1, rng.randint(0, 1)
     if difficulty == "medium":
@@ -1289,7 +1256,7 @@ class RandomAgent(BaseAgent):
 
 این عامل در تست `max_steps` و کنترل عمومی محیط مفید است.
 
-## ۳.۱۱ `main.py` — حلقه استاندارد اجرای اپیزود
+## ۳.۱۱ `runner.py` — حلقه استاندارد اجرای اپیزود
 
 **هدف یک‌خطی:** ساخت عامل انتخاب‌شده، اجرای حلقه، trace اختیاری و تولید دیکشنری نتیجه استاندارد.
 
@@ -1355,7 +1322,7 @@ class RandomAgent(BaseAgent):
 
 در صورت تمام‌شدن حلقه بدون `done`، محیط به‌صورت صریح با `max_steps` terminate می‌شود. نتیجه شامل score، score_delta، health، steps، pit entries و داده‌های اختصاصی عامل است.
 
-## ۳.۱۲ `demo_all.py` — اجرای خلاصه سه روش
+## ۳.۱۲ `demo.py` — اجرای خلاصه سه روش
 
 **هدف یک‌خطی:** اجرای A-Star، Rule-Based و Hybrid Genetic روی یک نقشه و چاپ یک CSV کوچک.
 
@@ -1451,22 +1418,14 @@ def run_benchmark(
                     "score": int(_safe_number(first_result.get("score"))),
                     "score_delta": int(_safe_number(first_result.get("score_delta"))),
                     "initial_health": int(_safe_number(first_result.get("initial_health"))),
-                    "remaining_health": int(
-                        _safe_number(first_result.get("remaining_health"))
-                    ),
+                    "remaining_health": int(_safe_number(first_result.get("remaining_health"))),
                     "steps": int(_safe_number(first_result.get("steps"))),
-                    "pit_entries": int(
-                        _safe_number(first_result.get("pit_entries"))
-                    ),
-                    "collected_gold": int(
-                        _safe_number(first_result.get("collected_gold"))
-                    ),
+                    "pit_entries": int(_safe_number(first_result.get("pit_entries"))),
+                    "collected_gold": int(_safe_number(first_result.get("collected_gold"))),
                     "wumpus_death": int(reason == "wumpus"),
                     "termination_reason": reason,
                     "runtime_ms": round(statistics.median(runtimes), 4),
-                    "expanded_nodes": int(
-                        _safe_number(first_result.get("expanded_nodes"))
-                    ),
+                    "expanded_nodes": int(_safe_number(first_result.get("expanded_nodes"))),
                     "plan_cost": int(_safe_number(first_result.get("plan_cost"))),
                     "error": first_result.get("error", ""),
                 }
@@ -1499,9 +1458,7 @@ def _summary_row(agent: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
         "average_score_success": round(_mean(successes, "score"), 2),
         "average_pit_entries": round(_mean(rows, "pit_entries"), 3),
         "wumpus_deaths": sum(int(row["wumpus_death"]) for row in rows),
-        "max_steps_failures": sum(
-            str(row["termination_reason"]) == "max_steps" for row in rows
-        ),
+        "max_steps_failures": sum(str(row["termination_reason"]) == "max_steps" for row in rows),
         "average_runtime_ms": round(_mean(rows, "runtime_ms"), 4),
         "average_expanded_nodes": round(_mean(rows, "expanded_nodes"), 2),
     }
@@ -1534,56 +1491,52 @@ def summarize(
 **هدف یک‌خطی:** خواندن پارامترها، ساخت یا انتخاب نقشه‌های آموزش، اجرای GA و ذخیره JSON/CSV/PNG.
 
 ```python
-    parser = argparse.ArgumentParser(description="Train Wumpus hybrid genetic weights.")
-    parser.add_argument("--maps", nargs="+")
-    parser.add_argument("--population", type=int, default=24)
-    parser.add_argument("--generations", type=int, default=24)
-    parser.add_argument("--mutation-rate", type=float, default=0.10)
-    parser.add_argument("--mutation-sigma", type=float, default=2.0)
-    parser.add_argument("--elite-count", type=int, default=2)
-    parser.add_argument("--tournament-size", type=int, default=3)
-    parser.add_argument("--max-steps", type=int, default=250)
-    parser.add_argument("--patience", type=int, default=8)
-    parser.add_argument("--seed", type=int, default=17)
-    parser.add_argument("--output", default="best_weights.json")
-    parser.add_argument("--history", default="results/genetic_history.csv")
-    parser.add_argument("--summary", default="results/genetic_training_summary.json")
-    parser.add_argument("--plot", default="results/genetic_fitness.png")
-    parser.add_argument("--regenerate-training-maps", action="store_true")
-    args = parser.parse_args()
+parser = argparse.ArgumentParser(description="Train Wumpus hybrid genetic weights.")
+parser.add_argument("--maps", nargs="+")
+parser.add_argument("--population", type=int, default=24)
+parser.add_argument("--generations", type=int, default=24)
+parser.add_argument("--mutation-rate", type=float, default=0.10)
+parser.add_argument("--mutation-sigma", type=float, default=2.0)
+parser.add_argument("--elite-count", type=int, default=2)
+parser.add_argument("--tournament-size", type=int, default=3)
+parser.add_argument("--max-steps", type=int, default=250)
+parser.add_argument("--patience", type=int, default=8)
+parser.add_argument("--seed", type=int, default=17)
+parser.add_argument("--output", default="best_weights.json")
+parser.add_argument("--history", default="results/genetic_history.csv")
+parser.add_argument("--summary", default="results/genetic_training_summary.json")
+parser.add_argument("--plot", default="results/genetic_fitness.png")
+parser.add_argument("--regenerate-training-maps", action="store_true")
+args = parser.parse_args()
 
-    if args.regenerate_training_maps:
-        generate_training_suite()
-    paths = args.maps or [
-        str(path) for path in sorted(Path("maps/training").glob("training_*.txt"))
-    ]
-    if not paths:
-        raise SystemExit(
-            "No training maps found. Run with --regenerate-training-maps first."
-        )
+if args.regenerate_training_maps:
+    generate_training_suite()
+paths = args.maps or [str(path) for path in sorted(Path("maps/training").glob("training_*.txt"))]
+if not paths:
+    raise SystemExit("No training maps found. Run with --regenerate-training-maps first.")
 
-    trainer = GeneticTrainer(
-        load_training_configs(paths),
-        population_size=args.population,
-        generations=args.generations,
-        mutation_rate=args.mutation_rate,
-        mutation_sigma=args.mutation_sigma,
-        elite_count=args.elite_count,
-        tournament_size=args.tournament_size,
-        max_steps=args.max_steps,
-        seed=args.seed,
-        patience=args.patience,
-    )
-    result = trainer.train(verbose=True)
-    save_training_artifacts(
-        result,
-        weights_path=args.output,
-        history_csv_path=args.history,
-        summary_json_path=args.summary,
-    )
-    plot_history(result, args.plot)
-    print("\nTraining complete")
-    print(f"best_fitness={result.best_fitness:.2f}")
+trainer = GeneticTrainer(
+    load_training_configs(paths),
+    population_size=args.population,
+    generations=args.generations,
+    mutation_rate=args.mutation_rate,
+    mutation_sigma=args.mutation_sigma,
+    elite_count=args.elite_count,
+    tournament_size=args.tournament_size,
+    max_steps=args.max_steps,
+    seed=args.seed,
+    patience=args.patience,
+)
+result = trainer.train(verbose=True)
+save_training_artifacts(
+    result,
+    weights_path=args.output,
+    history_csv_path=args.history,
+    summary_json_path=args.summary,
+)
+plot_history(result, args.plot)
+print("\nTraining complete")
+print(f"best_fitness={result.best_fitness:.2f}")
 ```
 
 ## ۳.۱۵ `compare_genetic_weights.py` — مقایسه قبل و بعد از تکامل
@@ -1591,11 +1544,8 @@ def summarize(
 **هدف یک‌خطی:** اجرای وزن‌های دستی و تکامل‌یافته روی ۱۲ نقشه آموزش و چاپ success/Fitness/steps.
 
 ```python
-
 def evaluate_set(label: str, weights: GeneticWeights, paths: list[Path]) -> None:
-    results = [
-        evaluate_episode(load_map(path), weights, max_steps=250) for path in paths
-    ]
+    results = [evaluate_episode(load_map(path), weights, max_steps=250) for path in paths]
     print(f"\n{label}")
     print("map,success,fitness,steps,health,pits,reason")
     for path, result in zip(paths, results):
@@ -1616,10 +1566,7 @@ def main() -> None:
     if not paths:
         raise SystemExit("No training maps found.")
     evaluate_set("Default hand-written weights", GeneticWeights(), paths)
-    evaluate_set(
-        "Evolved weights", GeneticWeights.load("best_weights.json"), paths
-    )
-
+    evaluate_set("Evolved weights", GeneticWeights.load("best_weights.json"), paths)
 ```
 
 ## ۳.۱۶ `verify_delivery.py` — کنترل تحویل
@@ -1636,20 +1583,14 @@ def main() -> None:
 
     GeneticWeights.load(ROOT / "best_weights.json")
 
-    test_manifest = json.loads(
-        (ROOT / "maps" / "test" / "manifest.json").read_text(encoding="utf-8")
-    )
-    training_manifest = json.loads(
-        (ROOT / "maps" / "training" / "manifest.json").read_text(encoding="utf-8")
-    )
+    test_manifest = json.loads((ROOT / "maps" / "test" / "manifest.json").read_text(encoding="utf-8"))
+    training_manifest = json.loads((ROOT / "maps" / "training" / "manifest.json").read_text(encoding="utf-8"))
     if len(test_manifest) != 30:
         raise SystemExit(f"Expected 30 test maps; got {len(test_manifest)}")
     if len(training_manifest) != 12:
         raise SystemExit(f"Expected 12 training maps; got {len(training_manifest)}")
 
-    with (ROOT / "results" / "final" / "experiment_results.csv").open(
-        encoding="utf-8", newline=""
-    ) as handle:
+    with (ROOT / "results" / "final" / "experiment_results.csv").open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
     if len(rows) != 90:
         raise SystemExit(f"Expected 90 experiment rows; got {len(rows)}")
@@ -1672,8 +1613,8 @@ def main() -> None:
 
     required = [
         ROOT / "docs" / "final_report" / "final_report.pdf",
-        ROOT / "docs" / "presentation" / "wumpus_world_presentation.pptx",
-        ROOT / "docs" / "presentation" / "wumpus_world_presentation.pdf",
+        ROOT / "docs" / "PDF" / "",
+        ROOT / "docs" / "PDF" / "",
         ROOT / "results" / "final" / "summary_results.csv",
         ROOT / "results" / "genetic_fitness.png",
     ]
@@ -1700,7 +1641,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 ASSETS = DOCS / "assets"
 REPORT_DIR = DOCS / "final_report"
-PRESENTATION_DIR = DOCS / "presentation"
+PRESENTATION_DIR = DOCS / "PDF"
 RESULTS = ROOT / "results" / "final"
 
 
@@ -1736,12 +1677,12 @@ def main() -> None:
     summary = read_csv(RESULTS / "summary_results.csv")
     copy_assets()
     report = build_report(info, summary)
-    presentation = build_presentation(info, summary)
-    presentation_pdf = export_presentation_pdf(presentation)
+    PDF = build_PDF(info, summary)
+    PDF_pdf = export_PDF_pdf(PDF)
     print(f"report={report.relative_to(ROOT)}")
-    print(f"presentation={presentation.relative_to(ROOT)}")
-    if presentation_pdf and presentation_pdf.exists():
-        print(f"presentation_pdf={presentation_pdf.relative_to(ROOT)}")
+    print(f"PDF={PDF.relative_to(ROOT)}")
+    if PDF_pdf and PDF_pdf.exists():
+        print(f"PDF_pdf={PDF_pdf.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
@@ -2593,12 +2534,12 @@ delivery_artifacts=ok
 
 # ۹. نمونه اجراهای واقعی
 
-## ۹.۱ خروجی کامل `demo_all.py`
+## ۹.۱ خروجی کامل `demo.py`
 
 دستور:
 
 ```bash
-python demo_all.py --map maps/sample_01.txt
+wumpus-world-demo --map maps/sample_01.txt
 ```
 
 خروجی واقعی:
@@ -2625,7 +2566,7 @@ genetic,True,144,26,94,0,escaped_with_gold
 ## ۹.۲ اجرای جداگانه A-Star
 
 ```bash
-python main.py --agent astar --map maps/sample_01.txt
+wumpus-world --agent astar --map maps/sample_01.txt
 ```
 
 بخش آغاز و خلاصه plan واقعی:
@@ -2657,7 +2598,7 @@ expanded_nodes=29, plan_cost=14
 ## ۹.۳ اجرای جداگانه Rule-Based
 
 ```bash
-python main.py --agent rule --map maps/sample_01.txt
+wumpus-world --agent rule --map maps/sample_01.txt
 ```
 
 نخستین trace واقعی:
@@ -2695,7 +2636,7 @@ known_safe_cells=30, visited_cells=23
 ## ۹.۴ اجرای جداگانه Hybrid Genetic
 
 ```bash
-python main.py --agent genetic --map maps/sample_01.txt
+wumpus-world --agent genetic --map maps/sample_01.txt
 ```
 
 نخستین تصمیم وزن‌دار واقعی:
@@ -2821,7 +2762,7 @@ generations_run=24
 }
 ```
 
-این فایل ورودی پیش‌فرض عامل genetic در `main.py` و `experiment.py` است. اگر فایل وجود نداشته یا JSON خراب باشد، initialization error ثبت می‌شود.
+این فایل ورودی پیش‌فرض عامل genetic در `runner.py` و `experiment.py` است. اگر فایل وجود نداشته یا JSON خراب باشد، initialization error ثبت می‌شود.
 
 ## ۱۰.۲ `project_info.json`
 
@@ -2845,7 +2786,7 @@ generations_run=24
 ```toml
 [project]
 name = "wumpus-world-genetic"
-version = "8.0.0"
+version = "8.1.0"
 description = "Wumpus World comparison of A*, rule-based, and hybrid genetic agents"
 requires-python = ">=3.10"
 
@@ -2855,7 +2796,7 @@ testpaths = ["tests"]
 addopts = "-ra"
 ```
 
-نسخه بسته `8.0.0`، حداقل Python برابر ۳٫۱۰ و مسیر تست `tests` تعریف شده است.
+نسخه بسته `8.1.0`، حداقل Python برابر ۳٫۱۰ و مسیر تست `tests` تعریف شده است.
 
 ## ۱۰.۴ وابستگی‌ها
 
@@ -2896,7 +2837,7 @@ weasyprint>=68,<69
 
 ## ۱۰.۷ خلاصه `CHANGELOG.md`
 
-Version 8.0.0 موارد اصلی زیر را ثبت می‌کند: strict validation، pit awareness، timing منصفانه، map generation متنوع، successful-step metric، بازآموزی GA، ۴۴ تست، CI، MIT License و مستندات همگام.
+Version 8.1.0 موارد اصلی زیر را ثبت می‌کند: strict validation، pit awareness، timing منصفانه، map generation متنوع، successful-step metric، بازآموزی GA، ۴۴ تست، CI، MIT License و مستندات همگام.
 
 ## ۱۰.۸ ساخت گزارش PDF و اسلاید
 
@@ -3065,21 +3006,21 @@ python -m compileall -q .
 ## ۱۳.۴ اجرای سریع سه عامل
 
 ```bash
-python demo_all.py --map maps/sample_01.txt
+wumpus-world-demo --map maps/sample_01.txt
 ```
 
 ## ۱۳.۵ اجرای جداگانه
 
 ```bash
-python main.py --agent astar --map maps/sample_astar_pit.txt
-python main.py --agent rule --map maps/sample_rule_reasoning.txt --max-steps 250
-python main.py --agent genetic --map maps/sample_01.txt --max-steps 250
+wumpus-world --agent astar --map maps/sample_astar_pit.txt
+wumpus-world --agent rule --map maps/sample_rule_reasoning.txt --max-steps 250
+wumpus-world --agent genetic --map maps/sample_01.txt --max-steps 250
 ```
 
 اجرای genetic با وزن دستی و نه وزن تکامل‌یافته:
 
 ```bash
-python main.py --agent genetic --map maps/sample_01.txt --use-default-weights
+wumpus-world --agent genetic --map maps/sample_01.txt --use-default-weights
 ```
 
 ## ۱۳.۶ بازآموزی GA
@@ -3167,8 +3108,8 @@ sha256sum -c FILE_MANIFEST.sha256
 | دستور | خروجی اصلی |
 |---|---|
 | `pytest -q` | نتیجه ۴۴ تست |
-| `demo_all.py` | خلاصه سه عامل |
-| `main.py` | trace کامل یک اپیزود |
+| `demo.py` | خلاصه سه عامل |
+| `runner.py` | trace کامل یک اپیزود |
 | `train_genetic.py` | `best_weights.json`، history و fitness plot |
 | `compare_genetic_weights.py` | مقایسه وزن دستی/تکامل‌یافته |
 | `experiment.py` | CSV خام، خلاصه، breakdown و نمودارها |

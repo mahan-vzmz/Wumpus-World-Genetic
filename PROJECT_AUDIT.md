@@ -1,9 +1,11 @@
-# Final Project Audit - Version 8
+# Final Project Audit - Version 8.1.0
 
 ## Validation status
 
-- Automated tests: **44 passed**
+- Automated tests: **passed**
 - Python compile check: **passed**
+- CLI smoke tests: **passed**
+- CI workflow execution: **passed after src migration**
 - Map parser validation: **all sample, training, and test maps passed**
 - Training maps: **12**
 - Test maps: **30**
@@ -24,9 +26,11 @@
 8. Successful-only path-length metric.
 9. Repeated median runtime.
 10. Honest hybrid genetic method description.
-11. Synced README, report, slides, CSV, and code.
+11. Synchronized the README files, PDF report, experiment outputs, package structure, and CLI documentation.
 12. Relative-path artifact generation.
 13. GitHub Actions and MIT License.
+14. Migrated repository to a robust `src/` layout with editable installation.
+15. Created proper package-based CLI entry points (`wumpus-world`).
 
 ## Final experiment
 

@@ -33,9 +33,7 @@ def copy_assets() -> None:
     ]
     for source in sources:
         if not source.exists():
-            raise FileNotFoundError(
-                f"Missing artifact source: {source}. Run train_genetic.py and experiment.py first."
-            )
+            raise FileNotFoundError(f"Missing artifact source: {source}. Run train_genetic.py and experiment.py first.")
         dest = ASSETS / source.name
         data = source.read_bytes()
         if not dest.exists() or dest.read_bytes() != data:
@@ -43,7 +41,6 @@ def copy_assets() -> None:
                 dest.write_bytes(data)
             except OSError:
                 pass
-
 
 
 def build_report(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
@@ -93,10 +90,10 @@ ul {{ margin-right:20px; }}
 <h1>گزارش نهایی پروژه Wumpus World</h1>
 <h2 style="border:0;text-align:center"> مقایسه A-Star، عامل قاعده‌محور و عامل ژنتیکی ترکیبی</h2>
 <div class="meta">
-<p><b>نام دانشجو:</b> {html.escape(info['student_name'])}</p>
-<p><b>درس:</b> {html.escape(info['course_name'])}</p>
-<p><b>استاد:</b> {html.escape(info['instructor_name'])}</p>
-<p><b>دانشگاه:</b> {html.escape(info['university_name'])}</p>
+<p><b>نام دانشجو:</b> {html.escape(info["student_name"])}</p>
+<p><b>درس:</b> {html.escape(info["course_name"])}</p>
+<p><b>استاد:</b> {html.escape(info["instructor_name"])}</p>
+<p><b>دانشگاه:</b> {html.escape(info["university_name"])}</p>
 </div>
 </section>
 
@@ -153,8 +150,10 @@ ul {{ margin-right:20px; }}
     try:
         import contextlib
         import io
+
         with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
             from weasyprint import HTML
+
             HTML(filename=str(html_path), base_url=str(REPORT_DIR)).write_pdf(str(pdf_path))
             if pdf_path.exists() and pdf_path.stat().st_size > 0:
                 return pdf_path
@@ -188,8 +187,20 @@ ul {{ margin-right:20px; }}
     return html_path
 
 
+def load_project_info(path: Path | None = None) -> dict[str, str]:
+    info_path = path or ROOT / "project_info.json"
+
+    if not info_path.exists():
+        raise FileNotFoundError(
+            "Missing project_info.json. Copy project_info.example.json "
+            "to project_info.json and complete the required fields."
+        )
+
+    return json.loads(info_path.read_text(encoding="utf-8"))
+
+
 def main() -> None:
-    info = json.loads((ROOT / "project_info.json").read_text(encoding="utf-8"))
+    info = load_project_info()
     summary = read_csv(RESULTS / "summary_results.csv")
     copy_assets()
     report = build_report(info, summary)

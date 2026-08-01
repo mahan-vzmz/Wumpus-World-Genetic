@@ -8,8 +8,8 @@
 
 ## وضعیت نهایی
 
-- نسخه پروژه: `8.0.0`
-- تست‌های خودکار: `44 passed`
+- نسخه پروژه: `8.1.0`
+- تست‌های خودکار: اجرای تست‌ها با دستور `pytest -q`
 - نقشه‌های آموزش ژنتیک: 12 نقشه جدا
 - نقشه‌های آزمایش نهایی: 30 نقشه دیده‌نشده
 - تعداد اپیزودهای مقایسه: 90
@@ -45,7 +45,10 @@ source .venv/bin/activate
 ```
 
 ```bash
-pip install -r requirements.txt
+pip install -e .
+
+# برای توسعه و تست:
+pip install -e ".[dev]"
 ```
 
 ## بررسی سلامت پروژه
@@ -55,16 +58,12 @@ pytest -q
 python -m compileall -q .
 ```
 
-خروجی مورد انتظار تست‌ها:
-
-```text
-44 passed
-```
+خروجی مورد انتظار تست‌ها، عبور موفق تمامی تست‌ها (مثلاً `47 passed` یا بیشتر) است.
 
 ## اجرای سریع هر سه روش
 
 ```bash
-python demo_all.py --map maps/sample_01.txt
+wumpus-world-demo --map maps/sample_01.txt
 ```
 
 خروجی فعلی نمونه:
@@ -78,15 +77,15 @@ genetic,True,144,26,94,0,escaped_with_gold
 ## اجرای جداگانه
 
 ```bash
-python main.py --agent astar --map maps/sample_astar_pit.txt
-python main.py --agent rule --map maps/sample_rule_reasoning.txt --max-steps 250
-python main.py --agent genetic --map maps/sample_01.txt --max-steps 250
+wumpus-world --agent astar --map maps/sample_astar_pit.txt
+wumpus-world --agent rule --map maps/sample_rule_reasoning.txt --max-steps 250
+wumpus-world --agent genetic --map maps/sample_01.txt --max-steps 250
 ```
 
 فایل وزن ژنتیکی اجباری است. استفاده از وزن‌های دستی فقط با گزینه صریح زیر انجام می‌شود:
 
 ```bash
-python main.py --agent genetic --map maps/sample_01.txt --use-default-weights
+wumpus-world --agent genetic --map maps/sample_01.txt --use-default-weights
 ```
 
 ## آموزش دوباره عامل ژنتیکی
@@ -119,10 +118,23 @@ python experiment.py
 python experiment.py --skip-generate
 ```
 
-## تولید گزارش PDF و اسلاید
+## تولید گزارش PDF
+
+برای ساخت گزارش، ابتدا نیازمندی‌های مستندات را نصب کنید:
 
 ```bash
-pip install -r requirements-docs.txt
+pip install -e ".[docs]"
+```
+
+سپس فایل `project_info.json` را از روی نسخه مثال بسازید (در ویندوز از `Copy-Item` و در لینوکس از `cp` استفاده کنید):
+
+```bash
+cp project_info.example.json project_info.json
+```
+
+اطلاعات فایل `project_info.json` را تکمیل کرده و سپس گزارش را تولید کنید:
+
+```bash
 python docs/build_artifacts.py
 ```
 
@@ -139,16 +151,26 @@ python docs/build_artifacts.py
 ## ساختار اصلی
 
 ```text
-astar_agent.py             A-Star با اطلاعات کامل
-environment.py             قوانین و وضعیت محیط
-knowledge_base.py          استنتاج محلی عامل‌های آنلاین
-rule_based_agent.py        عامل قاعده‌محور
-genetic_agent.py           سیاست وزن‌دار ترکیبی
-genetic_algorithm.py       آموزش GA و Fitness
-map_generator.py           تولید نقشه‌های آموزش و تست
-experiment.py              benchmark و نمودارها
-tests/                     44 تست خودکار
-docs/                      مستندات، گزارش و ارائه
+src/wumpus_world/
+├── __init__.py
+├── __main__.py
+├── cli.py                 نقطه ورود برای دستور wumpus-world
+├── demo.py                نقطه ورود برای دستور wumpus-world-demo
+├── runner.py              حلقه اجرای اپیزود
+├── environment.py         قوانین و وضعیت محیط
+├── knowledge_base.py      استنتاج محلی عامل‌های آنلاین
+├── map_parser.py          بررسی و خواندن نقشه
+├── map_generator.py       تولید نقشه‌های آموزش و تست
+├── agents/
+│   ├── base_agent.py      واسط پایه
+│   ├── astar_agent.py     A-Star با اطلاعات کامل
+│   ├── rule_based_agent.pyعامل قاعده‌محور
+│   └── genetic_agent.py   سیاست وزن‌دار ترکیبی
+└── training/
+    └── genetic_algorithm.py آموزش GA و Fitness
+
+tests/                     تست‌های خودکار
+docs/                      مستندات و گزارش PDF
 ```
 
 ## محدودیت‌های گزارش‌شده

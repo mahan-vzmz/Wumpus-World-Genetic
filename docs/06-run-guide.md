@@ -11,29 +11,26 @@ python -m venv .venv
 ```
 
 ```bash
-pip install -r requirements.txt
+pip install -e ".[dev]"
 ```
 
 ## تست
 
 ```bash
+ruff check .
+ruff format --check .
 pytest -q
-python -m compileall -q .
 ```
 
-خروجی مورد انتظار:
-
-```text
-44 passed
-```
+خروجی مورد انتظار: تمامی تست‌ها پاس شوند.
 
 ## اجرا
 
 ```bash
-python demo_all.py --map maps/sample_01.txt
-python main.py --agent astar --map maps/sample_astar_pit.txt
-python main.py --agent rule --map maps/sample_rule_reasoning.txt
-python main.py --agent genetic --map maps/sample_01.txt
+wumpus-world-demo --map maps/sample_01.txt
+wumpus-world --agent astar --map maps/sample_astar_pit.txt
+wumpus-world --agent rule --map maps/sample_rule_reasoning.txt
+wumpus-world --agent genetic --map maps/sample_01.txt
 ```
 
 ## آزمایش
@@ -54,11 +51,23 @@ python experiment.py --skip-generate
 python train_genetic.py --regenerate-training-maps
 ```
 
-## ساخت گزارش و ارائه
+## ساخت گزارش PDF
 
-ابتدا مقادیر `project_info.json` را کامل کن:
+ابتدا فایل `project_info.json` را بسازید:
+
+Windows PowerShell:
+```powershell
+Copy-Item project_info.example.json project_info.json
+```
+
+Linux/macOS:
+```bash
+cp project_info.example.json project_info.json
+```
+
+سپس مقادیر داخل آن را کامل کرده و اجرا کنید:
 
 ```bash
-pip install -r requirements-docs.txt
+pip install -e ".[docs]"
 python docs/build_artifacts.py
 ```

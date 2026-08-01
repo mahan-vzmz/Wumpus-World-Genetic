@@ -1,7 +1,7 @@
 # Wumpus World: Comparing A*, Rule-Based, and Genetic Agents
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
-[![Version](https://img.shields.io/badge/version-8.0.0-success.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-8.1.0-success.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Tests](https://github.com/mahan-vzmz/Wumpus-World-Genetic/actions/workflows/tests.yml/badge.svg)](https://github.com/mahan-vzmz/Wumpus-World-Genetic/actions)
 
@@ -13,7 +13,6 @@ A reproducible, fully-tested Python implementation of the classic AI environment
 2.  **Rule-Based Agent (Online)**: Uses Propositional Logic, a Knowledge Base, and safe backtracking based purely on local perceptions (Breeze, Stench).
 3.  **Hybrid Genetic Agent (Online)**: Combines local logic reasoning with a heuristic policy whose 10 numerical weights are evolved through a Genetic Algorithm.
 
-![Project Demo](docs/assets/demo.gif) *(Add your screenshot/gif here)*
 
 ## Main Results
 
@@ -56,6 +55,11 @@ wumpus-world --agent rule --map maps/sample_rule_reasoning.txt --max-steps 250
 wumpus-world --agent genetic --map maps/sample_01.txt
 ```
 
+You can also run the package directly:
+```bash
+python -m wumpus_world --help
+```
+
 *Note: The genetic agent requires the pre-trained `best_weights.json` file. To use manual weights, add `--use-default-weights`.*
 
 ## Experiment & Training
@@ -74,6 +78,11 @@ python train_genetic.py --regenerate-training-maps
 
 ```text
 src/wumpus_world/
+├── __init__.py
+├── __main__.py
+├── cli.py
+├── demo.py
+├── runner.py
 ├── environment.py         # Rules, Grid, Percepts, Game loop
 ├── knowledge_base.py      # Logic inference for online agents
 ├── map_parser.py          # Strict validation and parsing
@@ -86,7 +95,7 @@ src/wumpus_world/
 └── training/
     └── genetic_algorithm.py
 
-tests/                     # 44 automated tests
+tests/                     # Automated tests suite
 maps/                      # Static map samples
 results/                   # Experiment outputs (CSV, Charts)
 docs/                      # Reports and assets
