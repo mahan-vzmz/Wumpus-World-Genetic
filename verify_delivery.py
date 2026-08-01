@@ -4,9 +4,9 @@ import csv
 import json
 from pathlib import Path
 
-from main import run_episode
 from wumpus_world.agents.genetic_agent import GeneticWeights
 from wumpus_world.map_parser import load_map
+from wumpus_world.runner import run_episode
 
 ROOT = Path(__file__).resolve().parent
 

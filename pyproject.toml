@@ -32,8 +32,8 @@ docs = [
 ]
 
 [project.scripts]
-wumpus-world = "main:main"
-wumpus-world-demo = "demo_all:main"
+wumpus-world = "wumpus_world.cli:main"
+wumpus-world-demo = "wumpus_world.demo:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
