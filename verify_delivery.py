@@ -4,8 +4,8 @@ import csv
 import json
 from pathlib import Path
 
-from wumpus_world.agents.genetic_agent import GeneticWeights
 from main import run_episode
+from wumpus_world.agents.genetic_agent import GeneticWeights
 from wumpus_world.map_parser import load_map
 
 ROOT = Path(__file__).resolve().parent
@@ -20,20 +20,14 @@ def main() -> None:
 
     GeneticWeights.load(ROOT / "best_weights.json")
 
-    test_manifest = json.loads(
-        (ROOT / "maps" / "test" / "manifest.json").read_text(encoding="utf-8")
-    )
-    training_manifest = json.loads(
-        (ROOT / "maps" / "training" / "manifest.json").read_text(encoding="utf-8")
-    )
+    test_manifest = json.loads((ROOT / "maps" / "test" / "manifest.json").read_text(encoding="utf-8"))
+    training_manifest = json.loads((ROOT / "maps" / "training" / "manifest.json").read_text(encoding="utf-8"))
     if len(test_manifest) != 30:
         raise SystemExit(f"Expected 30 test maps; got {len(test_manifest)}")
     if len(training_manifest) != 12:
         raise SystemExit(f"Expected 12 training maps; got {len(training_manifest)}")
 
-    with (ROOT / "results" / "final" / "experiment_results.csv").open(
-        encoding="utf-8", newline=""
-    ) as handle:
+    with (ROOT / "results" / "final" / "experiment_results.csv").open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
     if len(rows) != 90:
         raise SystemExit(f"Expected 90 experiment rows; got {len(rows)}")

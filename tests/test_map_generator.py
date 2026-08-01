@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+
 from wumpus_world.agents.astar_agent import AStarAgent
 from wumpus_world.map_generator import generate_map, generate_test_suite
 from wumpus_world.map_parser import load_map

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -46,11 +47,7 @@ def load_map(path: str | Path) -> MapConfig:
     if not path.exists():
         raise FileNotFoundError(f"Map file not found: {path}")
 
-    lines = [
-        line.strip()
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
+    lines = [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
     expected = GRID_SIZE + CONFIG_LINE_COUNT
     if len(lines) != expected:
         raise ValueError(
@@ -62,9 +59,7 @@ def load_map(path: str | Path) -> MapConfig:
     if any(len(row) != GRID_SIZE for row in grid_lines):
         raise ValueError("Every grid row must contain exactly 8 characters.")
 
-    invalid = sorted(
-        {char for row in grid_lines for char in row if char not in ALLOWED_SYMBOLS}
-    )
+    invalid = sorted({char for row in grid_lines for char in row if char not in ALLOWED_SYMBOLS})
     if invalid:
         raise ValueError(f"Invalid map symbols: {invalid}")
 

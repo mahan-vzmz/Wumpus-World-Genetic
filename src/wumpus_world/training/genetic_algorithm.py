@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import csv
 import json
 import math
@@ -7,8 +8,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean
 from typing import Iterable, Sequence
-from wumpus_world.environment import WumpusEnvironment
+
 from wumpus_world.agents.genetic_agent import GENE_BOUNDS, GENE_NAMES, GeneticAgent, GeneticWeights
+from wumpus_world.environment import WumpusEnvironment
 from wumpus_world.map_parser import MapConfig, load_map
 
 Genome = list[float]
@@ -103,9 +105,7 @@ class GeneticTrainer:
 
         for generation in range(self.generations):
             fitnesses = [self.evaluate_genome(genome) for genome in population]
-            ranked = sorted(
-                zip(population, fitnesses), key=lambda item: item[1], reverse=True
-            )
+            ranked = sorted(zip(population, fitnesses), key=lambda item: item[1], reverse=True)
             generation_best_genome, generation_best = ranked[0]
             record = GenerationRecord(
                 generation=generation,
@@ -130,14 +130,10 @@ class GeneticTrainer:
 
             if self.patience is not None and stale_generations >= self.patience:
                 if verbose:
-                    print(
-                        f"early_stop=True reason=no_improvement_for_{self.patience}_generations"
-                    )
+                    print(f"early_stop=True reason=no_improvement_for_{self.patience}_generations")
                 break
 
-            next_population = [
-                list(genome) for genome, _ in ranked[: self.elite_count]
-            ]
+            next_population = [list(genome) for genome, _ in ranked[: self.elite_count]]
             while len(next_population) < self.population_size:
                 parent1 = self._tournament_select(population, fitnesses)
                 parent2 = self._tournament_select(population, fitnesses)
@@ -163,10 +159,7 @@ class GeneticTrainer:
         if cached is not None:
             return cached
         weights = GeneticWeights.from_genome(clipped)
-        evaluations = [
-            evaluate_episode(config, weights, max_steps=self.max_steps)
-            for config in self.configs
-        ]
+        evaluations = [evaluate_episode(config, weights, max_steps=self.max_steps) for config in self.configs]
         value = mean(item.fitness for item in evaluations)
         self._fitness_cache[clipped] = value
         return value
@@ -174,14 +167,10 @@ class GeneticTrainer:
     def _initial_population(self) -> list[Genome]:
         population: list[Genome] = [GeneticWeights().as_genome()]
         while len(population) < self.population_size:
-            population.append(
-                [self.rng.uniform(*GENE_BOUNDS[name]) for name in GENE_NAMES]
-            )
+            population.append([self.rng.uniform(*GENE_BOUNDS[name]) for name in GENE_NAMES])
         return population
 
-    def _tournament_select(
-        self, population: Sequence[Genome], fitnesses: Sequence[float]
-    ) -> Genome:
+    def _tournament_select(self, population: Sequence[Genome], fitnesses: Sequence[float]) -> Genome:
         indexes = self.rng.sample(range(len(population)), self.tournament_size)
         winner = max(indexes, key=lambda index: fitnesses[index])
         return list(population[winner])
@@ -208,9 +197,7 @@ class GeneticTrainer:
     def _clip_genome(genome: Iterable[float]) -> Genome:
         values = list(genome)
         if len(values) != len(GENE_NAMES):
-            raise ValueError(
-                f"Genome must contain {len(GENE_NAMES)} genes; got {len(values)}."
-            )
+            raise ValueError(f"Genome must contain {len(GENE_NAMES)} genes; got {len(values)}.")
         clipped: Genome = []
         for name, value in zip(GENE_NAMES, values):
             lower, upper = GENE_BOUNDS[name]
@@ -337,9 +324,7 @@ def save_training_artifacts(
         "seed": result.seed,
         "map_count": result.map_count,
         "generations_run": len(result.history),
-        "best_weights": {
-            name: getattr(result.best_weights, name) for name in GENE_NAMES
-        },
+        "best_weights": {name: getattr(result.best_weights, name) for name in GENE_NAMES},
     }
     summary_path = Path(summary_json_path)
     summary_path.parent.mkdir(parents=True, exist_ok=True)

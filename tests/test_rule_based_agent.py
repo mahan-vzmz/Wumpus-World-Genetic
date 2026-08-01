@@ -1,8 +1,9 @@
 from __future__ import annotations
+
+from wumpus_world.agents.rule_based_agent import RuleBasedAgent
 from wumpus_world.environment import Action, WumpusEnvironment
 from wumpus_world.knowledge_base import KnowledgeBase
 from wumpus_world.map_parser import load_map
-from wumpus_world.agents.rule_based_agent import RuleBasedAgent
 
 
 def test_no_breeze_and_no_stench_make_neighbors_safe() -> None:

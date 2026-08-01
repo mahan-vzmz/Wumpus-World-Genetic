@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+
 from wumpus_world.environment import Action, WumpusEnvironment
 from wumpus_world.map_parser import MapConfig, load_map
 
@@ -54,9 +55,7 @@ def test_wall_blocks_but_costs_health() -> None:
         ((0, 7), Action.RIGHT),
     ],
 )
-def test_all_grid_boundaries_are_blocked(
-    start: tuple[int, int], action: Action
-) -> None:
+def test_all_grid_boundaries_are_blocked(start: tuple[int, int], action: Action) -> None:
     env = WumpusEnvironment(make_config(empty_grid()))
     env.state.position = start
     env.state.visited.add(start)

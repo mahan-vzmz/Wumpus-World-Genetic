@@ -1,9 +1,12 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Iterable
+
 from wumpus_world.environment import ACTION_DELTAS, Action
 
 Position = tuple[int, int]
+
 
 @dataclass(frozen=True)
 class PerceptRecord:
@@ -61,9 +64,7 @@ class KnowledgeBase:
         if pit_here:
             self.definite_pits.add(position)
             self.safe.discard(position)
-            self.last_inferences.append(
-                f"{self._fmt(position)} is a confirmed pit because the agent entered it."
-            )
+            self.last_inferences.append(f"{self._fmt(position)} is a confirmed pit because the agent entered it.")
         else:
             self.no_pit.add(position)
             self.safe.add(position)
@@ -83,15 +84,11 @@ class KnowledgeBase:
                 traversable_neighbors.add(nxt)
             else:
                 self.walls.add(nxt)
-                self.last_inferences.append(
-                    f"{self._fmt(nxt)} is a wall because movement is blocked."
-                )
+                self.last_inferences.append(f"{self._fmt(nxt)} is a wall because movement is blocked.")
 
         if breeze:
             self.pit_clauses[position] = set(traversable_neighbors)
-            self.last_inferences.append(
-                "Breeze detected: at least one traversable neighbor may contain a pit."
-            )
+            self.last_inferences.append("Breeze detected: at least one traversable neighbor may contain a pit.")
         else:
             self.pit_clauses.pop(position, None)
             newly_safe_from_pit = traversable_neighbors - self.no_pit
@@ -105,9 +102,7 @@ class KnowledgeBase:
 
         if stench:
             self.wumpus_clauses[position] = set(traversable_neighbors)
-            self.last_inferences.append(
-                "Stench detected: at least one traversable neighbor may contain a Wumpus."
-            )
+            self.last_inferences.append("Stench detected: at least one traversable neighbor may contain a Wumpus.")
         else:
             self.wumpus_clauses.pop(position, None)
             newly_safe_from_wumpus = traversable_neighbors - self.no_wumpus
@@ -133,11 +128,7 @@ class KnowledgeBase:
         self.definite_wumpus = confirmed_wumpus
 
         for origin, original_clause in self.pit_clauses.items():
-            candidates = {
-                p
-                for p in original_clause
-                if p not in self.no_pit and p not in self.walls
-            }
+            candidates = {p for p in original_clause if p not in self.no_pit and p not in self.walls}
             for candidate in candidates:
                 self.evidence_pit[candidate] = self.evidence_pit.get(candidate, 0) + 1
             self.possible_pits.update(candidates)
@@ -150,11 +141,7 @@ class KnowledgeBase:
                 )
 
         for origin, original_clause in self.wumpus_clauses.items():
-            candidates = {
-                p
-                for p in original_clause
-                if p not in self.no_wumpus and p not in self.walls
-            }
+            candidates = {p for p in original_clause if p not in self.no_wumpus and p not in self.walls}
             for candidate in candidates:
                 self.evidence_wumpus[candidate] = self.evidence_wumpus.get(candidate, 0) + 1
             self.possible_wumpus.update(candidates)
@@ -175,9 +162,7 @@ class KnowledgeBase:
         self.safe -= self.definite_pits | self.definite_wumpus | self.walls
         if newly_safe:
             self.last_inferences.append(
-                "Safe cells inferred: "
-                + ", ".join(self._fmt(p) for p in sorted(newly_safe))
-                + "."
+                "Safe cells inferred: " + ", ".join(self._fmt(p) for p in sorted(newly_safe)) + "."
             )
 
     def risk(self, position: Position) -> float:

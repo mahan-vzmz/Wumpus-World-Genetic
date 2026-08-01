@@ -1,12 +1,15 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from heapq import heappop, heappush
 from itertools import count
 from math import inf
 from typing import Any
+
 from wumpus_world.agents.base_agent import BaseAgent
 from wumpus_world.environment import ACTION_DELTAS, Action
 from wumpus_world.map_parser import MapConfig
+
 
 @dataclass(frozen=True)
 class SearchState:
@@ -33,12 +36,7 @@ class AStarAgent(BaseAgent):
         self.config = config
         self.rows = len(config.grid)
         self.cols = len(config.grid[0])
-        self.gold_positions = {
-            (r, c)
-            for r, row in enumerate(config.grid)
-            for c, cell in enumerate(row)
-            if cell == "G"
-        }
+        self.gold_positions = {(r, c) for r, row in enumerate(config.grid) for c, cell in enumerate(row) if cell == "G"}
         self.plan_result: PlanResult | None = None
         self._next_action_index = 0
         self._expected_positions: tuple[tuple[int, int], ...] = ()
@@ -121,9 +119,7 @@ class AStarAgent(BaseAgent):
 
         raise NoPathError("No survivable path can collect gold and reach the exit.")
 
-    def _successors(
-        self, state: SearchState
-    ) -> list[tuple[Action, SearchState, int]]:
+    def _successors(self, state: SearchState) -> list[tuple[Action, SearchState, int]]:
         successors: list[tuple[Action, SearchState, int]] = []
         row, col = state.position
         for action, (dr, dc) in ACTION_DELTAS.items():
@@ -160,8 +156,7 @@ class AStarAgent(BaseAgent):
         if state.has_gold:
             return self._manhattan(state.position, self.config.exit_position)
         return min(
-            self._manhattan(state.position, gold)
-            + self._manhattan(gold, self.config.exit_position)
+            self._manhattan(state.position, gold) + self._manhattan(gold, self.config.exit_position)
             for gold in self.gold_positions
         )
 

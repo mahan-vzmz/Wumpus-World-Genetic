@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 import argparse
 import json
 import random
 from dataclasses import asdict, dataclass
 from pathlib import Path
+
 from wumpus_world.agents.astar_agent import AStarAgent
 from wumpus_world.map_parser import GRID_SIZE, load_map
 
@@ -37,9 +39,7 @@ def _neighbors(position: Position) -> list[Position]:
     return result
 
 
-def _random_shortest_path(
-    start: Position, goal: Position, rng: random.Random
-) -> list[Position]:
+def _random_shortest_path(start: Position, goal: Position, rng: random.Random) -> list[Position]:
     current = start
     path = [current]
     moves: list[tuple[int, int]] = []
@@ -54,9 +54,7 @@ def _random_shortest_path(
     return path
 
 
-def _add_detours(
-    path: list[Position], detours: int, rng: random.Random
-) -> list[Position]:
+def _add_detours(path: list[Position], detours: int, rng: random.Random) -> list[Position]:
     result = list(path)
     attempts = 0
     added = 0
@@ -106,9 +104,7 @@ def _choose_exit(rng: random.Random) -> Position:
     return rng.choice(candidates)
 
 
-def _difficulty_counts(
-    difficulty: str, rng: random.Random
-) -> tuple[int, int, int, int]:
+def _difficulty_counts(difficulty: str, rng: random.Random) -> tuple[int, int, int, int]:
     if difficulty == "easy":
         return rng.randint(4, 7), rng.randint(1, 2), 1, rng.randint(0, 1)
     if difficulty == "medium":
@@ -128,23 +124,12 @@ def generate_map(
     rng = random.Random(seed)
     start = (0, 0)
     exit_position = _choose_exit(rng)
-    interior = [
-        (r, c)
-        for r in range(1, GRID_SIZE - 1)
-        for c in range(1, GRID_SIZE - 1)
-        if (r, c) != exit_position
-    ]
+    interior = [(r, c) for r in range(1, GRID_SIZE - 1) for c in range(1, GRID_SIZE - 1) if (r, c) != exit_position]
     gold_position = rng.choice(interior)
 
-    wall_count, pit_count, wumpus_count, detour_count = _difficulty_counts(
-        difficulty, rng
-    )
-    path_to_gold = _add_detours(
-        _random_shortest_path(start, gold_position, rng), detour_count, rng
-    )
-    path_to_exit = _add_detours(
-        _random_shortest_path(gold_position, exit_position, rng), detour_count, rng
-    )
+    wall_count, pit_count, wumpus_count, detour_count = _difficulty_counts(difficulty, rng)
+    path_to_gold = _add_detours(_random_shortest_path(start, gold_position, rng), detour_count, rng)
+    path_to_exit = _add_detours(_random_shortest_path(gold_position, exit_position, rng), detour_count, rng)
     protected_path = path_to_gold + path_to_exit[1:]
     protected = set(protected_path)
 
@@ -157,9 +142,7 @@ def generate_map(
             if index % 3 == 0:
                 safety_buffer.update(_neighbors(position))
 
-    all_cells = {
-        (r, c) for r in range(GRID_SIZE) for c in range(GRID_SIZE)
-    }
+    all_cells = {(r, c) for r in range(GRID_SIZE) for c in range(GRID_SIZE)}
     reserved = protected | {start, exit_position, gold_position}
     candidates = sorted(all_cells - reserved)
 

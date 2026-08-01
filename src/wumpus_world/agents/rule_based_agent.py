@@ -1,13 +1,16 @@
 from __future__ import annotations
+
 from collections import deque
 from dataclasses import dataclass
 from typing import Any, Callable, Iterable
+
 from wumpus_world.agents.base_agent import BaseAgent
 from wumpus_world.environment import ACTION_DELTAS, Action
 from wumpus_world.knowledge_base import KnowledgeBase, Position
 from wumpus_world.map_parser import MapConfig
 
 ACTION_ORDER = (Action.RIGHT, Action.DOWN, Action.LEFT, Action.UP)
+
 
 @dataclass(frozen=True)
 class DecisionTrace:
@@ -75,10 +78,7 @@ class RuleBasedAgent(BaseAgent):
 
         # 2) Prefer a nearest provably safe, unvisited cell.
         safe_targets = {
-            p
-            for p in self.kb.safe
-            if p not in self.kb.visited
-            and (self._has_gold or p != self.exit_position)
+            p for p in self.kb.safe if p not in self.kb.visited and (self._has_gold or p != self.exit_position)
         }
         safe_path = self._shortest_path_to_any(position, safe_targets, self.kb.safe)
         if safe_path and len(safe_path) > 1:
@@ -104,10 +104,7 @@ class RuleBasedAgent(BaseAgent):
                 )
             else:
                 action = self._action_between(position, target)
-                reason = (
-                    f"No safe move remains; enter least-risk frontier "
-                    f"{self._fmt(target)} (risk={risk:.1f})."
-                )
+                reason = f"No safe move remains; enter least-risk frontier {self._fmt(target)} (risk={risk:.1f})."
             candidates = [
                 f"{self._fmt(p)} risk={self.kb.risk(p):.1f} status={self.kb.status(p)}"
                 for p in self._frontier_cells()
@@ -133,9 +130,7 @@ class RuleBasedAgent(BaseAgent):
             "No reachable frontier remains; use the safest valid local fallback.",
         )
 
-    def _least_risky_frontier(
-        self, current: Position
-    ) -> tuple[Position, list[Position], float] | None:
+    def _least_risky_frontier(self, current: Position) -> tuple[Position, list[Position], float] | None:
         best: tuple[tuple[float, int, int, int], Position, list[Position]] | None = None
         for target in self._frontier_cells():
             if target in self.kb.walls or target in self.kb.definite_wumpus:
@@ -171,9 +166,7 @@ class RuleBasedAgent(BaseAgent):
                 frontier.add(neighbor)
         return sorted(frontier)
 
-    def _shortest_safe_path(
-        self, start: Position, goal: Position
-    ) -> list[Position] | None:
+    def _shortest_safe_path(self, start: Position, goal: Position) -> list[Position] | None:
         if start == goal:
             return [start]
         allowed = set(self.kb.safe)
@@ -231,9 +224,7 @@ class RuleBasedAgent(BaseAgent):
             raise RuntimeError("No valid fallback action exists.")
         return min(ranked)[2]
 
-    def _adjacent_positions(
-        self, position: Position, valid_actions: set[Action]
-    ) -> set[Position]:
+    def _adjacent_positions(self, position: Position, valid_actions: set[Action]) -> set[Position]:
         result: set[Position] = set()
         for action in valid_actions:
             dr, dc = ACTION_DELTAS[action]

@@ -1,13 +1,15 @@
 from __future__ import annotations
+
 import argparse
 from pathlib import Path
+
+from wumpus_world.map_generator import generate_training_suite
 from wumpus_world.training.genetic_algorithm import (
     GeneticTrainer,
     load_training_configs,
     plot_history,
     save_training_artifacts,
 )
-from wumpus_world.map_generator import generate_training_suite
 
 
 def main() -> None:
@@ -31,13 +33,9 @@ def main() -> None:
 
     if args.regenerate_training_maps:
         generate_training_suite()
-    paths = args.maps or [
-        str(path) for path in sorted(Path("maps/training").glob("training_*.txt"))
-    ]
+    paths = args.maps or [str(path) for path in sorted(Path("maps/training").glob("training_*.txt"))]
     if not paths:
-        raise SystemExit(
-            "No training maps found. Run with --regenerate-training-maps first."
-        )
+        raise SystemExit("No training maps found. Run with --regenerate-training-maps first.")
 
     trainer = GeneticTrainer(
         load_training_configs(paths),

@@ -1,14 +1,15 @@
 from __future__ import annotations
+
 from pathlib import Path
 from statistics import mean
+
 from wumpus_world.agents.genetic_agent import GeneticWeights
-from wumpus_world.training.genetic_algorithm import evaluate_episode
 from wumpus_world.map_parser import load_map
+from wumpus_world.training.genetic_algorithm import evaluate_episode
+
 
 def evaluate_set(label: str, weights: GeneticWeights, paths: list[Path]) -> None:
-    results = [
-        evaluate_episode(load_map(path), weights, max_steps=250) for path in paths
-    ]
+    results = [evaluate_episode(load_map(path), weights, max_steps=250) for path in paths]
     print(f"\n{label}")
     print("map,success,fitness,steps,health,pits,reason")
     for path, result in zip(paths, results):
@@ -29,9 +30,7 @@ def main() -> None:
     if not paths:
         raise SystemExit("No training maps found.")
     evaluate_set("Default hand-written weights", GeneticWeights(), paths)
-    evaluate_set(
-        "Evolved weights", GeneticWeights.load("best_weights.json"), paths
-    )
+    evaluate_set("Evolved weights", GeneticWeights.load("best_weights.json"), paths)
 
 
 if __name__ == "__main__":

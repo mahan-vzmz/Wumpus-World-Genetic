@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import argparse
 import csv
 import json
@@ -7,6 +8,7 @@ import time
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -102,22 +104,14 @@ def run_benchmark(
                     "score": int(_safe_number(first_result.get("score"))),
                     "score_delta": int(_safe_number(first_result.get("score_delta"))),
                     "initial_health": int(_safe_number(first_result.get("initial_health"))),
-                    "remaining_health": int(
-                        _safe_number(first_result.get("remaining_health"))
-                    ),
+                    "remaining_health": int(_safe_number(first_result.get("remaining_health"))),
                     "steps": int(_safe_number(first_result.get("steps"))),
-                    "pit_entries": int(
-                        _safe_number(first_result.get("pit_entries"))
-                    ),
-                    "collected_gold": int(
-                        _safe_number(first_result.get("collected_gold"))
-                    ),
+                    "pit_entries": int(_safe_number(first_result.get("pit_entries"))),
+                    "collected_gold": int(_safe_number(first_result.get("collected_gold"))),
                     "wumpus_death": int(reason == "wumpus"),
                     "termination_reason": reason,
                     "runtime_ms": round(statistics.median(runtimes), 4),
-                    "expanded_nodes": int(
-                        _safe_number(first_result.get("expanded_nodes"))
-                    ),
+                    "expanded_nodes": int(_safe_number(first_result.get("expanded_nodes"))),
                     "plan_cost": int(_safe_number(first_result.get("plan_cost"))),
                     "error": first_result.get("error", ""),
                 }
@@ -152,9 +146,7 @@ def _summary_row(agent: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
         "average_score_success": round(_mean(successes, "score"), 2),
         "average_pit_entries": round(_mean(rows, "pit_entries"), 3),
         "wumpus_deaths": sum(int(row["wumpus_death"]) for row in rows),
-        "max_steps_failures": sum(
-            str(row["termination_reason"]) == "max_steps" for row in rows
-        ),
+        "max_steps_failures": sum(str(row["termination_reason"]) == "max_steps" for row in rows),
         "average_runtime_ms": round(_mean(rows, "runtime_ms"), 4),
         "average_expanded_nodes": round(_mean(rows, "expanded_nodes"), 2),
     }
@@ -189,9 +181,7 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
-def _bar_chart(
-    summary: list[dict[str, Any]], key: str, ylabel: str, output: Path
-) -> None:
+def _bar_chart(summary: list[dict[str, Any]], key: str, ylabel: str, output: Path) -> None:
     labels = [row["agent"] for row in summary]
     values = [float(row[key]) for row in summary]
     plt.figure(figsize=(7, 4.5))
@@ -213,19 +203,13 @@ def _bar_chart(
     plt.close()
 
 
-def _difficulty_chart(
-    difficulty_rows: list[dict[str, Any]], output: Path
-) -> None:
+def _difficulty_chart(difficulty_rows: list[dict[str, Any]], output: Path) -> None:
     difficulties = ("easy", "medium", "hard")
     x = list(range(len(difficulties)))
     width = 0.24
     plt.figure(figsize=(8, 4.8))
     for index, agent in enumerate(AGENTS):
-        lookup = {
-            row["difficulty"]: float(row["success_rate"])
-            for row in difficulty_rows
-            if row["agent"] == agent
-        }
+        lookup = {row["difficulty"]: float(row["success_rate"]) for row in difficulty_rows if row["agent"] == agent}
         values = [lookup.get(level, 0.0) for level in difficulties]
         positions = [value + (index - 1) * width for value in x]
         plt.bar(positions, values, width=width, label=agent)
@@ -242,9 +226,7 @@ def _difficulty_chart(
 
 
 def _failure_chart(rows: list[dict[str, Any]], output: Path) -> None:
-    reasons = sorted(
-        {str(row["termination_reason"]) for row in rows if not int(row["success"])}
-    )
+    reasons = sorted({str(row["termination_reason"]) for row in rows if not int(row["success"])})
     if not reasons:
         reasons = ["none"]
     x = list(range(len(reasons)))
@@ -252,9 +234,7 @@ def _failure_chart(rows: list[dict[str, Any]], output: Path) -> None:
     plt.figure(figsize=(max(8, len(reasons) * 1.4), 4.8))
     for index, agent in enumerate(AGENTS):
         counts = Counter(
-            str(row["termination_reason"])
-            for row in rows
-            if row["agent"] == agent and not int(row["success"])
+            str(row["termination_reason"]) for row in rows if row["agent"] == agent and not int(row["success"])
         )
         positions = [value + (index - 1) * width for value in x]
         plt.bar(
@@ -278,22 +258,16 @@ def write_report(
     difficulty_summary: list[dict[str, Any]],
     results_dir: Path,
 ) -> None:
-    success_winner = max(
-        summary, key=lambda row: (row["success_rate"], row["average_score_all"])
-    )
+    success_winner = max(summary, key=lambda row: (row["success_rate"], row["average_score_all"]))
     online = [row for row in summary if row["agent"] in {"rule", "genetic"}]
-    online_winner = max(
-        online, key=lambda row: (row["success_rate"], row["average_score_all"])
-    )
+    online_winner = max(online, key=lambda row: (row["success_rate"], row["average_score_all"]))
     lines = [
         "WUMPUS WORLD VERSION 8 - FINAL EXPERIMENT SUMMARY",
         "=" * 56,
         "",
         f"Episodes per agent: {summary[0]['episodes'] if summary else 0}",
-        f"Best overall success rate: {success_winner['agent']} "
-        f"({success_winner['success_rate']:.2f}%)",
-        f"Best online agent: {online_winner['agent']} "
-        f"({online_winner['success_rate']:.2f}%)",
+        f"Best overall success rate: {success_winner['agent']} ({success_winner['success_rate']:.2f}%)",
+        f"Best online agent: {online_winner['agent']} ({online_winner['success_rate']:.2f}%)",
         "",
         "OVERALL RESULTS",
         "-" * 56,
@@ -321,9 +295,7 @@ def write_report(
             "7. Test maps are deterministic and separate from the training maps.",
         ]
     )
-    failures = Counter(
-        str(row["termination_reason"]) for row in rows if not int(row["success"])
-    )
+    failures = Counter(str(row["termination_reason"]) for row in rows if not int(row["success"]))
     lines.extend(["", "FAILURE COUNTS", "-" * 56])
     if failures:
         for reason, count in failures.most_common():
@@ -331,14 +303,10 @@ def write_report(
     else:
         lines.append("none")
 
-    (results_dir / "experiment_summary.txt").write_text(
-        "\n".join(lines) + "\n", encoding="utf-8"
-    )
+    (results_dir / "experiment_summary.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def analyze_and_export(
-    rows: list[dict[str, Any]], results_dir: str | Path = "results/final"
-) -> None:
+def analyze_and_export(rows: list[dict[str, Any]], results_dir: str | Path = "results/final") -> None:
     results_dir = Path(results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
     summary, difficulty_summary = summarize(rows)
@@ -375,9 +343,7 @@ def analyze_and_export(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Benchmark A*, rule-based, and hybrid genetic agents."
-    )
+    parser = argparse.ArgumentParser(description="Benchmark A*, rule-based, and hybrid genetic agents.")
     parser.add_argument("--test-dir", default="maps/test")
     parser.add_argument("--results-dir", default="results/final")
     parser.add_argument("--per-difficulty", type=int, default=10)

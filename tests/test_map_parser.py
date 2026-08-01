@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 from pathlib import Path
+
 import pytest
+
 from wumpus_world.map_parser import load_map
 
 

@@ -1,8 +1,11 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+
 from wumpus_world.map_parser import MapConfig
+
 
 class Action(str, Enum):
     UP = "UP"
@@ -35,7 +38,6 @@ class GameState:
 
 
 class WumpusEnvironment:
-
     def __init__(self, config: MapConfig):
         self.config = config
         self.rows = len(config.grid)
@@ -46,10 +48,7 @@ class WumpusEnvironment:
 
     def reset(self) -> dict[str, Any]:
         self.remaining_gold = {
-            (r, c)
-            for r, row in enumerate(self.config.grid)
-            for c, cell in enumerate(row)
-            if cell == "G"
+            (r, c) for r, row in enumerate(self.config.grid) for c, cell in enumerate(row) if cell == "G"
         }
         self.state = GameState(
             position=(0, 0),
@@ -122,9 +121,7 @@ class WumpusEnvironment:
         self.state.termination_reason = reason
         self.state.score = self._calculate_score()
 
-    def step(
-        self, action: Action | str
-    ) -> tuple[dict[str, Any], int, bool, dict[str, Any]]:
+    def step(self, action: Action | str) -> tuple[dict[str, Any], int, bool, dict[str, Any]]:
         if self.state.done:
             raise RuntimeError("Episode is finished. Call reset() before taking another action.")
 
@@ -137,9 +134,7 @@ class WumpusEnvironment:
         old_position = self.state.position
         dr, dc = ACTION_DELTAS[action]
         candidate = (old_position[0] + dr, old_position[1] + dc)
-        blocked = not self._inside(candidate) or (
-            self._inside(candidate) and self.cell_at(candidate) == "D"
-        )
+        blocked = not self._inside(candidate) or (self._inside(candidate) and self.cell_at(candidate) == "D")
 
         self.state.health -= 1
         self.state.steps += 1
@@ -165,11 +160,7 @@ class WumpusEnvironment:
             if candidate == self.config.exit_position and not self.state.done:
                 self.state.done = True
                 self.state.success = self.state.collected_gold > 0
-                self.state.termination_reason = (
-                    "escaped_with_gold"
-                    if self.state.success
-                    else "escaped_without_gold"
-                )
+                self.state.termination_reason = "escaped_with_gold" if self.state.success else "escaped_without_gold"
 
         if self.state.health <= 0 and not self.state.done:
             self.state.health = 0

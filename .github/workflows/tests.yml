@@ -16,10 +16,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
-      - run: python -m pip install --upgrade pip
-      - run: pip install -e .[dev]
-      - run: ruff check .
-      - run: ruff format --check .
-      - run: pytest -q
-      - run: python -m compileall -q .
-      - run: python demo_all.py --map maps/sample_01.txt
+          cache-dependency-path: pyproject.toml
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+      - name: Install project
+        run: python -m pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check .
+      - name: Check formatting
+        run: ruff format --check .
+      - name: Run tests
+        run: pytest -q
+      - name: Compile Python files
+        run: python -m compileall -q src tests experiment.py train_genetic.py verify_delivery.py
+      - name: Check CLI
+        run: wumpus-world --help
+      - name: Check demo CLI
+        run: wumpus-world-demo --map maps/sample_01.txt

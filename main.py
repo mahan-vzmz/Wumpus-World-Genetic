@@ -1,14 +1,15 @@
 from __future__ import annotations
+
 import argparse
-from pathlib import Path
 from typing import Any
+
 from wumpus_world.agents.astar_agent import AStarAgent, NoPathError
 from wumpus_world.agents.base_agent import BaseAgent
-from wumpus_world.environment import WumpusEnvironment
 from wumpus_world.agents.genetic_agent import GeneticAgent, GeneticWeights
-from wumpus_world.map_parser import load_map
 from wumpus_world.agents.random_agent import RandomAgent
 from wumpus_world.agents.rule_based_agent import RuleBasedAgent
+from wumpus_world.environment import WumpusEnvironment
+from wumpus_world.map_parser import load_map
 
 
 def build_agent(
@@ -112,9 +113,7 @@ def run_episode(
             )
         if isinstance(agent, GeneticAgent):
             print("Loaded evolved genetic weights:")
-            for name, value in zip(
-                agent.weights.__dataclass_fields__, agent.weights.as_genome()
-            ):
+            for name, value in zip(agent.weights.__dataclass_fields__, agent.weights.as_genome()):
                 print(f"  {name}={value:.4f}")
         print("Initial state")
         print(env.render())
@@ -176,10 +175,7 @@ def run_episode(
     if isinstance(agent, GeneticAgent):
         result["known_safe_cells"] = len(agent.kb.safe)
         result["visited_cells"] = len(agent.kb.visited)
-        result["weights"] = {
-            name: getattr(agent.weights, name)
-            for name in agent.weights.__dataclass_fields__
-        }
+        result["weights"] = {name: getattr(agent.weights, name) for name in agent.weights.__dataclass_fields__}
     if verbose:
         print("Final result:", result)
     return result

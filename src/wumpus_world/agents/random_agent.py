@@ -1,8 +1,11 @@
 from __future__ import annotations
+
 import random
 from typing import Any
+
 from wumpus_world.agents.base_agent import BaseAgent
 from wumpus_world.environment import Action
+
 
 class RandomAgent(BaseAgent):
     def __init__(self, seed: int = 42):

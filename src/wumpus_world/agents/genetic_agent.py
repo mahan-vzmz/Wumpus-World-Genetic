@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 import json
 from collections import deque
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable
+
 from wumpus_world.agents.base_agent import BaseAgent
 from wumpus_world.environment import ACTION_DELTAS, Action
 from wumpus_world.knowledge_base import KnowledgeBase, Position
@@ -56,9 +58,7 @@ class GeneticWeights:
     def from_genome(cls, genome: Iterable[float]) -> "GeneticWeights":
         values = list(genome)
         if len(values) != len(GENE_NAMES):
-            raise ValueError(
-                f"Genome must contain {len(GENE_NAMES)} values; got {len(values)}."
-            )
+            raise ValueError(f"Genome must contain {len(GENE_NAMES)} values; got {len(values)}.")
         return cls(**dict(zip(GENE_NAMES, map(float, values))))
 
     def clipped(self) -> "GeneticWeights":
@@ -137,11 +137,7 @@ class GeneticAgent(BaseAgent):
             valid_actions=observation["valid_actions"],
         )
 
-        valid_actions = [
-            action
-            for action in ACTION_ORDER
-            if action.value in observation["valid_actions"]
-        ]
+        valid_actions = [action for action in ACTION_ORDER if action.value in observation["valid_actions"]]
         if not valid_actions:
             raise RuntimeError("No valid movement is available.")
 
@@ -164,9 +160,7 @@ class GeneticAgent(BaseAgent):
                 continue
             target = self._target(position, action)
             if target == self.exit_position and not has_gold:
-                scored.append(
-                    (-1_000_000.0, order_index, action, {"premature_exit": 1.0})
-                )
+                scored.append((-1_000_000.0, order_index, action, {"premature_exit": 1.0}))
                 continue
             features = self._features(
                 current=position,
@@ -181,9 +175,7 @@ class GeneticAgent(BaseAgent):
         score, _, action, _ = max(scored, key=lambda item: (item[0], -item[1]))
         candidate_lines = tuple(
             self._format_candidate(candidate_action, candidate_score, features)
-            for candidate_score, _, candidate_action, features in sorted(
-                scored, key=lambda item: item[1]
-            )
+            for candidate_score, _, candidate_action, features in sorted(scored, key=lambda item: item[1])
         )
         return self._record(
             position,
@@ -206,12 +198,17 @@ class GeneticAgent(BaseAgent):
         unvisited = 1.0 if self.visit_counts.get(target, 0) == 0 else 0.0
         revisit_count = float(self.visit_counts.get(target, 0))
         reverse = 1.0 if target == self.previous_position else 0.0
-        unknown = 1.0 if status in {
-            "UNKNOWN",
-            "POSSIBLE_PIT",
-            "POSSIBLE_WUMPUS",
-            "POSSIBLE_WUMPUS_OR_PIT",
-        } else 0.0
+        unknown = (
+            1.0
+            if status
+            in {
+                "UNKNOWN",
+                "POSSIBLE_PIT",
+                "POSSIBLE_WUMPUS",
+                "POSSIBLE_WUMPUS_OR_PIT",
+            }
+            else 0.0
+        )
 
         pit_evidence = float(self.kb.evidence_pit.get(target, 0))
         if target in self.kb.definite_pits:
@@ -223,15 +220,17 @@ class GeneticAgent(BaseAgent):
         exit_progress = 0.0
         if has_gold:
             exit_progress = float(
-                self._manhattan(current, self.exit_position)
-                - self._manhattan(target, self.exit_position)
+                self._manhattan(current, self.exit_position) - self._manhattan(target, self.exit_position)
             )
 
-        frontier = sum(
-            1
-            for neighbor in self.kb.neighbors(target)
-            if neighbor not in self.kb.visited and neighbor not in self.kb.walls
-        ) / 4.0
+        frontier = (
+            sum(
+                1
+                for neighbor in self.kb.neighbors(target)
+                if neighbor not in self.kb.visited and neighbor not in self.kb.walls
+            )
+            / 4.0
+        )
         uncertainty = pit_evidence + 2.0 * wumpus_evidence + unknown
         health_ratio = max(0.0, min(1.0, health / max(1, self.initial_health)))
         low_health_risk = (1.0 - health_ratio) * uncertainty
@@ -250,14 +249,9 @@ class GeneticAgent(BaseAgent):
         }
 
     def _weighted_score(self, features: dict[str, float]) -> float:
-        return sum(
-            float(getattr(self.weights, name)) * float(features[name])
-            for name in GENE_NAMES
-        )
+        return sum(float(getattr(self.weights, name)) * float(features[name]) for name in GENE_NAMES)
 
-    def _shortest_known_safe_path(
-        self, start: Position, goal: Position
-    ) -> list[Position] | None:
+    def _shortest_known_safe_path(self, start: Position, goal: Position) -> list[Position] | None:
         if start == goal:
             return [start]
         allowed = set(self.kb.safe) | {start}
@@ -311,14 +305,10 @@ class GeneticAgent(BaseAgent):
         return action
 
     @staticmethod
-    def _format_candidate(
-        action: Action, score: float, features: dict[str, float]
-    ) -> str:
+    def _format_candidate(action: Action, score: float, features: dict[str, float]) -> str:
         if "premature_exit" in features:
             return f"{action.value}: score=-1000000.00 (premature exit without gold)"
-        compact = ", ".join(
-            f"{name}={value:.2f}" for name, value in features.items() if value != 0
-        )
+        compact = ", ".join(f"{name}={value:.2f}" for name, value in features.items() if value != 0)
         return f"{action.value}: score={score:.2f} [{compact or 'all-zero features'}]"
 
     def _target(self, position: Position, action: Action) -> Position:
