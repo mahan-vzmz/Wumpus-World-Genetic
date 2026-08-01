@@ -4,10 +4,10 @@ from collections import deque
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable
-from base_agent import BaseAgent
-from environment import ACTION_DELTAS, Action
-from knowledge_base import KnowledgeBase, Position
-from map_parser import MapConfig
+from wumpus_world.agents.base_agent import BaseAgent
+from wumpus_world.environment import ACTION_DELTAS, Action
+from wumpus_world.knowledge_base import KnowledgeBase, Position
+from wumpus_world.map_parser import MapConfig
 
 ACTION_ORDER = (Action.RIGHT, Action.DOWN, Action.LEFT, Action.UP)
 GENE_NAMES = (

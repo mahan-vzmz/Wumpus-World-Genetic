@@ -2,13 +2,13 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 from typing import Any
-from astar_agent import AStarAgent, NoPathError
-from base_agent import BaseAgent
-from environment import WumpusEnvironment
-from genetic_agent import GeneticAgent, GeneticWeights
-from map_parser import load_map
-from random_agent import RandomAgent
-from rule_based_agent import RuleBasedAgent
+from wumpus_world.agents.astar_agent import AStarAgent, NoPathError
+from wumpus_world.agents.base_agent import BaseAgent
+from wumpus_world.environment import WumpusEnvironment
+from wumpus_world.agents.genetic_agent import GeneticAgent, GeneticWeights
+from wumpus_world.map_parser import load_map
+from wumpus_world.agents.random_agent import RandomAgent
+from wumpus_world.agents.rule_based_agent import RuleBasedAgent
 
 
 def build_agent(

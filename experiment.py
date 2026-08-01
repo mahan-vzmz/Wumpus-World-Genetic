@@ -13,7 +13,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from main import run_episode
-from map_generator import generate_test_suite
+from wumpus_world.map_generator import generate_test_suite
 
 AGENTS = ("astar", "rule", "genetic")
 METRIC_FIELDS = (

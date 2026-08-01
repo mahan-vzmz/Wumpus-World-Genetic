@@ -1,9 +1,9 @@
 from __future__ import annotations
 from pathlib import Path
 from statistics import mean
-from genetic_agent import GeneticWeights
-from genetic_algorithm import evaluate_episode
-from map_parser import load_map
+from wumpus_world.agents.genetic_agent import GeneticWeights
+from wumpus_world.training.genetic_algorithm import evaluate_episode
+from wumpus_world.map_parser import load_map
 
 def evaluate_set(label: str, weights: GeneticWeights, paths: list[Path]) -> None:
     results = [

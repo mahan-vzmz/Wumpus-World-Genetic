@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
-from environment import Action
+from wumpus_world.environment import Action
 
 
 class BaseAgent(ABC):

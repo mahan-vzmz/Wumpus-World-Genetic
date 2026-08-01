@@ -4,9 +4,9 @@ from heapq import heappop, heappush
 from itertools import count
 from math import inf
 from typing import Any
-from base_agent import BaseAgent
-from environment import ACTION_DELTAS, Action
-from map_parser import MapConfig
+from wumpus_world.agents.base_agent import BaseAgent
+from wumpus_world.environment import ACTION_DELTAS, Action
+from wumpus_world.map_parser import MapConfig
 
 @dataclass(frozen=True)
 class SearchState:

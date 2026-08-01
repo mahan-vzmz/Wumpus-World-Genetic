@@ -4,8 +4,8 @@ import json
 import random
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from astar_agent import AStarAgent
-from map_parser import GRID_SIZE, load_map
+from wumpus_world.agents.astar_agent import AStarAgent
+from wumpus_world.map_parser import GRID_SIZE, load_map
 
 Position = tuple[int, int]
 

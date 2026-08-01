@@ -2,10 +2,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import pytest
-from environment import Action, WumpusEnvironment
-from genetic_agent import GENE_BOUNDS, GENE_NAMES, GeneticAgent, GeneticWeights
-from genetic_algorithm import GeneticTrainer, evaluate_episode
-from map_parser import load_map
+from wumpus_world.environment import Action, WumpusEnvironment
+from wumpus_world.agents.genetic_agent import GENE_BOUNDS, GENE_NAMES, GeneticAgent, GeneticWeights
+from wumpus_world.training.genetic_algorithm import GeneticTrainer, evaluate_episode
+from wumpus_world.map_parser import load_map
 
 
 def test_genetic_weights_round_trip(tmp_path: Path) -> None:

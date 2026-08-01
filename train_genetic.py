@@ -1,13 +1,13 @@
 from __future__ import annotations
 import argparse
 from pathlib import Path
-from genetic_algorithm import (
+from wumpus_world.training.genetic_algorithm import (
     GeneticTrainer,
     load_training_configs,
     plot_history,
     save_training_artifacts,
 )
-from map_generator import generate_training_suite
+from wumpus_world.map_generator import generate_training_suite
 
 
 def main() -> None:

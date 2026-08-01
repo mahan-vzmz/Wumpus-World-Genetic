@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Iterable
-from environment import ACTION_DELTAS, Action
+from wumpus_world.environment import ACTION_DELTAS, Action
 
 Position = tuple[int, int]
 

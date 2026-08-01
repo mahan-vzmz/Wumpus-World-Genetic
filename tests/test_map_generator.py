@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from astar_agent import AStarAgent
-from map_generator import generate_map, generate_test_suite
-from map_parser import load_map
+from wumpus_world.agents.astar_agent import AStarAgent
+from wumpus_world.map_generator import generate_map, generate_test_suite
+from wumpus_world.map_parser import load_map
 
 
 def test_generated_map_is_valid_and_solvable(tmp_path: Path) -> None:

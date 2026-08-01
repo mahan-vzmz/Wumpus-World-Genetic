@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 import pytest
-from map_parser import load_map
+from wumpus_world.map_parser import load_map
 
 
 def write_map(tmp_path: Path, rows: list[str], config: list[str]) -> Path:

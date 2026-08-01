@@ -1,8 +1,8 @@
 from __future__ import annotations
 import pytest
-from astar_agent import AStarAgent, NoPathError
-from environment import Action, WumpusEnvironment
-from map_parser import MapConfig
+from wumpus_world.agents.astar_agent import AStarAgent, NoPathError
+from wumpus_world.environment import Action, WumpusEnvironment
+from wumpus_world.map_parser import MapConfig
 
 
 def make_config(

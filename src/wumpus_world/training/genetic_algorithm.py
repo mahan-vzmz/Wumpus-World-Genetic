@@ -7,9 +7,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean
 from typing import Iterable, Sequence
-from environment import WumpusEnvironment
-from genetic_agent import GENE_BOUNDS, GENE_NAMES, GeneticAgent, GeneticWeights
-from map_parser import MapConfig, load_map
+from wumpus_world.environment import WumpusEnvironment
+from wumpus_world.agents.genetic_agent import GENE_BOUNDS, GENE_NAMES, GeneticAgent, GeneticWeights
+from wumpus_world.map_parser import MapConfig, load_map
 
 Genome = list[float]
 

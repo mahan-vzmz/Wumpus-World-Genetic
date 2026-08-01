@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from environment import Action, WumpusEnvironment
-from map_parser import MapConfig, load_map
+from wumpus_world.environment import Action, WumpusEnvironment
+from wumpus_world.map_parser import MapConfig, load_map
 
 
 def make_config(
