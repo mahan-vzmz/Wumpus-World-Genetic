@@ -11,7 +11,6 @@
 - Benchmark error rows: **0**
 - Main sample: **all 3 final agents succeeded**
 - Report PDF: **generated and preflighted**
-- Presentation PPTX/PDF: **generated and preflighted**
 
 ## Corrected issues
 

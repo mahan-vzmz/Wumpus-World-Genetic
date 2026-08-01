@@ -131,13 +131,10 @@ python docs/build_artifacts.py
 ## فایل‌های تحویل
 
 - `docs/final_report/final_report.pdf`
-- `docs/presentation/wumpus_world_presentation.pptx`
-- `docs/presentation/wumpus_world_presentation.pdf`
 - `results/final/summary_results.csv`
 - `results/final/difficulty_results.csv`
 - `results/final/experiment_results.csv`
 - `best_weights.json`
-- `DELIVERY_CHECKLIST_FA.md`
 
 ## ساختار اصلی
 
