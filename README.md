@@ -1,164 +1,103 @@
-# Wumpus World - Version 8
+# Wumpus World: Comparing A*, Rule-Based, and Genetic Agents
 
-پروژه نهایی درس هوش مصنوعی برای مقایسه سه روش حل Wumpus World روی گرید 8×8:
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
+[![Version](https://img.shields.io/badge/version-8.0.0-success.svg)](CHANGELOG.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tests](https://github.com/mahan-vzmz/Wumpus-World-Genetic/actions/workflows/tests.yml/badge.svg)](https://github.com/mahan-vzmz/Wumpus-World-Genetic/actions)
 
-1. **A-Star آگاه از کل نقشه** به‌عنوان Oracle یا کران بالای عملکرد؛
-2. **عامل قاعده‌محور آنلاین** مبتنی بر Breeze، Stench، پایگاه دانش و backtracking؛
-3. **عامل ژنتیکی ترکیبی آنلاین** که اکتشاف را با وزن‌های تکامل‌یافته انجام می‌دهد و از پایگاه دانش و بازگشت امن استفاده می‌کند.
+> 🇮🇷 **Persian speakers:** For the Persian documentation, please read [README_FA.md](README_FA.md).
 
-## وضعیت نهایی
+A reproducible, fully-tested Python implementation of the classic AI environment **Wumpus World** on an 8x8 grid. This project compares three different artificial intelligence paradigms:
 
-- نسخه پروژه: `8.0.0`
-- تست‌های خودکار: `44 passed`
-- نقشه‌های آموزش ژنتیک: 12 نقشه جدا
-- نقشه‌های آزمایش نهایی: 30 نقشه دیده‌نشده
-- تعداد اپیزودهای مقایسه: 90
-- seed آموزش: `17`
-- seed آزمایش: `20260730`
+1.  **A-Star Search (Oracle)**: Has full map knowledge. Acts as the theoretical upper bound for performance.
+2.  **Rule-Based Agent (Online)**: Uses Propositional Logic, a Knowledge Base, and safe backtracking based purely on local perceptions (Breeze, Stench).
+3.  **Hybrid Genetic Agent (Online)**: Combines local logic reasoning with a heuristic policy whose 10 numerical weights are evolved through a Genetic Algorithm.
 
-### نتیجه آزمایش نهایی
+![Project Demo](docs/assets/demo.gif) *(Add your screenshot/gif here)*
 
-| روش | موفقیت | امتیاز متوسط همه اجراها | حرکت متوسط همه اجراها | حرکت متوسط اجراهای موفق |
+## Main Results
+
+Evaluated on 30 unseen test maps (10 easy, 10 medium, 10 hard) over 90 episodes:
+
+| Agent | Success Rate | Average Score | Avg Steps (All) | Avg Steps (Success) |
 |---|---:|---:|---:|---:|
-| A-Star | 100.00% | 157.60 | 12.40 | 12.40 |
-| Rule-Based | 90.00% | 117.93 | 32.90 | 32.30 |
-| Hybrid Genetic | 83.33% | 120.97 | 31.80 | 24.60 |
+| **A-Star** | 100.00% | 157.60 | 12.40 | 12.40 |
+| **Rule-Based** | 90.00% | 117.93 | 32.90 | 32.30 |
+| **Hybrid Genetic** | 83.33% | 120.97 | 31.80 | 24.60 |
 
-نکته علمی: A-Star کل نقشه را می‌بیند و مقایسه مستقیم آن با دو عامل آنلاین منصفانه نیست. مقایسه اصلی بین Rule-Based و Hybrid Genetic است. عامل قاعده‌محور نرخ موفقیت بیشتری داشته، ولی عامل ژنتیکی در اپیزودهای موفق مسیر کوتاه‌تر و امتیاز موفقیت بالاتری ثبت کرده است.
+*Scientific Note*: A-Star is an Oracle with perfect information. The real comparison is between the Rule-Based and Genetic agents. The Rule-Based agent is more reliable (higher success rate), but the Hybrid Genetic agent finds much shorter paths during successful episodes.
 
-## نصب
+## Quick Installation
 
 ```bash
 python -m venv .venv
-```
 
-ویندوز:
-
-```bash
+# Activate (Windows)
 .venv\Scripts\activate
-```
 
-Linux/macOS:
-
-```bash
+# Activate (Linux / Mac)
 source .venv/bin/activate
+
+# Install package and dependencies
+pip install -e .
 ```
 
+## Quick Start & Usage
+
+Run all three agents on a sample map and print the benchmark results:
 ```bash
-pip install -r requirements.txt
+wumpus-world-demo --map maps/sample_01.txt
 ```
 
-## بررسی سلامت پروژه
-
+Run a specific agent individually:
 ```bash
-pytest -q
-python -m compileall -q .
+wumpus-world --agent astar --map maps/sample_astar_pit.txt
+wumpus-world --agent rule --map maps/sample_rule_reasoning.txt --max-steps 250
+wumpus-world --agent genetic --map maps/sample_01.txt
 ```
 
-خروجی مورد انتظار تست‌ها:
+*Note: The genetic agent requires the pre-trained `best_weights.json` file. To use manual weights, add `--use-default-weights`.*
 
-```text
-44 passed
-```
+## Experiment & Training
 
-## اجرای سریع هر سه روش
-
-```bash
-python demo_all.py --map maps/sample_01.txt
-```
-
-خروجی فعلی نمونه:
-
-```text
-astar,True,156,14,106,0,escaped_with_gold
-rule,True,140,30,90,0,escaped_with_gold
-genetic,True,144,26,94,0,escaped_with_gold
-```
-
-## اجرای جداگانه
-
-```bash
-python main.py --agent astar --map maps/sample_astar_pit.txt
-python main.py --agent rule --map maps/sample_rule_reasoning.txt --max-steps 250
-python main.py --agent genetic --map maps/sample_01.txt --max-steps 250
-```
-
-فایل وزن ژنتیکی اجباری است. استفاده از وزن‌های دستی فقط با گزینه صریح زیر انجام می‌شود:
-
-```bash
-python main.py --agent genetic --map maps/sample_01.txt --use-default-weights
-```
-
-## آموزش دوباره عامل ژنتیکی
-
-```bash
-python train_genetic.py --regenerate-training-maps
-```
-
-تنظیمات نسخه تحویلی:
-
-```text
-population=24
-generations=24
-patience=8
-max_steps=250
-seed=17
-training_maps=12
-best_fitness=1840.67
-```
-
-## اجرای آزمایش نهایی
-
+To run the full benchmark experiment (generates 30 maps, tests all agents, outputs CSV/PNGs):
 ```bash
 python experiment.py
 ```
 
-این دستور 30 نقشه تست را با seed ثابت تولید می‌کند، هر سه عامل را اجرا می‌کند و نتایج را در `results/final/` می‌سازد. برای استفاده از نقشه‌های فعلی:
-
+To re-train the genetic algorithm from scratch on new random maps:
 ```bash
-python experiment.py --skip-generate
+python train_genetic.py --regenerate-training-maps
 ```
 
-## تولید گزارش PDF و اسلاید
-
-```bash
-pip install -r requirements-docs.txt
-python docs/build_artifacts.py
-```
-
-اسکریپت فقط از مسیرهای نسبی پروژه استفاده می‌کند و به محیط سازنده وابستگی ندارد.
-
-## فایل‌های تحویل
-
-- `docs/final_report/final_report.pdf`
-- `results/final/summary_results.csv`
-- `results/final/difficulty_results.csv`
-- `results/final/experiment_results.csv`
-- `best_weights.json`
-
-## ساختار اصلی
+## Architecture & Structure
 
 ```text
-astar_agent.py             A-Star با اطلاعات کامل
-environment.py             قوانین و وضعیت محیط
-knowledge_base.py          استنتاج محلی عامل‌های آنلاین
-rule_based_agent.py        عامل قاعده‌محور
-genetic_agent.py           سیاست وزن‌دار ترکیبی
-genetic_algorithm.py       آموزش GA و Fitness
-map_generator.py           تولید نقشه‌های آموزش و تست
-experiment.py              benchmark و نمودارها
-tests/                     44 تست خودکار
-docs/                      مستندات، گزارش و ارائه
+src/wumpus_world/
+├── environment.py         # Rules, Grid, Percepts, Game loop
+├── knowledge_base.py      # Logic inference for online agents
+├── map_parser.py          # Strict validation and parsing
+├── map_generator.py       # Procedural generation (Easy/Medium/Hard)
+├── agents/
+│   ├── base_agent.py      # Base interface
+│   ├── astar_agent.py     # Oracle pathfinding
+│   ├── rule_based_agent.py# Logical inference agent
+│   └── genetic_agent.py   # Weighted heuristic + logic
+└── training/
+    └── genetic_algorithm.py
+
+tests/                     # 44 automated tests
+maps/                      # Static map samples
+results/                   # Experiment outputs (CSV, Charts)
+docs/                      # Reports and assets
 ```
 
-## محدودیت‌های گزارش‌شده
+## Limitations
 
-- A-Star یک Oracle است و سطح اطلاعات متفاوتی دارد.
-- عامل ژنتیکی یک روش ترکیبی است، نه یک سیاست کاملاً مستقل از قواعد.
-- تضمین موفقیت برای عامل‌های آنلاین وجود ندارد.
-- نتایج فقط برای seed و مجموعه تست ثبت‌شده ادعا می‌شوند.
-- زمان اجرا از median چند اجرای کامل به دست می‌آید و به سخت‌افزار وابسته است.
+- The Genetic agent uses a linear policy combination and does not guarantee optimal performance.
+- Execution times rely on hardware and are reported using repeated medians.
+- The A-Star agent solves the problem fundamentally differently (offline/oracle) and is only included as a theoretical ceiling.
 
-## مجوز
+## License
 
-MIT License
+This project is licensed under the [MIT License](LICENSE).

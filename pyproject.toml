@@ -1,14 +1,45 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "wumpus-world-genetic"
 version = "8.0.0"
 description = "Wumpus World comparison of A*, rule-based, and hybrid genetic agents"
+readme = "README.md"
 requires-python = ">=3.10"
+dependencies = [
+    "matplotlib>=3.8,<4.0"
+]
 
 [[project.authors]]
 name = "ماهان ورمزیار"
 email = "mahan.varmazyar@gmail.com"
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0,<10.0",
+    "ruff"
+]
+docs = [
+    "python-pptx>=1.0,<2.0",
+    "weasyprint>=68,<69",
+    "xhtml2pdf>=0.2.17"
+]
+
+[project.scripts]
+wumpus-world = "main:main"
+wumpus-world-demo = "demo_all:main"
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
 addopts = "-ra"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = []
