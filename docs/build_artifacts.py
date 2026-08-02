@@ -314,6 +314,15 @@ ul {{ margin-right:20px; }}
 </body></html>"""
     html_path = REPORT_DIR / "final_report.html"
     pdf_path = REPORT_DIR / "final_report.pdf"
+
+    if (
+        html_path.exists()
+        and pdf_path.exists()
+        and pdf_path.stat().st_size > 0
+        and html_path.read_text(encoding="utf-8") == html_text
+    ):
+        return pdf_path
+
     html_path.write_text(html_text, encoding="utf-8")
     pdf_path.unlink(missing_ok=True)
     errors: list[str] = []
