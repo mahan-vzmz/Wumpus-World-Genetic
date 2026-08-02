@@ -5,7 +5,10 @@ import html
 import json
 import shutil
 import subprocess
+from importlib.metadata import version
 from pathlib import Path
+
+PROJECT_VERSION = version("wumpus-world-genetic")
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
@@ -106,7 +109,7 @@ ul {{ margin-right:20px; }}
 <ul><li>Breeze: وجود چاه در همسایگی چهارجهته</li><li>Stench: وجود غول در همسایگی چهارجهته</li><li>Pit here: تشخیص چاه پس از زنده‌ماندن و ورود</li><li>حرکت‌های معتبر، جان، داشتن طلا و مختصات خروج</li></ul>
 
 <h2>۲. معماری</h2>
-<p>parser، محیط، عامل‌ها، پایگاه دانش، آموزش ژنتیک، مولد نقشه و benchmark در ماژول‌های مستقل قرار گرفته‌اند. تمام عامل‌ها از تابع اجرای مشترک استفاده می‌کنند. نسخه 8 باگ پایان max_steps، برنامه‌ریزی دوباره A-Star، تشخیص نادرست چاه بازدیدشده، fallback بی‌صدای وزن‌های ژنتیکی و اعتبارسنجی ناقص نقشه را اصلاح می‌کند.</p>
+<p>parser، محیط، عامل‌ها، پایگاه دانش، آموزش ژنتیک، مولد نقشه و benchmark در ماژول‌های مستقل قرار گرفته‌اند. تمام عامل‌ها از تابع اجرای مشترک استفاده می‌کنند. در نسخه {PROJECT_VERSION} ساختار پکیج با مسیرهای استاندارد، نصب‌پذیری، و دستورات یکپارچه CLI بهینه‌سازی شده است.</p>
 
 <h2>۳. روش A-Star</h2>
 <p>حالت جست‌وجو شامل موقعیت، جان باقی‌مانده و داشتن طلاست. دیوار و غول از فضای حالت حذف می‌شوند. ورود به چاه در صورت زنده‌ماندن مجاز است، اما کاهش واقعی جان و جریمه چاه در هزینه مسیر لحاظ می‌شود. heuristic فاصله منهتن یک lower bound معتبر است.</p>
@@ -139,7 +142,7 @@ ul {{ margin-right:20px; }}
 <ul><li>A-Star سطح اطلاعات متفاوتی دارد.</li><li>نتایج برای seed و مجموعه تست ثبت‌شده معتبرند.</li><li>عامل ژنتیکی تضمین بهینگی یا موفقیت ندارد.</li><li>زمان اجرا به سخت‌افزار وابسته است.</li><li>برای استنباط آماری قوی‌تر، چند seed و confidence interval لازم است.</li></ul>
 
 <h2>۱۱. نتیجه‌گیری</h2>
-<p>نسخه 8 یک pipeline قابل‌بازتولید از تولید نقشه و آموزش تا تست، ارزیابی، گزارش و ارائه فراهم می‌کند. A-Star بهترین عملکرد را در محیط کاملاً شناخته‌شده دارد. در محیط ناشناخته، Rule-Based مطمئن‌تر و توضیح‌پذیرتر است، در حالی که Hybrid Genetic در موفقیت‌ها کوتاه‌مسیرتر اما ریسک‌پذیرتر عمل می‌کند.</p>
+<p>نسخه {PROJECT_VERSION} یک pipeline قابل‌بازتولید از تولید نقشه و آموزش تا تست، ارزیابی و گزارش فراهم می‌کند. A-Star بهترین عملکرد را در محیط کاملاً شناخته‌شده دارد. در محیط ناشناخته، Rule-Based مطمئن‌تر و توضیح‌پذیرتر است، در حالی که Hybrid Genetic در موفقیت‌ها کوتاه‌مسیرتر اما ریسک‌پذیرتر عمل می‌کند.</p>
 
 <h2>۱۲. منابع</h2>
 <ol><li>Russell, S. J., & Norvig, P. Artificial Intelligence: A Modern Approach.</li></ol>
@@ -147,6 +150,8 @@ ul {{ margin-right:20px; }}
     html_path = REPORT_DIR / "final_report.html"
     pdf_path = REPORT_DIR / "final_report.pdf"
     html_path.write_text(html_text, encoding="utf-8")
+    errors: list[str] = []
+    
     try:
         import contextlib
         import io
@@ -157,8 +162,8 @@ ul {{ margin-right:20px; }}
             HTML(filename=str(html_path), base_url=str(REPORT_DIR)).write_pdf(str(pdf_path))
             if pdf_path.exists() and pdf_path.stat().st_size > 0:
                 return pdf_path
-    except Exception:
-        pass
+    except Exception as exc:
+        errors.append(f"WeasyPrint: {exc}")
 
     try:
         browser_paths = [
@@ -181,10 +186,10 @@ ul {{ margin-right:20px; }}
             subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if pdf_path.exists() and pdf_path.stat().st_size > 0:
                 return pdf_path
-    except Exception:
-        pass
+    except Exception as exc:
+        errors.append(f"Browser fallback: {exc}")
 
-    return html_path
+    raise RuntimeError("Unable to generate PDF.\n" + "\n".join(errors))
 
 
 def load_project_info(path: Path | None = None) -> dict[str, str]:
@@ -196,7 +201,27 @@ def load_project_info(path: Path | None = None) -> dict[str, str]:
             "to project_info.json and complete the required fields."
         )
 
-    return json.loads(info_path.read_text(encoding="utf-8"))
+    info = json.loads(info_path.read_text(encoding="utf-8"))
+    
+    PLACEHOLDER_VALUES = {
+        "Your Name",
+        "Your Student ID",
+        "Instructor Name",
+        "University Name",
+        "YYYY-MM-DD",
+    }
+    
+    invalid = {
+        key: value
+        for key, value in info.items()
+        if value in PLACEHOLDER_VALUES
+    }
+    
+    if invalid:
+        fields = ", ".join(sorted(invalid))
+        raise ValueError(f"Complete placeholder fields in project_info.json: {fields}")
+        
+    return info
 
 
 def main() -> None:

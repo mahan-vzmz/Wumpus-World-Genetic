@@ -40,4 +40,4 @@
 | Rule-Based | 90.00% | 117.93 | 32.30 |
 | Hybrid Genetic | 83.33% | 120.97 | 24.60 |
 
-The only fields not inferable from the repository are personal submission metadata such as student ID, instructor, and university. They are isolated in `project_info.json` and do not affect code, tests, results, or artifacts.
+Submission metadata does not affect the source code, automated tests, agent behavior, or experiment results. It only affects the generated report cover and must remain in the untracked `project_info.json` file.

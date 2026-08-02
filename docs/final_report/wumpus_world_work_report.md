@@ -291,7 +291,7 @@ flowchart TD
 | `runner.py` | ساخت عامل و حلقه اجرای استاندارد اپیزود | astar_agent, base_agent, environment, genetic_agent, map_parser, random_agent, rule_based_agent | 214 |
 | `map_generator.py` | تولید قطعی نقشه‌های آموزش و آزمون | astar_agent, map_parser | 314 |
 | `map_parser.py` | خواندن و اعتبارسنجی سخت‌گیرانه نقشه | کتابخانه استاندارد/وابستگی خارجی | 99 |
-| `project_info.json` | اطلاعات صفحه عنوان گزارش و ارائه | docs/build_artifacts.py | 8 |
+| `project_info.json` | اطلاعات صفحه عنوان گزارش PDF | docs/build_artifacts.py | 8 |
 | `pyproject.toml` | metadata بسته و تنظیمات pytest | pytest | 10 |
 | `random_agent.py` | baseline تصادفی با seed ثابت برای کنترل محیط | base_agent, environment | 24 |
 | `requirements-docs.txt` | وابستگی‌های ساخت PDF و PPTX | pip؛ کد/تست یا docs/build_artifacts.py | 3 |
@@ -2828,7 +2828,7 @@ weasyprint>=68,<69
 - اعتبار همه نقشه‌ها؛
 - ۱۲ آموزش، ۳۰ آزمون و ۹۰ ردیف بدون error؛
 - موفقیت هر سه عامل روی sample؛
-- ساخت و preflight گزارش و ارائه؛
+- ساخت و preflight گزارش PDF؛
 - رفع `max_steps`، parser، pit memory، دوباره‌برنامه‌ریزی A-Star، fallback وزن، انصاف داده، metric و مسیرهای artifact.
 
 ## ۱۰.۶ خلاصه `DELIVERY_CHECKLIST_FA.md`
@@ -3086,7 +3086,7 @@ python experiment.py --per-difficulty 1 --results-dir results/quick --timing-rep
 python verify_delivery.py
 ```
 
-## ۱۳.۱۰ ساخت گزارش و ارائه
+## ۱۳.۱۰ ساخت گزارش PDF
 
 ابتدا `project_info.json` را تکمیل کنید، سپس:
 

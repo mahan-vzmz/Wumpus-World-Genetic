@@ -1,4 +1,4 @@
-# Wumpus World - Version 8
+# Wumpus World - Version 8.1.0
 
 پروژه نهایی درس هوش مصنوعی برای مقایسه سه روش حل Wumpus World روی گرید 8×8:
 

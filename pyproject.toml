@@ -23,12 +23,10 @@ email = "mahan.varmazyar@gmail.com"
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0,<10.0",
-    "ruff"
+    "ruff>=0.12,<1.0"
 ]
 docs = [
-    "python-pptx>=1.0,<2.0",
-    "weasyprint>=68,<69",
-    "xhtml2pdf>=0.2.17"
+    "weasyprint>=68,<69"
 ]
 
 [project.scripts]
