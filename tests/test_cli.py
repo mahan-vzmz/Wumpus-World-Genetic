@@ -68,7 +68,8 @@ def _get_cli_cmd() -> list[str]:
 def test_cli_runs_outside_repository(tmp_path: Path) -> None:
     project_root = Path(__file__).resolve().parents[1]
     result = subprocess.run(
-        _get_cli_cmd() + [
+        _get_cli_cmd()
+        + [
             "--agent",
             "astar",
             "--map",
@@ -86,7 +87,8 @@ def test_cli_runs_outside_repository(tmp_path: Path) -> None:
 def test_missing_weights_returns_nonzero(tmp_path: Path) -> None:
     project_root = Path(__file__).resolve().parents[1]
     result = subprocess.run(
-        _get_cli_cmd() + [
+        _get_cli_cmd()
+        + [
             "--agent",
             "genetic",
             "--map",

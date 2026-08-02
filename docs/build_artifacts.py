@@ -151,7 +151,7 @@ ul {{ margin-right:20px; }}
     pdf_path = REPORT_DIR / "final_report.pdf"
     html_path.write_text(html_text, encoding="utf-8")
     errors: list[str] = []
-    
+
     try:
         import contextlib
         import io
@@ -202,7 +202,7 @@ def load_project_info(path: Path | None = None) -> dict[str, str]:
         )
 
     info = json.loads(info_path.read_text(encoding="utf-8"))
-    
+
     PLACEHOLDER_VALUES = {
         "Your Name",
         "Your Student ID",
@@ -210,17 +210,13 @@ def load_project_info(path: Path | None = None) -> dict[str, str]:
         "University Name",
         "YYYY-MM-DD",
     }
-    
-    invalid = {
-        key: value
-        for key, value in info.items()
-        if value in PLACEHOLDER_VALUES
-    }
-    
+
+    invalid = {key: value for key, value in info.items() if value in PLACEHOLDER_VALUES}
+
     if invalid:
         fields = ", ".join(sorted(invalid))
         raise ValueError(f"Complete placeholder fields in project_info.json: {fields}")
-        
+
     return info
 
 

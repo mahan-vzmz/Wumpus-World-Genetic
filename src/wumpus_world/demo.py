@@ -34,7 +34,7 @@ def main() -> None:
             f"{result['remaining_health']},{result['pit_entries']},"
             f"{result['termination_reason']}"
         )
-        
+
     if has_error:
         raise SystemExit(2)
 

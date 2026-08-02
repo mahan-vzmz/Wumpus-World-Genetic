@@ -23,7 +23,7 @@ def main() -> None:
     parser.add_argument("--use-default-weights", action="store_true")
     parser.add_argument("--quiet", action="store_true")
     args = parser.parse_args()
-    
+
     result = run_episode(
         args.map,
         args.agent,
@@ -32,7 +32,7 @@ def main() -> None:
         use_default_weights=args.use_default_weights,
         verbose=not args.quiet,
     )
-    
+
     if result.get("termination_reason") == "initialization_error":
         raise SystemExit(2)
 
