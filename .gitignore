@@ -5,6 +5,9 @@ __pycache__/
 .venv/
 venv/
 *.egg-info/
+build/
+dist/
+wumpus_world_genetic-*/
 
 # Coverage and tooling
 .coverage
@@ -22,6 +25,13 @@ Thumbs.db
 _artifact_build/
 _renders/
 
-# Outputs and sensitive files
-results/
-project_info.json
+# Results tracking policy
+results/*
+!results/README.md
+!results/final/
+!results/final/summary_results.csv
+!results/final/difficulty_results.csv
+!results/final/experiment_results.csv
+!results/final/run_metadata.json
+!results/genetic_training_summary.json
+!results/genetic_history.csv

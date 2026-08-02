@@ -6,9 +6,15 @@
 4. [`04-experiment-design.md`](04-experiment-design.md) - طراحی علمی آزمایش
 5. [`05-results-and-analysis.md`](05-results-and-analysis.md) - نتایج واقعی نسخه 8.1.0
 6. [`06-run-guide.md`](06-run-guide.md) - نصب، اجرا و خطایابی
-گزارش نهایی
 
-برای بازسازی PDF:
+## گزارش‌ها
+
+- [گزارش نهایی PDF](final_report/final_report.pdf)
+- [گزارش نهایی HTML](final_report/final_report.html)
+- [ممیزی پروژه](../PROJECT_AUDIT.md)
+- [تاریخچه تغییرات](../CHANGELOG.md)
+
+برای بازسازی گزارش HTML و PDF:
 
 ```bash
 pip install -e ".[docs]"

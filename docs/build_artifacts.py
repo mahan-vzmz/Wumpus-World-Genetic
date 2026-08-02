@@ -42,12 +42,57 @@ def copy_assets() -> None:
         if not dest.exists() or dest.read_bytes() != data:
             try:
                 dest.write_bytes(data)
-            except OSError:
-                pass
+            except OSError as exc:
+                raise RuntimeError(f"Unable to update report asset {dest}: {exc}") from exc
+
+
+def load_run_metadata() -> dict[str, str | float | int]:
+    meta_path = RESULTS / "run_metadata.json"
+    if meta_path.exists():
+        try:
+            data = json.loads(meta_path.read_text(encoding="utf-8"))
+            if "seed" not in data:
+                data["seed"] = data.get("training_seed", 17)
+            return data
+        except Exception:
+            pass
+
+    # Fallbacks
+    training_summary_path = ROOT / "results" / "genetic_training_summary.json"
+    training_maps = 12
+    population = 24
+    generations = 24
+    mutation_rate = 0.10
+    seed = 17
+    best_fitness = 1840.67
+
+    if training_summary_path.exists():
+        try:
+            ts = json.loads(training_summary_path.read_text(encoding="utf-8"))
+            best_fitness = float(ts.get("best_fitness", best_fitness))
+            seed = int(ts.get("seed", seed))
+            training_maps = int(ts.get("map_count", training_maps))
+            generations = int(ts.get("generations_run", generations))
+        except Exception:
+            pass
+
+    return {
+        "project_version": PROJECT_VERSION,
+        "training_maps": training_maps,
+        "test_maps": 30,
+        "maps_per_difficulty": 10,
+        "population": population,
+        "generations": generations,
+        "mutation_rate": mutation_rate,
+        "seed": seed,
+        "best_fitness": best_fitness,
+    }
 
 
 def build_report(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    run_meta = load_run_metadata()
+
     rows = "".join(
         f"<tr><td>{html.escape(row['agent'])}</td>"
         f"<td>{row['success_rate']}%</td>"
@@ -59,6 +104,36 @@ def build_report(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
         f"<td>{row['wumpus_deaths']}</td></tr>"
         for row in summary
     )
+
+    mode = info.get("report_mode", "academic").lower()
+    if mode == "public":
+        author = info.get("author_name") or info.get("student_name", "Public Repository")
+        title = info.get("project_title", "Wumpus World Genetic Agents")
+        institution = info.get("institution_name", "GitHub Public Edition")
+        meta_html = (
+            f"<p><b>نسخه عمومی GitHub</b></p>"
+            f"<p><b>پروژه:</b> {html.escape(title)}</p>"
+            f"<p><b>نویسنده:</b> {html.escape(author)}</p>"
+            f"<p><b>درس/محیط:</b> {html.escape(info.get('course_name', 'Artificial Intelligence'))}</p>"
+            f"<p><b>ناشر/منبع:</b> {html.escape(institution)}</p>"
+            f"<p><b>نسخه نرم‌افزار:</b> {html.escape(PROJECT_VERSION)}</p>"
+        )
+    else:
+        meta_html = (
+            f"<p><b>نام دانشجو:</b> {html.escape(info.get('student_name', ''))}</p>"
+            f"<p><b>درس:</b> {html.escape(info.get('course_name', ''))}</p>"
+            f"<p><b>استاد:</b> {html.escape(info.get('instructor_name', ''))}</p>"
+            f"<p><b>دانشگاه:</b> {html.escape(info.get('university_name', ''))}</p>"
+        )
+
+    best_fit = f"{float(run_meta['best_fitness']):.2f}"
+    training_maps = run_meta["training_maps"]
+    pop_size = run_meta["population"]
+    max_gens = run_meta["generations"]
+    mut_rate = run_meta["mutation_rate"]
+    seed_val = run_meta["seed"]
+    test_maps = run_meta["test_maps"]
+    per_diff = run_meta.get("maps_per_difficulty", 10)
 
     html_text = f"""<!doctype html>
 <html lang="fa" dir="rtl">
@@ -93,15 +168,12 @@ ul {{ margin-right:20px; }}
 <h1>گزارش نهایی پروژه Wumpus World</h1>
 <h2 style="border:0;text-align:center"> مقایسه A-Star، عامل قاعده‌محور و عامل ژنتیکی ترکیبی</h2>
 <div class="meta">
-<p><b>نام دانشجو:</b> {html.escape(info["student_name"])}</p>
-<p><b>درس:</b> {html.escape(info["course_name"])}</p>
-<p><b>استاد:</b> {html.escape(info["instructor_name"])}</p>
-<p><b>دانشگاه:</b> {html.escape(info["university_name"])}</p>
+{meta_html}
 </div>
 </section>
 
 <h2>چکیده</h2>
-<p>در این پروژه محیط Wumpus World روی گرید 8×8 پیاده‌سازی شد و سه روش متفاوت روی یک محیط و مجموعه معیار مشترک مقایسه شدند. A-Star به کل نقشه دسترسی دارد و نقش Oracle را ایفا می‌کند. عامل قاعده‌محور و عامل ژنتیکی ترکیبی فقط از ادراک‌های محلی، حافظه و مختصات عمومی خروج استفاده می‌کنند. وزن‌های روش ژنتیکی روی 12 نقشه آموزش تکامل یافتند و ارزیابی نهایی روی 30 نقشه تست جداگانه و 90 اپیزود انجام شد.</p>
+<p>در این پروژه محیط Wumpus World روی گرید 8×8 پیاده‌سازی شد و سه روش متفاوت روی یک محیط و مجموعه معیار مشترک مقایسه شدند. A-Star به کل نقشه دسترسی دارد و نقش Oracle را ایفا می‌کند. عامل قاعده‌محور و عامل ژنتیکی ترکیبی فقط از ادراک‌های محلی، حافظه و مختصات عمومی خروج استفاده می‌کنند. وزن‌های روش ژنتیکی روی {training_maps} نقشه آموزش تکامل یافتند و ارزیابی نهایی روی {test_maps} نقشه تست جداگانه انجام شد.</p>
 <div class="callout">نتیجه اصلی: A-Star به 100٪، Rule-Based به 90٪ و Hybrid Genetic به 83.33٪ موفقیت رسید. در میان عامل‌های آنلاین، Rule-Based مطمئن‌تر و Hybrid Genetic در اپیزودهای موفق کوتاه‌مسیرتر بود.</div>
 
 <h2>۱. تعریف مسئله و قوانین</h2>
@@ -122,11 +194,11 @@ ul {{ margin-right:20px; }}
 <p class="code">score(action) = Σ weight_i × feature_i(action)</p>
 
 <h2>۶. آموزش الگوریتم ژنتیک</h2>
-<ul><li>12 نقشه آموزش جدا</li><li>Population = 24</li><li>Maximum generations = 24</li><li>Elitism = 2</li><li>Tournament size = 3</li><li>Mutation rate = 0.10</li><li>Seed = 17</li><li>Best fitness = 1840.67</li></ul>
+<ul><li>{training_maps} نقشه آموزش جدا</li><li>Population = {pop_size}</li><li>Maximum generations = {max_gens}</li><li>Elitism = 2</li><li>Tournament size = 3</li><li>Mutation rate = {mut_rate}</li><li>Seed = {seed_val}</li><li>Best fitness = {best_fit}</li></ul>
 <figure><img src="../assets/genetic_fitness.png"><figcaption>روند بهترین و میانگین Fitness در طول آموزش</figcaption></figure>
 
 <h2>۷. طراحی آزمایش</h2>
-<p>30 نقشه تست دیده‌نشده شامل 10 نقشه آسان، 10 متوسط و 10 سخت با seed ثابت تولید شدند. خروج، محل طلا و طول مسیرها متنوع است. جان اولیه همه سطوح برابر 120 است تا امتیاز بین دشواری‌ها قابل مقایسه باشد. زمان اجرا median سه اجرای کامل است و تعداد حرکت موفق جداگانه گزارش می‌شود.</p>
+<p>{test_maps} نقشه تست دیده‌نشده شامل {per_diff} نقشه آسان، {per_diff} متوسط و {per_diff} سخت با seed ثابت تولید شدند. خروج، محل طلا و طول مسیرها متنوع است. جان اولیه همه سطوح برابر 120 است تا امتیاز بین دشواری‌ها قابل مقایسه باشد. زمان اجرا median سه اجرای کامل است و تعداد حرکت موفق جداگانه گزارش می‌شود.</p>
 
 <h2>۸. نتایج کلی</h2>
 <table><thead><tr><th>Agent</th><th>Success</th><th>Score all</th><th>Steps all</th><th>Steps success</th><th>Health</th><th>Pit entries</th><th>Wumpus deaths</th></tr></thead><tbody>{rows}</tbody></table>
@@ -150,6 +222,7 @@ ul {{ margin-right:20px; }}
     html_path = REPORT_DIR / "final_report.html"
     pdf_path = REPORT_DIR / "final_report.pdf"
     html_path.write_text(html_text, encoding="utf-8")
+    pdf_path.unlink(missing_ok=True)
     errors: list[str] = []
 
     try:
@@ -174,7 +247,9 @@ ul {{ margin-right:20px; }}
             r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         ]
         browser_binary = next((p for p in browser_paths if p and Path(p).exists()), None)
-        if browser_binary:
+        if browser_binary is None:
+            errors.append("Browser fallback: no supported browser found")
+        else:
             cmd = [
                 str(browser_binary),
                 "--headless",
@@ -202,20 +277,34 @@ def load_project_info(path: Path | None = None) -> dict[str, str]:
         )
 
     info = json.loads(info_path.read_text(encoding="utf-8"))
+    mode = info.get("report_mode", "academic").lower()
 
-    PLACEHOLDER_VALUES = {
-        "Your Name",
-        "Your Student ID",
-        "Instructor Name",
-        "University Name",
-        "YYYY-MM-DD",
-    }
-
-    invalid = {key: value for key, value in info.items() if value in PLACEHOLDER_VALUES}
-
-    if invalid:
-        fields = ", ".join(sorted(invalid))
-        raise ValueError(f"Complete placeholder fields in project_info.json: {fields}")
+    if mode == "public":
+        PLACEHOLDER_VALUES = {
+            "Your Name",
+            "Project Title",
+            "YYYY-MM-DD",
+        }
+        invalid = {key: value for key, value in info.items() if value in PLACEHOLDER_VALUES}
+        if invalid:
+            fields = ", ".join(sorted(invalid))
+            raise ValueError(f"Complete placeholder fields in project_info.json: {fields}")
+        student_name = info.get("student_name", "")
+        author_name = info.get("author_name", "")
+        if student_name == "Your Name" or author_name == "Your Name":
+            raise ValueError("student_name/author_name cannot be 'Your Name'")
+    else:
+        PLACEHOLDER_VALUES = {
+            "Your Name",
+            "Your Student ID",
+            "Instructor Name",
+            "University Name",
+            "YYYY-MM-DD",
+        }
+        invalid = {key: value for key, value in info.items() if value in PLACEHOLDER_VALUES}
+        if invalid:
+            fields = ", ".join(sorted(invalid))
+            raise ValueError(f"Complete placeholder fields in project_info.json: {fields}")
 
     return info
 

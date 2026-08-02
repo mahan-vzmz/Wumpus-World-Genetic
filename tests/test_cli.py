@@ -57,12 +57,19 @@ def test_module_entry_point() -> None:
 
 
 def _get_cli_cmd() -> list[str]:
-    # Use python -m to avoid issues if wumpus-world is not in PATH
     try:
         subprocess.run([wumpus_world_cmd, "--help"], capture_output=True, check=True)
         return [wumpus_world_cmd]
     except (FileNotFoundError, subprocess.CalledProcessError):
         return [sys.executable, "-m", "wumpus_world"]
+
+
+def _get_demo_cmd() -> list[str]:
+    try:
+        subprocess.run([wumpus_world_demo_cmd, "--help"], capture_output=True, check=True)
+        return [wumpus_world_demo_cmd]
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return [sys.executable, "-m", "wumpus_world.demo"]
 
 
 def test_cli_runs_outside_repository(tmp_path: Path) -> None:
@@ -84,6 +91,51 @@ def test_cli_runs_outside_repository(tmp_path: Path) -> None:
     assert result.returncode == 0, f"stdout: {result.stdout}\nstderr: {result.stderr}"
 
 
+def test_default_cli_runs_outside_repository(tmp_path: Path) -> None:
+    result = subprocess.run(
+        _get_cli_cmd() + ["--quiet"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, f"stdout: {result.stdout}\nstderr: {result.stderr}"
+
+
+def test_default_demo_runs_outside_repository(tmp_path: Path) -> None:
+    result = subprocess.run(
+        _get_demo_cmd(),
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, f"stdout: {result.stdout}\nstderr: {result.stderr}"
+
+
+def test_missing_map_returns_nonzero(tmp_path: Path) -> None:
+    result = subprocess.run(
+        _get_cli_cmd() + ["--map", str(tmp_path / "missing.txt"), "--quiet"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+
+
+def test_missing_map_prints_error_to_stderr(tmp_path: Path) -> None:
+    result = subprocess.run(
+        _get_cli_cmd() + ["--map", str(tmp_path / "missing.txt"), "--quiet"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert result.stderr.strip() != ""
+
+
 def test_missing_weights_returns_nonzero(tmp_path: Path) -> None:
     project_root = Path(__file__).resolve().parents[1]
     result = subprocess.run(
@@ -96,8 +148,41 @@ def test_missing_weights_returns_nonzero(tmp_path: Path) -> None:
             "--weights",
             str(tmp_path / "missing.json"),
         ],
+        cwd=tmp_path,
         capture_output=True,
         text=True,
         check=False,
     )
     assert result.returncode != 0, f"stdout: {result.stdout}\nstderr: {result.stderr}"
+
+
+def test_missing_weights_prints_error_to_stderr(tmp_path: Path) -> None:
+    project_root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        _get_cli_cmd()
+        + [
+            "--agent",
+            "genetic",
+            "--map",
+            str(project_root / "maps" / "sample_01.txt"),
+            "--weights",
+            str(tmp_path / "missing.json"),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert result.stderr.strip() != ""
+
+
+def test_default_genetic_agent_loads_packaged_weights(tmp_path: Path) -> None:
+    result = subprocess.run(
+        _get_cli_cmd() + ["--agent", "genetic", "--quiet"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, f"stdout: {result.stdout}\nstderr: {result.stderr}"

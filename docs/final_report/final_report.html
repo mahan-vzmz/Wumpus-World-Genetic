@@ -31,15 +31,12 @@ ul { margin-right:20px; }
 <h1>گزارش نهایی پروژه Wumpus World</h1>
 <h2 style="border:0;text-align:center"> مقایسه A-Star، عامل قاعده‌محور و عامل ژنتیکی ترکیبی</h2>
 <div class="meta">
-<p><b>نام دانشجو:</b> Public Edition</p>
-<p><b>درس:</b> Artificial Intelligence Project</p>
-<p><b>استاد:</b> Public Repository</p>
-<p><b>دانشگاه:</b> GitHub</p>
+<p><b>نسخه عمومی GitHub</b></p><p><b>پروژه:</b> Wumpus World Genetic Agents</p><p><b>نویسنده:</b> Mahan Varmazyar</p><p><b>درس/محیط:</b> Artificial Intelligence</p><p><b>ناشر/منبع:</b> GitHub Public Edition</p><p><b>نسخه نرم‌افزار:</b> 8.1.0</p>
 </div>
 </section>
 
 <h2>چکیده</h2>
-<p>در این پروژه محیط Wumpus World روی گرید 8×8 پیاده‌سازی شد و سه روش متفاوت روی یک محیط و مجموعه معیار مشترک مقایسه شدند. A-Star به کل نقشه دسترسی دارد و نقش Oracle را ایفا می‌کند. عامل قاعده‌محور و عامل ژنتیکی ترکیبی فقط از ادراک‌های محلی، حافظه و مختصات عمومی خروج استفاده می‌کنند. وزن‌های روش ژنتیکی روی 12 نقشه آموزش تکامل یافتند و ارزیابی نهایی روی 30 نقشه تست جداگانه و 90 اپیزود انجام شد.</p>
+<p>در این پروژه محیط Wumpus World روی گرید 8×8 پیاده‌سازی شد و سه روش متفاوت روی یک محیط و مجموعه معیار مشترک مقایسه شدند. A-Star به کل نقشه دسترسی دارد و نقش Oracle را ایفا می‌کند. عامل قاعده‌محور و عامل ژنتیکی ترکیبی فقط از ادراک‌های محلی، حافظه و مختصات عمومی خروج استفاده می‌کنند. وزن‌های روش ژنتیکی روی 12 نقشه آموزش تکامل یافتند و ارزیابی نهایی روی 30 نقشه تست جداگانه انجام شد.</p>
 <div class="callout">نتیجه اصلی: A-Star به 100٪، Rule-Based به 90٪ و Hybrid Genetic به 83.33٪ موفقیت رسید. در میان عامل‌های آنلاین، Rule-Based مطمئن‌تر و Hybrid Genetic در اپیزودهای موفق کوتاه‌مسیرتر بود.</div>
 
 <h2>۱. تعریف مسئله و قوانین</h2>
@@ -60,7 +57,7 @@ ul { margin-right:20px; }
 <p class="code">score(action) = Σ weight_i × feature_i(action)</p>
 
 <h2>۶. آموزش الگوریتم ژنتیک</h2>
-<ul><li>12 نقشه آموزش جدا</li><li>Population = 24</li><li>Maximum generations = 24</li><li>Elitism = 2</li><li>Tournament size = 3</li><li>Mutation rate = 0.10</li><li>Seed = 17</li><li>Best fitness = 1840.67</li></ul>
+<ul><li>12 نقشه آموزش جدا</li><li>Population = 24</li><li>Maximum generations = 24</li><li>Elitism = 2</li><li>Tournament size = 3</li><li>Mutation rate = 0.1</li><li>Seed = 17</li><li>Best fitness = 1840.67</li></ul>
 <figure><img src="../assets/genetic_fitness.png"><figcaption>روند بهترین و میانگین Fitness در طول آموزش</figcaption></figure>
 
 <h2>۷. طراحی آزمایش</h2>

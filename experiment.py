@@ -2,20 +2,25 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import statistics
+import subprocess
 import time
 from collections import Counter, defaultdict
+from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Iterable
 
 import matplotlib
-
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from wumpus_world.map_generator import generate_test_suite
 from wumpus_world.runner import run_episode
+
+matplotlib.use("Agg")
+
+PROJECT_VERSION = version("wumpus-world-genetic")
 
 AGENTS = ("astar", "rule", "genetic")
 METRIC_FIELDS = (
@@ -262,7 +267,7 @@ def write_report(
     online = [row for row in summary if row["agent"] in {"rule", "genetic"}]
     online_winner = max(online, key=lambda row: (row["success_rate"], row["average_score_all"]))
     lines = [
-        "WUMPUS WORLD VERSION 8 - FINAL EXPERIMENT SUMMARY",
+        f"WUMPUS WORLD VERSION {PROJECT_VERSION} - FINAL EXPERIMENT SUMMARY",
         "=" * 56,
         "",
         f"Episodes per agent: {summary[0]['episodes'] if summary else 0}",
@@ -306,7 +311,69 @@ def write_report(
     (results_dir / "experiment_summary.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def analyze_and_export(rows: list[dict[str, Any]], results_dir: str | Path = "results/final") -> None:
+def write_run_metadata(
+    results_dir: Path,
+    test_seed: int = 20260730,
+    per_difficulty: int = 10,
+    max_steps: int = 250,
+    timing_repeats: int = 3,
+    weights_path: str = "best_weights.json",
+) -> None:
+    results_dir.mkdir(parents=True, exist_ok=True)
+    git_commit = "unknown"
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode == 0 and proc.stdout.strip():
+            git_commit = proc.stdout.strip()
+    except Exception:
+        pass
+
+    weights_file = Path(weights_path)
+    weights_sha256 = ""
+    best_fitness = 0.0
+    if weights_file.exists():
+        data = weights_file.read_bytes()
+        weights_sha256 = hashlib.sha256(data).hexdigest()
+        try:
+            weights_json = json.loads(data.decode("utf-8"))
+            best_fitness = float(weights_json.get("metadata", {}).get("best_fitness", 0.0))
+        except Exception:
+            pass
+
+    metadata = {
+        "project_version": PROJECT_VERSION,
+        "git_commit": git_commit,
+        "training_seed": 17,
+        "training_map_seed": 1701,
+        "test_seed": test_seed,
+        "training_maps": 12,
+        "test_maps": per_difficulty * 3,
+        "maps_per_difficulty": per_difficulty,
+        "population": 24,
+        "generations": 24,
+        "mutation_rate": 0.1,
+        "max_steps": max_steps,
+        "timing_repeats": timing_repeats,
+        "weights_sha256": weights_sha256,
+        "best_fitness": best_fitness,
+    }
+    (results_dir / "run_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+
+
+def analyze_and_export(
+    rows: list[dict[str, Any]],
+    results_dir: str | Path = "results/final",
+    test_seed: int = 20260730,
+    per_difficulty: int = 10,
+    max_steps: int = 250,
+    timing_repeats: int = 3,
+    weights_path: str = "best_weights.json",
+) -> None:
     results_dir = Path(results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
     summary, difficulty_summary = summarize(rows)
@@ -340,6 +407,14 @@ def analyze_and_export(rows: list[dict[str, Any]], results_dir: str | Path = "re
     _difficulty_chart(difficulty_summary, results_dir / "success_by_difficulty.png")
     _failure_chart(rows, results_dir / "failure_reasons.png")
     write_report(rows, summary, difficulty_summary, results_dir)
+    write_run_metadata(
+        results_dir,
+        test_seed=test_seed,
+        per_difficulty=per_difficulty,
+        max_steps=max_steps,
+        timing_repeats=timing_repeats,
+        weights_path=weights_path,
+    )
 
 
 def main() -> None:
@@ -369,7 +444,15 @@ def main() -> None:
         weights_path=args.weights,
         timing_repeats=args.timing_repeats,
     )
-    analyze_and_export(rows, args.results_dir)
+    analyze_and_export(
+        rows,
+        results_dir=args.results_dir,
+        test_seed=args.seed,
+        per_difficulty=args.per_difficulty,
+        max_steps=args.max_steps,
+        timing_repeats=args.timing_repeats,
+        weights_path=args.weights,
+    )
     print(f"Completed {len(rows)} episodes.")
     print(f"Results saved in {args.results_dir}")
 

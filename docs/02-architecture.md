@@ -4,17 +4,20 @@
 
 | فایل | مسئولیت |
 |---|---|
-| `map_parser.py` | خواندن و اعتبارسنجی سخت‌گیرانه فایل نقشه |
-| `environment.py` | قوانین بازی، امتیاز، پایان و ادراک‌ها |
-| `base_agent.py` | رابط مشترک عامل‌ها |
-| `astar_agent.py` | برنامه‌ریزی A-Star با اطلاعات کامل |
-| `knowledge_base.py` | حافظه و استنتاج محلی |
-| `rule_based_agent.py` | تصمیم‌گیری قاعده‌محور و backtracking |
-| `genetic_agent.py` | استخراج ویژگی و سیاست وزن‌دار ترکیبی |
-| `genetic_algorithm.py` | Fitness، انتخاب، crossover، mutation و elitism |
-| `map_generator.py` | تولید قطعی نقشه‌های آموزش و تست |
+| `src/wumpus_world/map_parser.py` | خواندن و اعتبارسنجی سخت‌گیرانه فایل نقشه |
+| `src/wumpus_world/environment.py` | قوانین بازی، امتیاز، پایان و ادراک‌ها |
+| `src/wumpus_world/agents/base_agent.py` | رابط مشترک عامل‌ها |
+| `src/wumpus_world/agents/astar_agent.py` | برنامه‌ریزی A-Star با اطلاعات کامل |
+| `src/wumpus_world/knowledge_base.py` | حافظه و استنتاج محلی |
+| `src/wumpus_world/agents/rule_based_agent.py` | تصمیم‌گیری قاعده‌محور و backtracking |
+| `src/wumpus_world/agents/genetic_agent.py` | استخراج ویژگی و سیاست وزن‌دار ترکیبی |
+| `src/wumpus_world/training/genetic_algorithm.py` | Fitness، انتخاب، crossover، mutation و elitism |
+| `src/wumpus_world/map_generator.py` | تولید قطعی نقشه‌های آموزش و تست |
+| `src/wumpus_world/runner.py` | اجرای یکپارچه اپیزود برای انواع عامل‌ها |
+| `src/wumpus_world/cli.py` | رابط خط فرمان تک‌عامل (`wumpus-world`) |
+| `src/wumpus_world/demo.py` | رابط خط فرمان مقایسه‌ای (`wumpus-world-demo`) |
 | `experiment.py` | اجرای benchmark، خلاصه، CSV و نمودار |
-| `docs/build_artifacts.py` | ساخت قابل‌بازتولید گزارش PDF و ارائه |
+| `docs/build_artifacts.py` | ساخت قابل‌بازتولید گزارش HTML و PDF |
 
 ## جریان اجرای یک اپیزود
 

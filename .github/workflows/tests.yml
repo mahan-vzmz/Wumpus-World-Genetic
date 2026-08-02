@@ -28,8 +28,45 @@ jobs:
       - name: Run tests
         run: pytest -q
       - name: Compile Python files
-        run: python -m compileall -q src tests experiment.py train_genetic.py verify_delivery.py
+        run: python -m compileall -q src tests experiment.py train_genetic.py verify_delivery.py tools/check_repository_consistency.py
       - name: Check CLI
         run: wumpus-world --help
       - name: Check demo CLI
-        run: wumpus-world-demo --map maps/sample_01.txt
+        run: wumpus-world-demo
+
+  delivery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - run: python -m pip install -e ".[dev]"
+      - name: Verify delivery artifacts
+        run: python verify_delivery.py
+      - name: Check repository consistency
+        run: python tools/check_repository_consistency.py
+
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - run: python -m pip install --upgrade pip build
+      - run: python -m build
+      - run: python -m pip install dist/*.whl
+
+      - name: Test installed CLI outside repository
+        run: |
+          cd /tmp
+          wumpus-world --quiet
+          wumpus-world-demo

@@ -8,22 +8,38 @@ version = "8.1.0"
 description = "Wumpus World comparison of A*, rule-based, and hybrid genetic agents"
 readme = "README.md"
 requires-python = ">=3.10"
+license = { file = "LICENSE" }
+keywords = [
+    "artificial-intelligence",
+    "genetic-algorithm",
+    "wumpus-world",
+    "a-star",
+    "intelligent-agents"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+
 dependencies = [
     "matplotlib>=3.8,<4.0"
 ]
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["wumpus_world*"]
 
 [[project.authors]]
 name = "ماهان ورمزیار"
 email = "mahan.varmazyar@gmail.com"
 
+[project.urls]
+Repository = "https://github.com/mahan-vzmz/Wumpus-World-Genetic"
+Documentation = "https://github.com/mahan-vzmz/Wumpus-World-Genetic/tree/main/docs"
+Issues = "https://github.com/mahan-vzmz/Wumpus-World-Genetic/issues"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0,<10.0",
-    "ruff>=0.12,<1.0"
+    "ruff>=0.12,<1.0",
+    "build>=1.2,<2.0"
 ]
 docs = [
     "weasyprint>=68,<69"
@@ -32,6 +48,16 @@ docs = [
 [project.scripts]
 wumpus-world = "wumpus_world.cli:main"
 wumpus-world-demo = "wumpus_world.demo:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["wumpus_world*"]
+
+[tool.setuptools.package-data]
+wumpus_world = [
+    "data/*.json",
+    "data/maps/*.txt"
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

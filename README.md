@@ -60,7 +60,15 @@ You can also run the package directly:
 python -m wumpus_world --help
 ```
 
-*Note: The genetic agent requires the pre-trained `best_weights.json` file. To use manual weights, add `--use-default-weights`.*
+*Note: `best_weights.json` is the canonical weight file for version 8.1.x and contains trained gene values and training metadata. To use default hardcoded weights instead, pass `--use-default-weights`.*
+
+## Documentation
+
+- [Persian README](README_FA.md)
+- [Final PDF Report](docs/final_report/final_report.pdf)
+- [Project Audit](PROJECT_AUDIT.md)
+- [Experiment Results](results/final/summary_results.csv)
+- [Changelog](CHANGELOG.md)
 
 ## Experiment & Training
 

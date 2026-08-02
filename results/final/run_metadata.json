@@ -1,0 +1,17 @@
+{
+  "project_version": "8.1.0",
+  "git_commit": "unknown",
+  "training_seed": 17,
+  "training_map_seed": 1701,
+  "test_seed": 20260730,
+  "training_maps": 12,
+  "test_maps": 30,
+  "maps_per_difficulty": 10,
+  "population": 24,
+  "generations": 24,
+  "mutation_rate": 0.1,
+  "max_steps": 250,
+  "timing_repeats": 3,
+  "weights_sha256": "43926bd001b97950c4062a71d79712be17ee0fafe9d05e3e26090e551f3ea4d6",
+  "best_fitness": 1840.6666666666667
+}
