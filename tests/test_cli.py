@@ -81,7 +81,7 @@ def test_cli_runs_outside_repository(tmp_path: Path) -> None:
         text=True,
         check=False,
     )
-    assert result.returncode == 0
+    assert result.returncode == 0, f"stdout: {result.stdout}\nstderr: {result.stderr}"
 
 
 def test_missing_weights_returns_nonzero(tmp_path: Path) -> None:
