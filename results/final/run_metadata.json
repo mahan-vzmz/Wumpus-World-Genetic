@@ -1,5 +1,5 @@
 {
-  "project_version": "8.1.0",
+  "project_version": "8.1.1",
   "source_commit": "13695651fcffa91389808b8b4340b412c61f1bda",
   "training_seed": 17,
   "training_map_seed": 1701,
@@ -8,8 +8,10 @@
   "test_maps": 30,
   "maps_per_difficulty": 10,
   "population": 24,
-  "generations": 24,
+  "requested_generations": 24,
+  "generations_run": 24,
   "mutation_rate": 0.1,
+  "mutation_sigma": 0.2,
   "elite_count": 2,
   "tournament_size": 3,
   "max_steps": 250,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import hashlib
 import shutil
 import sys
@@ -17,9 +18,26 @@ def sha256_file(path: Path) -> str:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Synchronize or check packaged genetic weights.")
+    parser.add_argument("--check", action="store_true", help="Only verify weight sync without modifying files.")
+    args = parser.parse_args()
+
     if not ROOT_WEIGHTS.exists():
         print(f"Error: Root weights file missing: {ROOT_WEIGHTS}", file=sys.stderr)
         sys.exit(1)
+
+    root_hash = sha256_file(ROOT_WEIGHTS)
+    packaged_hash = sha256_file(PACKAGED_WEIGHTS)
+
+    if args.check:
+        if root_hash != packaged_hash:
+            print(
+                f"Error: Packaged weights out of sync with root ({root_hash[:12]} != {packaged_hash[:12]}).",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        print(f"Packaged weights are cleanly synchronized ({root_hash[:12]}).")
+        return
 
     PACKAGED_WEIGHTS.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT_WEIGHTS, PACKAGED_WEIGHTS)

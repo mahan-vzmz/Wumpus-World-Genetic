@@ -46,14 +46,21 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - run: python -m pip install -e ".[dev,docs]"
-      - name: Sync packaged weights
-        run: python tools/sync_packaged_weights.py
+      - name: Check committed repository state
+        run: python tools/check_repository_consistency.py
+      - name: Check packaged weights sync
+        run: python tools/sync_packaged_weights.py --check
       - name: Rebuild HTML and PDF reports
         run: python docs/build_artifacts.py --info project_info.public.json
       - name: Verify delivery artifacts
         run: python verify_delivery.py
-      - name: Check repository consistency
-        run: python tools/check_repository_consistency.py
+      - name: Check generated artifacts are committed
+        run: |
+          git diff --exit-code -- \
+            src/wumpus_world/data/best_weights.json \
+            docs/final_report/final_report.html \
+            docs/final_report/final_report.pdf \
+            results/final/run_metadata.json
 
   package:
     runs-on: ubuntu-latest
@@ -66,7 +73,7 @@ jobs:
           python-version: "3.13"
 
       - run: python -m pip install --upgrade pip build
-      - run: python tools/sync_packaged_weights.py
+      - run: python tools/sync_packaged_weights.py --check
       - run: python -m build
       - run: python -m pip install dist/*.whl
 

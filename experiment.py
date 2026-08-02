@@ -357,8 +357,10 @@ def write_run_metadata(
     training_map_seed = 1701
     training_maps = 12
     population = 24
-    generations = 24
+    requested_generations = 50
+    generations_run = 24
     mutation_rate = 0.1
+    mutation_sigma = 0.2
     elite_count = 2
     tournament_size = 3
 
@@ -366,17 +368,20 @@ def write_run_metadata(
     if training_summary_path.exists():
         try:
             ts = json.loads(training_summary_path.read_text(encoding="utf-8"))
-            training_seed = int(ts.get("seed", training_seed))
-            training_maps = int(ts.get("map_count", training_maps))
-            population = int(ts.get("population", population))
-            generations = int(ts.get("generations_run", generations))
-            mutation_rate = float(ts.get("mutation_rate", mutation_rate))
-            elite_count = int(ts.get("elite_count", elite_count))
-            tournament_size = int(ts.get("tournament_size", tournament_size))
-            if best_fitness == 0.0:
-                best_fitness = float(ts.get("best_fitness", 0.0))
-        except Exception:
-            pass
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid training summary JSON in {training_summary_path}: {exc}") from exc
+
+        training_seed = int(ts.get("seed", training_seed))
+        training_maps = int(ts.get("map_count", training_maps))
+        population = int(ts.get("population", population))
+        requested_generations = int(ts.get("requested_generations", ts.get("generations_run", 50)))
+        generations_run = int(ts.get("generations_run", generations_run))
+        mutation_rate = float(ts.get("mutation_rate", mutation_rate))
+        mutation_sigma = float(ts.get("mutation_sigma", mutation_sigma))
+        elite_count = int(ts.get("elite_count", elite_count))
+        tournament_size = int(ts.get("tournament_size", tournament_size))
+        if best_fitness == 0.0:
+            best_fitness = float(ts.get("best_fitness", 0.0))
 
     metadata = {
         "project_version": PROJECT_VERSION,
@@ -388,8 +393,10 @@ def write_run_metadata(
         "test_maps": per_difficulty * 3,
         "maps_per_difficulty": per_difficulty,
         "population": population,
-        "generations": generations,
+        "requested_generations": requested_generations,
+        "generations_run": generations_run,
         "mutation_rate": mutation_rate,
+        "mutation_sigma": mutation_sigma,
         "elite_count": elite_count,
         "tournament_size": tournament_size,
         "max_steps": max_steps,

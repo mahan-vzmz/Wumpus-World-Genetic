@@ -87,12 +87,17 @@ def load_run_metadata() -> dict[str, Any]:
     required_keys = [
         "project_version",
         "source_commit",
+        "training_seed",
+        "training_map_seed",
+        "test_seed",
         "training_maps",
         "test_maps",
         "maps_per_difficulty",
         "population",
-        "generations",
+        "requested_generations",
+        "generations_run",
         "mutation_rate",
+        "mutation_sigma",
         "elite_count",
         "tournament_size",
         "max_steps",
@@ -104,20 +109,27 @@ def load_run_metadata() -> dict[str, Any]:
     if missing:
         raise ValueError(f"run_metadata.json missing required keys: {missing}")
 
+    if not isinstance(data["source_commit"], str) or not data["source_commit"].strip():
+        raise ValueError("source_commit in run_metadata.json must be a non-empty string")
+    if data["training_maps"] <= 0 or data["test_maps"] <= 0 or data["population"] <= 0:
+        raise ValueError("Map counts and population size in run_metadata.json must be positive integers")
+    if data["requested_generations"] <= 0 or data["generations_run"] <= 0:
+        raise ValueError("Generation counts in run_metadata.json must be positive integers")
+
     return data
 
 
 def load_project_info(path: Path | str | None = None) -> dict[str, str]:
     if path is not None:
         info_path = Path(path)
-    elif (ROOT / "project_info.json").exists():
-        info_path = ROOT / "project_info.json"
     elif (ROOT / "project_info.public.json").exists():
         info_path = ROOT / "project_info.public.json"
+    elif (ROOT / "project_info.json").exists():
+        info_path = ROOT / "project_info.json"
     else:
         raise FileNotFoundError(
-            "Missing project_info.json and project_info.public.json. "
-            "Copy project_info.example.json to project_info.json or project_info.public.json."
+            "Missing project_info.public.json and project_info.json. "
+            "Copy project_info.example.json to project_info.public.json or project_info.json."
         )
 
     if not info_path.exists():
@@ -187,17 +199,34 @@ def build_report(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
     rule_rate = summary_by_agent.get("rule", {}).get("success_rate", "0")
     genetic_rate = summary_by_agent.get("genetic", {}).get("success_rate", "0")
 
+    rule_steps_succ = float(summary_by_agent.get("rule", {}).get("average_steps_success", "0"))
+    genetic_steps_succ = float(summary_by_agent.get("genetic", {}).get("average_steps_success", "0"))
+
+    initial_health = 120
+
     best_fit = f"{float(run_meta['best_fitness']):.2f}"
     training_maps = run_meta["training_maps"]
     pop_size = run_meta["population"]
-    max_gens = run_meta["generations"]
+    req_gens = run_meta["requested_generations"]
+    run_gens = run_meta["generations_run"]
     mut_rate = run_meta["mutation_rate"]
+    mut_sigma = run_meta["mutation_sigma"]
     elitism = run_meta["elite_count"]
     tournament_size = run_meta["tournament_size"]
     seed_val = run_meta["training_seed"]
     test_maps = run_meta["test_maps"]
     per_diff = run_meta.get("maps_per_difficulty", 10)
     timing_repeats = run_meta.get("timing_repeats", 3)
+
+    if float(rule_rate) >= float(genetic_rate):
+        rel_text = f"در میان عامل‌های آنلاین، Rule-Based با نرخ موفقیت {rule_rate}٪ نسبت به Hybrid Genetic ({genetic_rate}٪) عملکرد مطمئن‌تری ثبت کرد."
+    else:
+        rel_text = f"در میان عامل‌های آنلاین، Hybrid Genetic با نرخ موفقیت {genetic_rate}٪ نسبت به Rule-Based ({rule_rate}٪) عملکرد بهتری نشان داد."
+
+    if genetic_steps_succ < rule_steps_succ:
+        step_text = f"Hybrid Genetic در اپیزودهای موفق با میانگین {genetic_steps_succ:.1f} حرکت در مقایسه با Rule-Based ({rule_steps_succ:.1f} حرکت) مسیر کوتاه‌تری را طی کرد."
+    else:
+        step_text = f"Rule-Based در اپیزودهای موفق با میانگین {rule_steps_succ:.1f} حرکت در مقایسه با Hybrid Genetic ({genetic_steps_succ:.1f} حرکت) مسیر کوتاه‌تری را ثبت کرد."
 
     html_text = f"""<!doctype html>
 <html lang="fa" dir="rtl">
@@ -238,7 +267,7 @@ ul {{ margin-right:20px; }}
 
 <h2>چکیده</h2>
 <p>در این پروژه محیط Wumpus World روی گرید 8×8 پیاده‌سازی شد و سه روش متفاوت روی یک محیط و مجموعه معیار مشترک مقایسه شدند. A-Star به کل نقشه دسترسی دارد و نقش Oracle را ایفا می‌کند. عامل قاعده‌محور و عامل ژنتیکی ترکیبی فقط از ادراک‌های محلی، حافظه و مختصات عمومی خروج استفاده می‌کنند. وزن‌های روش ژنتیکی روی {training_maps} نقشه آموزش تکامل یافتند و ارزیابی نهایی روی {test_maps} نقشه تست جداگانه انجام شد.</p>
-<div class="callout">نتیجه اصلی: A-Star به {astar_rate}٪، Rule-Based به {rule_rate}٪ و Hybrid Genetic به {genetic_rate}٪ موفقیت رسید. در میان عامل‌های آنلاین، Rule-Based مطمئن‌تر و Hybrid Genetic در اپیزودهای موفق کوتاه‌مسیرتر بود.</div>
+<div class="callout">نتیجه اصلی: A-Star به {astar_rate}٪، Rule-Based به {rule_rate}٪ و Hybrid Genetic به {genetic_rate}٪ موفقیت رسید. {rel_text} {step_text}</div>
 
 <h2>۱. تعریف مسئله و قوانین</h2>
 <p>عامل از خانه (1,1) شروع می‌کند، باید حداقل یک طلا جمع‌آوری کند و پیش از تمام‌شدن جان به خروج برسد. هر تلاش برای حرکت یک واحد جان کم می‌کند. دیوار حرکت را مسدود می‌کند، چاه پس از هزینه حرکت جان را نصف می‌کند، غول مرگ فوری ایجاد می‌کند و خروج بدون طلا شکست است.</p>
@@ -258,11 +287,11 @@ ul {{ margin-right:20px; }}
 <p class="code">score(action) = Σ weight_i × feature_i(action)</p>
 
 <h2>۶. آموزش الگوریتم ژنتیک</h2>
-<ul><li>{training_maps} نقشه آموزش جدا</li><li>Population = {pop_size}</li><li>Maximum generations = {max_gens}</li><li>Elitism = {elitism}</li><li>Tournament size = {tournament_size}</li><li>Mutation rate = {mut_rate}</li><li>Seed = {seed_val}</li><li>Best fitness = {best_fit}</li></ul>
+<ul><li>{training_maps} نقشه آموزش جدا</li><li>Population = {pop_size}</li><li>Maximum generations = {req_gens}</li><li>Generations executed = {run_gens}</li><li>Elitism = {elitism}</li><li>Tournament size = {tournament_size}</li><li>Mutation rate = {mut_rate}</li><li>Mutation sigma = {mut_sigma}</li><li>Seed = {seed_val}</li><li>Best fitness = {best_fit}</li></ul>
 <figure><img src="../assets/genetic_fitness.png"><figcaption>روند بهترین و میانگین Fitness در طول آموزش</figcaption></figure>
 
 <h2>۷. طراحی آزمایش</h2>
-<p>{test_maps} نقشه تست دیده‌نشده شامل {per_diff} نقشه آسان، {per_diff} متوسط و {per_diff} سخت با seed ثابت تولید شدند. خروج، محل طلا و طول مسیرها متنوع است. جان اولیه همه سطوح برابر 120 است تا امتیاز بین دشواری‌ها قابل مقایسه باشد. زمان اجرا median {timing_repeats} اجرای کامل است و تعداد حرکت موفق جداگانه گزارش می‌شود.</p>
+<p>{test_maps} نقشه تست دیده‌نشده شامل {per_diff} نقشه آسان، {per_diff} متوسط و {per_diff} سخت با seed ثابت تولید شدند. خروج، محل طلا و طول مسیرها متنوع است. جان اولیه همه سطوح برابر {initial_health} است تا امتیاز بین دشواری‌ها قابل مقایسه باشد. زمان اجرا median {timing_repeats} اجرای کامل است و تعداد حرکت موفق جداگانه گزارش می‌شود.</p>
 
 <h2>۸. نتایج کلی</h2>
 <table><thead><tr><th>Agent</th><th>Success</th><th>Score all</th><th>Steps all</th><th>Steps success</th><th>Health</th><th>Pit entries</th><th>Wumpus deaths</th></tr></thead><tbody>{rows}</tbody></table>
@@ -270,7 +299,7 @@ ul {{ margin-right:20px; }}
 <figure><img src="../assets/average_steps_success.png"><figcaption>میانگین حرکت فقط در اپیزودهای موفق</figcaption></figure>
 
 <h2>۹. تحلیل مقایسه‌ای</h2>
-<p>A-Star به دلیل اطلاعات کامل و وجود حداقل یک مسیر امن، کران بالای عملکرد است. Rule-Based در میان عامل‌های آنلاین نرخ موفقیت بالاتری دارد و محافظه‌کارتر است. Hybrid Genetic در اپیزودهای موفق حرکت کمتری مصرف می‌کند و امتیاز موفقیت بالاتری دارد، اما ریسک مرگ با غول بیشتر است. بنابراین نتیجه علمی، برتری مطلق یک روش نیست؛ بلکه تفاوت در trade-off میان اطمینان، توضیح‌پذیری و سرعت موفقیت است.</p>
+<p>A-Star به دلیل اطلاعات کامل و وجود حداقل یک مسیر امن، کران بالای عملکرد است. {rel_text} {step_text} بنابراین نتیجه علمی، برتری مطلق یک روش نیست؛ بلکه تفاوت در trade-off میان اطمینان، توضیح‌پذیری و سرعت موفقیت است.</p>
 <figure><img src="../assets/success_by_difficulty.png"><figcaption>نرخ موفقیت بر اساس سطح دشواری</figcaption></figure>
 <figure><img src="../assets/failure_reasons.png"><figcaption>دلایل شکست</figcaption></figure>
 
@@ -278,7 +307,7 @@ ul {{ margin-right:20px; }}
 <ul><li>A-Star سطح اطلاعات متفاوتی دارد.</li><li>نتایج برای seed و مجموعه تست ثبت‌شده معتبرند.</li><li>عامل ژنتیکی تضمین بهینگی یا موفقیت ندارد.</li><li>زمان اجرا به سخت‌افزار وابسته است.</li><li>برای استنباط آماری قوی‌تر، چند seed و confidence interval لازم است.</li></ul>
 
 <h2>۱۱. نتیجه‌گیری</h2>
-<p>نسخه {PROJECT_VERSION} یک pipeline قابل‌بازتولید از تولید نقشه و آموزش تا تست، ارزیابی و گزارش فراهم می‌کند. A-Star بهترین عملکرد را در محیط کاملاً شناخته‌شده دارد. در محیط ناشناخته، Rule-Based مطمئن‌تر و توضیح‌پذیرتر است، در حالی که Hybrid Genetic در موفقیت‌ها کوتاه‌مسیرتر اما ریسک‌پذیرتر عمل می‌کند.</p>
+<p>نسخه {PROJECT_VERSION} یک pipeline قابل‌بازتولید از تولید نقشه و آموزش تا تست، ارزیابی و گزارش فراهم می‌کند. A-Star بهترین عملکرد را در محیط کاملاً شناخته‌شده دارد. {rel_text} {step_text}</p>
 
 <h2>۱۲. منابع</h2>
 <ol><li>Russell, S. J., & Norvig, P. Artificial Intelligence: A Modern Approach.</li></ol>

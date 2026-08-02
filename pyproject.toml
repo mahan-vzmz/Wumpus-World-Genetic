@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wumpus-world-genetic"
-version = "8.1.0"
+version = "8.1.1"
 description = "Wumpus World comparison of A*, rule-based, and hybrid genetic agents"
 readme = "README.md"
 requires-python = ">=3.10"

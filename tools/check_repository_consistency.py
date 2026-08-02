@@ -4,6 +4,7 @@ import csv
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -14,7 +15,7 @@ RUN_METADATA_PATH = ROOT / "results" / "final" / "run_metadata.json"
 SUMMARY_CSV_PATH = ROOT / "results" / "final" / "summary_results.csv"
 EXPERIMENT_CSV_PATH = ROOT / "results" / "final" / "experiment_results.csv"
 FINAL_REPORT_HTML = ROOT / "docs" / "final_report" / "final_report.html"
-FINAL_REPORT_PDF = ROOT / "docs" / "final_report" / "final_report.pdf"
+CHANGELOG_PATH = ROOT / "CHANGELOG.md"
 
 
 def sha256_file(path: Path) -> str:
@@ -26,7 +27,43 @@ def sha256_file(path: Path) -> str:
 def get_pyproject_version() -> str:
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     match = re.search(r'version\s*=\s*"([^"]+)"', pyproject)
-    return match.group(1) if match else "8.1.0"
+    return match.group(1) if match else "8.1.1"
+
+
+def get_changelog_latest_version() -> str:
+    if not CHANGELOG_PATH.exists():
+        return ""
+    text = CHANGELOG_PATH.read_text(encoding="utf-8")
+    match = re.search(r"##\s+Version\s+([0-9]+\.[0-9]+\.[0-9]+)", text)
+    return match.group(1) if match else ""
+
+
+def check_git_tracking(errors: list[str]) -> None:
+    # Verify project_info.public.json is tracked
+    public_info = ROOT / "project_info.public.json"
+    if not public_info.exists():
+        errors.append("Missing project_info.public.json in repository")
+    else:
+        proc = subprocess.run(
+            ["git", "ls-files", "--error-unmatch", "project_info.public.json"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode != 0:
+            errors.append("project_info.public.json must be tracked in Git")
+
+    # Verify project_info.json is NOT tracked
+    proc_academic = subprocess.run(
+        ["git", "ls-files", "project_info.json"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc_academic.returncode == 0 and proc_academic.stdout.strip():
+        errors.append("project_info.json must NOT be tracked in Git (run `git rm --cached project_info.json`)")
 
 
 def check_weight_integrity(errors: list[str]) -> None:
@@ -71,8 +108,8 @@ def check_run_metadata(errors: list[str]) -> None:
         return
 
     source_commit = data.get("source_commit", "").strip()
-    if not source_commit or source_commit == "unknown":
-        errors.append("run_metadata.json contains invalid or unknown source_commit")
+    if not re.fullmatch(r"[0-9a-f]{40}", source_commit):
+        errors.append(f"source_commit must be a full 40-character Git SHA; got '{source_commit}'")
 
     meta_version = data.get("project_version", "")
     expected_version = get_pyproject_version()
@@ -81,30 +118,38 @@ def check_run_metadata(errors: list[str]) -> None:
             f"project_version in run_metadata.json ({meta_version}) does not match pyproject.toml ({expected_version})"
         )
 
+    changelog_version = get_changelog_latest_version()
+    if changelog_version != expected_version:
+        errors.append(
+            f"Latest version in CHANGELOG.md ({changelog_version}) does not match pyproject.toml ({expected_version})"
+        )
+
 
 def check_report_metadata(errors: list[str]) -> None:
     info_path = ROOT / "project_info.public.json"
     if not info_path.exists():
-        info_path = ROOT / "project_info.json"
-
-    if not info_path.exists():
-        errors.append("Neither project_info.public.json nor project_info.json exists")
+        errors.append("project_info.public.json missing")
         return
 
     try:
         info = json.loads(info_path.read_text(encoding="utf-8"))
     except Exception as exc:
-        errors.append(f"Invalid JSON in {info_path.name}: {exc}")
+        errors.append(f"Invalid JSON in project_info.public.json: {exc}")
         return
 
     mode = info.get("report_mode", "").lower()
-    if mode not in {"public", "academic"}:
-        errors.append(f"report_mode in {info_path.name} must be 'public' or 'academic'; got '{mode}'")
+    if mode != "public":
+        errors.append(f"report_mode in project_info.public.json must be 'public'; got '{mode}'")
+
+    required = {"project_title", "author_name", "course_name"}
+    missing = [f for f in required if not info.get(f)]
+    if missing:
+        errors.append(f"Missing required fields in project_info.public.json: {', '.join(missing)}")
 
     placeholders = {"Your Name", "Your Student ID", "Instructor Name", "University Name", "YYYY-MM-DD", "Project Title"}
     invalid = {k: v for k, v in info.items() if v in placeholders}
     if invalid:
-        errors.append(f"Placeholder values in {info_path.name}: {', '.join(sorted(invalid))}")
+        errors.append(f"Placeholder values in project_info.public.json: {', '.join(sorted(invalid))}")
 
 
 def check_result_consistency(errors: list[str]) -> None:
@@ -130,10 +175,13 @@ def check_result_consistency(errors: list[str]) -> None:
             summary_rows = list(csv.DictReader(h))
         html_text = FINAL_REPORT_HTML.read_text(encoding="utf-8")
         for row in summary_rows:
-            rate_str = f"{row['success_rate']}"
-            if rate_str not in html_text:
+            agent = row["agent"]
+            rate_str = f"<td>{row['success_rate']}%</td>"
+            # Verify exact agent row contains its specific success rate in HTML
+            row_pattern = rf"<tr><td>{agent}</td><td>{row['success_rate']}%</td>"
+            if not re.search(row_pattern, html_text):
                 errors.append(
-                    f"Success rate {rate_str}% for agent '{row['agent']}' not found in {FINAL_REPORT_HTML.name}"
+                    f"Success rate {rate_str} for agent '{agent}' not matched in HTML table of {FINAL_REPORT_HTML.name}"
                 )
 
 
@@ -181,6 +229,7 @@ def check_canonical_artifacts(errors: list[str]) -> None:
 def main() -> None:
     errors: list[str] = []
 
+    check_git_tracking(errors)
     check_canonical_artifacts(errors)
     check_weight_integrity(errors)
     check_run_metadata(errors)

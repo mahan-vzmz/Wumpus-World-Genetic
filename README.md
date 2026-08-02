@@ -1,7 +1,7 @@
 # Wumpus World: Comparing A*, Rule-Based, and Genetic Agents
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
-[![Version](https://img.shields.io/badge/version-8.1.0-success.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-8.1.1-success.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Tests](https://github.com/mahan-vzmz/Wumpus-World-Genetic/actions/workflows/tests.yml/badge.svg)](https://github.com/mahan-vzmz/Wumpus-World-Genetic/actions)
 
