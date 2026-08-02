@@ -72,8 +72,8 @@ def run_episode(
     if max_steps < 1:
         raise ValueError("max_steps must be positive.")
 
-    env = WumpusEnvironment(load_map(map_path))
     try:
+        env = WumpusEnvironment(load_map(map_path))
         agent = build_agent(
             agent_name,
             env,
@@ -83,18 +83,19 @@ def run_episode(
         observation = env.reset()
         agent.reset()
     except (NoPathError, FileNotFoundError, ValueError) as exc:
+        env_bound = "env" in locals()
         result = {
             "agent": agent_name,
             "success": False,
             "termination_reason": "initialization_error",
             "error": f"{type(exc).__name__}: {exc}",
-            "initial_health": env.config.initial_health,
-            "remaining_health": env.state.health,
-            "score": env.state.score,
-            "score_delta": env.state.score - env.config.initial_health,
-            "steps": env.state.steps,
-            "pit_entries": env.state.pit_entries,
-            "collected_gold": env.state.collected_gold,
+            "initial_health": env.config.initial_health if env_bound else 0,
+            "remaining_health": env.state.health if env_bound else 0,
+            "score": env.state.score if env_bound else 0,
+            "score_delta": (env.state.score - env.config.initial_health) if env_bound else 0,
+            "steps": env.state.steps if env_bound else 0,
+            "pit_entries": env.state.pit_entries if env_bound else 0,
+            "collected_gold": env.state.collected_gold if env_bound else 0,
         }
         if verbose:
             print("Initialization failed:", result["error"])
