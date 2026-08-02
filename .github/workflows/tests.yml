@@ -58,8 +58,10 @@ jobs:
         run: |
           git diff --exit-code -- \
             src/wumpus_world/data/best_weights.json \
+            docs/assets/ \
             docs/final_report/final_report.html \
             docs/final_report/final_report.pdf \
+            docs/final_report/report_manifest.json \
             results/final/run_metadata.json
 
   package:

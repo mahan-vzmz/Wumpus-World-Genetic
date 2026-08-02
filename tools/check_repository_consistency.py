@@ -6,13 +6,17 @@ import json
 import re
 import subprocess
 import sys
+from collections import defaultdict
 from pathlib import Path
+from statistics import mean
 
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_WEIGHTS = ROOT / "best_weights.json"
 PACKAGED_WEIGHTS = ROOT / "src" / "wumpus_world" / "data" / "best_weights.json"
+TRAINING_SUMMARY_PATH = ROOT / "results" / "genetic_training_summary.json"
 RUN_METADATA_PATH = ROOT / "results" / "final" / "run_metadata.json"
 SUMMARY_CSV_PATH = ROOT / "results" / "final" / "summary_results.csv"
+DIFFICULTY_CSV_PATH = ROOT / "results" / "final" / "difficulty_results.csv"
 EXPERIMENT_CSV_PATH = ROOT / "results" / "final" / "experiment_results.csv"
 FINAL_REPORT_HTML = ROOT / "docs" / "final_report" / "final_report.html"
 CHANGELOG_PATH = ROOT / "CHANGELOG.md"
@@ -39,7 +43,6 @@ def get_changelog_latest_version() -> str:
 
 
 def check_git_tracking(errors: list[str]) -> None:
-    # Verify project_info.public.json is tracked
     public_info = ROOT / "project_info.public.json"
     if not public_info.exists():
         errors.append("Missing project_info.public.json in repository")
@@ -54,7 +57,6 @@ def check_git_tracking(errors: list[str]) -> None:
         if proc.returncode != 0:
             errors.append("project_info.public.json must be tracked in Git")
 
-    # Verify project_info.json is NOT tracked
     proc_academic = subprocess.run(
         ["git", "ls-files", "project_info.json"],
         cwd=ROOT,
@@ -96,6 +98,63 @@ def check_weight_integrity(errors: list[str]) -> None:
             errors.append(f"Failed to read run_metadata.json: {exc}")
 
 
+def check_training_metadata_consistency(errors: list[str]) -> None:
+    if not TRAINING_SUMMARY_PATH.exists():
+        errors.append(f"Missing training summary file: {TRAINING_SUMMARY_PATH}")
+        return
+    if not RUN_METADATA_PATH.exists():
+        errors.append(f"Missing run metadata file: {RUN_METADATA_PATH}")
+        return
+
+    try:
+        training = json.loads(TRAINING_SUMMARY_PATH.read_text(encoding="utf-8"))
+        run_meta = json.loads(RUN_METADATA_PATH.read_text(encoding="utf-8"))
+    except Exception as exc:
+        errors.append(f"Failed to parse training summary or run metadata JSON: {exc}")
+        return
+
+    field_pairs = {
+        "seed": "training_seed",
+        "map_count": "training_maps",
+        "population": "population",
+        "requested_generations": "requested_generations",
+        "generations_run": "generations_run",
+        "mutation_rate": "mutation_rate",
+        "mutation_sigma": "mutation_sigma",
+        "crossover_rate": "crossover_rate",
+        "patience": "patience",
+        "elite_count": "elite_count",
+        "tournament_size": "tournament_size",
+        "max_steps": "max_steps",
+    }
+
+    for training_key, run_key in field_pairs.items():
+        val_t = training.get(training_key)
+        val_r = run_meta.get(run_key)
+        if val_t != val_r:
+            errors.append(
+                f"Training metadata mismatch for {training_key}/{run_key}: training={val_t!r}, run_metadata={val_r!r}"
+            )
+
+    if abs(float(training.get("best_fitness", 0)) - float(run_meta.get("best_fitness", 0))) > 1e-4:
+        errors.append(
+            f"best_fitness mismatch: training={training.get('best_fitness')}, run_metadata={run_meta.get('best_fitness')}"
+        )
+
+    if ROOT_WEIGHTS.exists():
+        try:
+            root_weights_json = json.loads(ROOT_WEIGHTS.read_text(encoding="utf-8"))
+            root_genes = root_weights_json.get("genes", {})
+            summary_genes = training.get("best_weights", {})
+            for key, val in summary_genes.items():
+                if abs(float(val) - float(root_genes.get(key, 0))) > 1e-4:
+                    errors.append(
+                        f"Weight gene '{key}' mismatch between training summary ({val}) and best_weights.json ({root_genes.get(key)})"
+                    )
+        except Exception as exc:
+            errors.append(f"Failed to verify best_weights genes: {exc}")
+
+
 def check_run_metadata(errors: list[str]) -> None:
     if not RUN_METADATA_PATH.exists():
         errors.append(f"Missing run metadata file: {RUN_METADATA_PATH}")
@@ -110,6 +169,16 @@ def check_run_metadata(errors: list[str]) -> None:
     source_commit = data.get("source_commit", "").strip()
     if not re.fullmatch(r"[0-9a-f]{40}", source_commit):
         errors.append(f"source_commit must be a full 40-character Git SHA; got '{source_commit}'")
+    else:
+        proc = subprocess.run(
+            ["git", "cat-file", "-e", f"{source_commit}^{{commit}}"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode != 0:
+            errors.append(f"source_commit '{source_commit}' does not exist in local Git object database")
 
     meta_version = data.get("project_version", "")
     expected_version = get_pyproject_version()
@@ -146,7 +215,18 @@ def check_report_metadata(errors: list[str]) -> None:
     if missing:
         errors.append(f"Missing required fields in project_info.public.json: {', '.join(missing)}")
 
-    placeholders = {"Your Name", "Your Student ID", "Instructor Name", "University Name", "YYYY-MM-DD", "Project Title"}
+    placeholders = {
+        "Your Name",
+        "Your Student ID",
+        "Instructor Name",
+        "University Name",
+        "YYYY-MM-DD",
+        "Project Title",
+        "نام و نام خانوادگی",
+        "شماره دانشجویی",
+        "نام استاد",
+        "نام دانشگاه",
+    }
     invalid = {k: v for k, v in info.items() if v in placeholders}
     if invalid:
         errors.append(f"Placeholder values in project_info.public.json: {', '.join(sorted(invalid))}")
@@ -163,26 +243,93 @@ def check_result_consistency(errors: list[str]) -> None:
 
     if not EXPERIMENT_CSV_PATH.exists():
         errors.append(f"Missing experiment CSV: {EXPERIMENT_CSV_PATH}")
-    else:
-        with EXPERIMENT_CSV_PATH.open(encoding="utf-8", newline="") as h:
-            rows = list(csv.DictReader(h))
-        expected_rows = num_maps * 3
-        if len(rows) != expected_rows:
-            errors.append(f"Expected {expected_rows} experiment rows ({num_maps} maps * 3 agents); found {len(rows)}")
+        return
 
-    if SUMMARY_CSV_PATH.exists() and FINAL_REPORT_HTML.exists():
+    with EXPERIMENT_CSV_PATH.open(encoding="utf-8", newline="") as h:
+        raw_rows = list(csv.DictReader(h))
+
+    expected_rows = num_maps * 3
+    if len(raw_rows) != expected_rows:
+        errors.append(f"Expected {expected_rows} experiment rows ({num_maps} maps * 3 agents); found {len(raw_rows)}")
+        return
+
+    agent_groups: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for r in raw_rows:
+        agent_groups[r["agent"]].append(r)
+
+    computed_summary: dict[str, dict[str, float | int]] = {}
+    for agent, group in agent_groups.items():
+        episodes = len(group)
+        successes = sum(1 for r in group if r["success"] in ("1", "True", "true"))
+        success_rate = round((successes / episodes) * 100.0, 2)
+        scores = [int(r["score"]) for r in group]
+        steps_all = [int(r["steps"]) for r in group]
+        steps_succ = [int(r["steps"]) for r in group if r["success"] in ("1", "True", "true")]
+        healths = [int(r["remaining_health"]) for r in group]
+        pits = [int(r["pit_entries"]) for r in group]
+        deaths = sum(
+            1
+            for r in group
+            if r.get("wumpus_death") in ("1", "True", "true") or r.get("termination_reason") == "wumpus_killed"
+        )
+
+        computed_summary[agent] = {
+            "episodes": episodes,
+            "successes": successes,
+            "success_rate": success_rate,
+            "average_score_all": round(mean(scores), 2),
+            "average_steps_all": round(mean(steps_all), 2),
+            "average_steps_success": round(mean(steps_succ), 2) if steps_succ else 0.0,
+            "average_remaining_health_all": round(mean(healths), 2),
+            "average_pit_entries": round(mean(pits), 2),
+            "wumpus_deaths": deaths,
+        }
+
+    if SUMMARY_CSV_PATH.exists():
         with SUMMARY_CSV_PATH.open(encoding="utf-8", newline="") as h:
             summary_rows = list(csv.DictReader(h))
-        html_text = FINAL_REPORT_HTML.read_text(encoding="utf-8")
+
         for row in summary_rows:
             agent = row["agent"]
-            rate_str = f"<td>{row['success_rate']}%</td>"
-            # Verify exact agent row contains its specific success rate in HTML
-            row_pattern = rf"<tr><td>{agent}</td><td>{row['success_rate']}%</td>"
-            if not re.search(row_pattern, html_text):
+            comp = computed_summary.get(agent)
+            if not comp:
+                errors.append(f"Summary CSV contains unknown agent '{agent}'")
+                continue
+
+            for key in (
+                "success_rate",
+                "average_score_all",
+                "average_steps_all",
+                "average_steps_success",
+                "average_remaining_health_all",
+                "average_pit_entries",
+            ):
+                csv_val = float(row[key])
+                calc_val = float(comp[key])
+                if abs(csv_val - calc_val) > 1e-2:
+                    errors.append(
+                        f"Summary metric mismatch for agent '{agent}' field '{key}': CSV={csv_val}, computed={calc_val}"
+                    )
+
+            if int(row["wumpus_deaths"]) != int(comp["wumpus_deaths"]):
                 errors.append(
-                    f"Success rate {rate_str} for agent '{agent}' not matched in HTML table of {FINAL_REPORT_HTML.name}"
+                    f"Summary wumpus_deaths mismatch for agent '{agent}': CSV={row['wumpus_deaths']}, computed={comp['wumpus_deaths']}"
                 )
+
+    if FINAL_REPORT_HTML.exists():
+        html_text = FINAL_REPORT_HTML.read_text(encoding="utf-8")
+        if SUMMARY_CSV_PATH.exists():
+            with SUMMARY_CSV_PATH.open(encoding="utf-8", newline="") as h:
+                summary_rows = list(csv.DictReader(h))
+
+            for row in summary_rows:
+                agent = row["agent"]
+                rate_str = row["success_rate"]
+                row_pattern = rf"<tr><td>{agent}</td><td>{rate_str}%</td>"
+                if not re.search(row_pattern, html_text):
+                    errors.append(
+                        f"Success rate {rate_str}% for agent '{agent}' not matched in HTML table of {FINAL_REPORT_HTML.name}"
+                    )
 
 
 def check_obsolete_references(errors: list[str]) -> None:
@@ -232,6 +379,7 @@ def main() -> None:
     check_git_tracking(errors)
     check_canonical_artifacts(errors)
     check_weight_integrity(errors)
+    check_training_metadata_consistency(errors)
     check_run_metadata(errors)
     check_report_metadata(errors)
     check_result_consistency(errors)

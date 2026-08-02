@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import html
 import json
 import shutil
@@ -42,6 +43,10 @@ PLACEHOLDER_VALUES = {
     "University Name",
     "YYYY-MM-DD",
     "Project Title",
+    "نام و نام خانوادگی",
+    "شماره دانشجویی",
+    "نام استاد",
+    "نام دانشگاه",
 }
 
 
@@ -50,7 +55,7 @@ def read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
-def copy_assets() -> None:
+def copy_assets() -> list[Path]:
     ASSETS.mkdir(parents=True, exist_ok=True)
     sources = [
         RESULTS / "success_rate.png",
@@ -62,6 +67,7 @@ def copy_assets() -> None:
         RESULTS / "failure_reasons.png",
         ROOT / "results" / "genetic_fitness.png",
     ]
+    copied: list[Path] = []
     for source in sources:
         if not source.exists():
             raise FileNotFoundError(f"Missing artifact source: {source}. Run train_genetic.py and experiment.py first.")
@@ -72,6 +78,8 @@ def copy_assets() -> None:
                 dest.write_bytes(data)
             except OSError as exc:
                 raise RuntimeError(f"Unable to update report asset {dest}: {exc}") from exc
+        copied.append(dest)
+    return copied
 
 
 def load_run_metadata() -> dict[str, Any]:
@@ -98,6 +106,8 @@ def load_run_metadata() -> dict[str, Any]:
         "generations_run",
         "mutation_rate",
         "mutation_sigma",
+        "crossover_rate",
+        "patience",
         "elite_count",
         "tournament_size",
         "max_steps",
@@ -129,7 +139,7 @@ def load_project_info(path: Path | str | None = None) -> dict[str, str]:
     else:
         raise FileNotFoundError(
             "Missing project_info.public.json and project_info.json. "
-            "Create project_info.public.json or project_info.json."
+            "Copy project_info.public.json or project_info.academic.example.json to project_info.json."
         )
 
     if not info_path.exists():
@@ -157,7 +167,42 @@ def load_project_info(path: Path | str | None = None) -> dict[str, str]:
     return info
 
 
-def build_report(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
+def report_fingerprint(html_text: str, assets: list[Path], info: dict[str, str]) -> str:
+    digest = hashlib.sha256()
+    digest.update(html_text.encode("utf-8"))
+    digest.update(json.dumps(info, sort_keys=True).encode("utf-8"))
+    digest.update(PROJECT_VERSION.encode("utf-8"))
+
+    for asset in sorted(assets, key=lambda p: p.name):
+        if asset.exists():
+            digest.update(asset.name.encode("utf-8"))
+            digest.update(asset.read_bytes())
+
+    return digest.hexdigest()
+
+
+def preflight_pdf(pdf_path: Path) -> None:
+    if not pdf_path.exists() or pdf_path.stat().st_size == 0:
+        raise ValueError(f"PDF report file is missing or empty: {pdf_path}")
+
+    data = pdf_path.read_bytes()
+    if not data.startswith(b"%PDF-"):
+        raise ValueError(f"PDF file header invalid (does not start with %PDF-): {pdf_path}")
+
+    if b"%%EOF" not in data[-2048:]:
+        raise ValueError(f"PDF file trailer invalid (missing %%EOF marker): {pdf_path}")
+
+    try:
+        import pypdf
+
+        reader = pypdf.PdfReader(str(pdf_path))
+        if len(reader.pages) < 1:
+            raise ValueError("PDF report has 0 pages.")
+    except ImportError:
+        pass
+
+
+def build_report(info: dict[str, str], summary: list[dict[str, str]], asset_paths: list[Path]) -> Path:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     run_meta = load_run_metadata()
 
@@ -189,9 +234,11 @@ def build_report(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
     else:
         meta_html = (
             f"<p><b>نام دانشجو:</b> {html.escape(info.get('student_name', ''))}</p>"
+            f"<p><b>شماره دانشجویی:</b> {html.escape(info.get('student_id', ''))}</p>"
             f"<p><b>درس:</b> {html.escape(info.get('course_name', ''))}</p>"
             f"<p><b>استاد:</b> {html.escape(info.get('instructor_name', ''))}</p>"
             f"<p><b>دانشگاه:</b> {html.escape(info.get('university_name', ''))}</p>"
+            f"<p><b>تاریخ تحویل:</b> {html.escape(info.get('submission_date', ''))}</p>"
         )
 
     summary_by_agent = {row["agent"]: row for row in summary}
@@ -203,6 +250,12 @@ def build_report(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
     genetic_steps_succ = float(summary_by_agent.get("genetic", {}).get("average_steps_success", "0"))
 
     initial_health = 120
+    exp_csv = RESULTS / "experiment_results.csv"
+    if exp_csv.exists():
+        exp_rows = read_csv(exp_csv)
+        health_values = {int(r["initial_health"]) for r in exp_rows if "initial_health" in r}
+        if len(health_values) == 1:
+            initial_health = health_values.pop()
 
     best_fit = f"{float(run_meta['best_fitness']):.2f}"
     training_maps = run_meta["training_maps"]
@@ -314,19 +367,30 @@ ul {{ margin-right:20px; }}
 </body></html>"""
     html_path = REPORT_DIR / "final_report.html"
     pdf_path = REPORT_DIR / "final_report.pdf"
-
-    if (
-        html_path.exists()
-        and pdf_path.exists()
-        and pdf_path.stat().st_size > 0
-        and html_path.read_text(encoding="utf-8") == html_text
-    ):
-        return pdf_path
+    manifest_path = REPORT_DIR / "report_manifest.json"
 
     html_path.write_text(html_text, encoding="utf-8")
+
+    current_fp = report_fingerprint(html_text, asset_paths, info)
+
+    manifest_data = {}
+    if manifest_path.exists():
+        try:
+            manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    if html_path.exists() and pdf_path.exists() and manifest_data.get("fingerprint") == current_fp:
+        try:
+            preflight_pdf(pdf_path)
+            return pdf_path
+        except Exception:
+            pass
+
     pdf_path.unlink(missing_ok=True)
     errors: list[str] = []
 
+    generated = False
     try:
         import contextlib
         import io
@@ -336,37 +400,45 @@ ul {{ margin-right:20px; }}
 
             HTML(filename=str(html_path), base_url=str(REPORT_DIR)).write_pdf(str(pdf_path))
             if pdf_path.exists() and pdf_path.stat().st_size > 0:
-                return pdf_path
+                preflight_pdf(pdf_path)
+                generated = True
     except Exception as exc:
         errors.append(f"WeasyPrint: {exc}")
 
-    try:
-        browser_paths = [
-            shutil.which("msedge"),
-            shutil.which("chrome"),
-            r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
-            r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-        ]
-        browser_binary = next((p for p in browser_paths if p and Path(p).exists()), None)
-        if browser_binary is None:
-            errors.append("Browser fallback: no supported browser found")
-        else:
-            cmd = [
-                str(browser_binary),
-                "--headless",
-                "--disable-gpu",
-                "--no-pdf-header-footer",
-                f"--print-to-pdf={pdf_path.resolve()}",
-                str(html_path.resolve()),
+    if not generated:
+        try:
+            browser_paths = [
+                shutil.which("msedge"),
+                shutil.which("chrome"),
+                r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+                r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+                r"C:\Program Files\Google\Chrome\Application\chrome.exe",
             ]
-            subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if pdf_path.exists() and pdf_path.stat().st_size > 0:
-                return pdf_path
-    except Exception as exc:
-        errors.append(f"Browser fallback: {exc}")
+            browser_binary = next((p for p in browser_paths if p and Path(p).exists()), None)
+            if browser_binary is None:
+                errors.append("Browser fallback: no supported browser found")
+            else:
+                cmd = [
+                    str(browser_binary),
+                    "--headless",
+                    "--disable-gpu",
+                    "--no-pdf-header-footer",
+                    f"--print-to-pdf={pdf_path.resolve()}",
+                    str(html_path.resolve()),
+                ]
+                subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if pdf_path.exists() and pdf_path.stat().st_size > 0:
+                    preflight_pdf(pdf_path)
+                    generated = True
+        except Exception as exc:
+            errors.append(f"Browser fallback: {exc}")
 
-    raise RuntimeError("Unable to generate PDF.\n" + "\n".join(errors))
+    if not generated:
+        raise RuntimeError("Unable to generate PDF.\n" + "\n".join(errors))
+
+    manifest_data = {"fingerprint": current_fp, "version": PROJECT_VERSION}
+    manifest_path.write_text(json.dumps(manifest_data, indent=2), encoding="utf-8")
+    return pdf_path
 
 
 def main() -> None:
@@ -376,8 +448,8 @@ def main() -> None:
 
     info = load_project_info(args.info)
     summary = read_csv(RESULTS / "summary_results.csv")
-    copy_assets()
-    report = build_report(info, summary)
+    asset_paths = copy_assets()
+    report = build_report(info, summary, asset_paths)
     print(f"report={report.relative_to(ROOT)}")
 
 

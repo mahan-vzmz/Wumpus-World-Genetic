@@ -126,13 +126,19 @@ python experiment.py --skip-generate
 pip install -e ".[docs]"
 ```
 
-سپس فایل `project_info.json` را از روی نسخه مثال بسازید (در ویندوز از `Copy-Item` و در لینوکس از `cp` استفاده کنید):
+برای ساخت گزارش دانشگاهی با جلد نام دانشجو و شماره دانشجویی، ابتدا نمونه فایل دانشگاهی را کپی کنید:
 
 ```bash
-cp project_info.public.json project_info.json
+cp project_info.academic.example.json project_info.json
 ```
 
-اطلاعات فایل `project_info.json` را تکمیل کرده و سپس گزارش را تولید کنید:
+اطلاعات فایل `project_info.json` را تکمیل کرده و سپس اسکریپت ساخت گزارش را با پرچم `--info` اجرا کنید:
+
+```bash
+python docs/build_artifacts.py --info project_info.json
+```
+
+برای گزارش عمومی GitHub، اسکریپت را بدون آرگومان اجرا کنید (از `project_info.public.json` استفاده می‌کند):
 
 ```bash
 python docs/build_artifacts.py

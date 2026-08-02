@@ -47,9 +47,11 @@ class TrainingResult:
     generations: int = 24
     mutation_rate: float = 0.10
     mutation_sigma: float = 2.0
+    crossover_rate: float = 0.90
     elite_count: int = 2
     tournament_size: int = 3
     max_steps: int = 250
+    patience: int | None = 8
 
 
 class GeneticTrainer:
@@ -162,9 +164,11 @@ class GeneticTrainer:
             generations=self.generations,
             mutation_rate=self.mutation_rate,
             mutation_sigma=self.mutation_sigma,
+            crossover_rate=self.crossover_rate,
             elite_count=self.elite_count,
             tournament_size=self.tournament_size,
             max_steps=self.max_steps,
+            patience=self.patience,
         )
 
     def evaluate_genome(self, genome: Sequence[float]) -> float:

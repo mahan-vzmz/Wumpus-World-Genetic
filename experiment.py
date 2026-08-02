@@ -353,35 +353,31 @@ def write_run_metadata(
         except Exception:
             pass
 
-    training_seed = 17
-    training_map_seed = 1701
-    training_maps = 12
-    population = 24
-    requested_generations = 50
-    generations_run = 24
-    mutation_rate = 0.1
-    mutation_sigma = 0.2
-    elite_count = 2
-    tournament_size = 3
-
     training_summary_path = Path("results/genetic_training_summary.json")
-    if training_summary_path.exists():
-        try:
-            ts = json.loads(training_summary_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            raise ValueError(f"Invalid training summary JSON in {training_summary_path}: {exc}") from exc
+    if not training_summary_path.exists():
+        raise FileNotFoundError(
+            "Missing results/genetic_training_summary.json. Run train_genetic.py before experiment.py."
+        )
 
-        training_seed = int(ts.get("seed", training_seed))
-        training_maps = int(ts.get("map_count", training_maps))
-        population = int(ts.get("population", population))
-        requested_generations = int(ts.get("requested_generations", ts.get("generations_run", 50)))
-        generations_run = int(ts.get("generations_run", generations_run))
-        mutation_rate = float(ts.get("mutation_rate", mutation_rate))
-        mutation_sigma = float(ts.get("mutation_sigma", mutation_sigma))
-        elite_count = int(ts.get("elite_count", elite_count))
-        tournament_size = int(ts.get("tournament_size", tournament_size))
-        if best_fitness == 0.0:
-            best_fitness = float(ts.get("best_fitness", 0.0))
+    try:
+        ts = json.loads(training_summary_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid training summary JSON in {training_summary_path}: {exc}") from exc
+
+    training_seed = int(ts.get("seed", 17))
+    training_map_seed = 1701
+    training_maps = int(ts.get("map_count", 12))
+    population = int(ts.get("population", 24))
+    requested_generations = int(ts.get("requested_generations", ts.get("generations_run", 24)))
+    generations_run = int(ts.get("generations_run", 24))
+    mutation_rate = float(ts.get("mutation_rate", 0.1))
+    mutation_sigma = float(ts.get("mutation_sigma", 2.0))
+    crossover_rate = float(ts.get("crossover_rate", 0.9))
+    patience = ts.get("patience", 8)
+    elite_count = int(ts.get("elite_count", 2))
+    tournament_size = int(ts.get("tournament_size", 3))
+    if best_fitness == 0.0:
+        best_fitness = float(ts.get("best_fitness", 0.0))
 
     metadata = {
         "project_version": PROJECT_VERSION,
@@ -397,6 +393,8 @@ def write_run_metadata(
         "generations_run": generations_run,
         "mutation_rate": mutation_rate,
         "mutation_sigma": mutation_sigma,
+        "crossover_rate": crossover_rate,
+        "patience": patience,
         "elite_count": elite_count,
         "tournament_size": tournament_size,
         "max_steps": max_steps,

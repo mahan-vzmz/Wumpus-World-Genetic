@@ -1,6 +1,6 @@
 {
   "project_version": "8.1.1",
-  "source_commit": "13695651fcffa91389808b8b4340b412c61f1bda",
+  "source_commit": "f1c0bfc2061d462cd0131e0904d15866bcab1922",
   "training_seed": 17,
   "training_map_seed": 1701,
   "test_seed": 20260730,
@@ -11,7 +11,9 @@
   "requested_generations": 24,
   "generations_run": 24,
   "mutation_rate": 0.1,
-  "mutation_sigma": 0.2,
+  "mutation_sigma": 2.0,
+  "crossover_rate": 0.9,
+  "patience": 8,
   "elite_count": 2,
   "tournament_size": 3,
   "max_steps": 250,

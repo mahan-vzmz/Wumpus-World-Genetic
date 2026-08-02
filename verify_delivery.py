@@ -48,14 +48,30 @@ def main() -> None:
         if not result["success"]:
             raise SystemExit(f"Sample demo failed for {agent}: {result}")
 
+    pdf_path = ROOT / "docs" / "final_report" / "final_report.pdf"
     required = [
-        ROOT / "docs" / "final_report" / "final_report.pdf",
+        pdf_path,
         ROOT / "results" / "final" / "summary_results.csv",
         ROOT / "results" / "genetic_fitness.png",
     ]
     missing = [str(path.relative_to(ROOT)) for path in required if not path.exists()]
     if missing:
         raise SystemExit(f"Missing delivery files: {missing}")
+
+    pdf_data = pdf_path.read_bytes()
+    if not pdf_data.startswith(b"%PDF-"):
+        raise SystemExit(f"Final report is not a valid PDF file (missing %PDF- header): {pdf_path}")
+    if b"%%EOF" not in pdf_data[-2048:]:
+        raise SystemExit(f"Final report PDF has no valid EOF marker: {pdf_path}")
+
+    try:
+        import pypdf
+
+        reader = pypdf.PdfReader(str(pdf_path))
+        if len(reader.pages) < 1:
+            raise SystemExit("Final report PDF has 0 pages.")
+    except ImportError:
+        pass
 
     print(f"maps_valid={len(maps)}")
     print("training_maps=12")
