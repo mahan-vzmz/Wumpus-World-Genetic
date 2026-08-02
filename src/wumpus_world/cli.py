@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 from wumpus_world.runner import run_episode
-
-
-from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 

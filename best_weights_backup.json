@@ -1,0 +1,21 @@
+{
+  "method": "hybrid_genetic_weighted_policy",
+  "genes": {
+    "safe_bonus": 10.625620633750929,
+    "unvisited_bonus": 11.639006121499282,
+    "exit_progress_weight": 22.99994114276404,
+    "pit_risk_penalty": -10.523869328409052,
+    "wumpus_risk_penalty": -21.070672247387776,
+    "unknown_weight": -9.381408396390587,
+    "revisit_penalty": -8.787926723204233,
+    "reverse_penalty": -9.973984747728005,
+    "frontier_bonus": 2.4071499628129733,
+    "health_caution_penalty": -15.134155289074585
+  },
+  "metadata": {
+    "best_fitness": 1840.6666666666667,
+    "seed": 17,
+    "map_count": 12,
+    "generations_run": 24
+  }
+}
