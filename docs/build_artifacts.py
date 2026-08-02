@@ -129,7 +129,7 @@ def load_project_info(path: Path | str | None = None) -> dict[str, str]:
     else:
         raise FileNotFoundError(
             "Missing project_info.public.json and project_info.json. "
-            "Copy project_info.example.json to project_info.public.json or project_info.json."
+            "Create project_info.public.json or project_info.json."
         )
 
     if not info_path.exists():

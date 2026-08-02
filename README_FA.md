@@ -129,7 +129,7 @@ pip install -e ".[docs]"
 سپس فایل `project_info.json` را از روی نسخه مثال بسازید (در ویندوز از `Copy-Item` و در لینوکس از `cp` استفاده کنید):
 
 ```bash
-cp project_info.example.json project_info.json
+cp project_info.public.json project_info.json
 ```
 
 اطلاعات فایل `project_info.json` را تکمیل کرده و سپس گزارش را تولید کنید:

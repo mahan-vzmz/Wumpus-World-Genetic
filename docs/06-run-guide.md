@@ -57,12 +57,12 @@ python train_genetic.py --regenerate-training-maps
 
 Windows PowerShell:
 ```powershell
-Copy-Item project_info.example.json project_info.json
+Copy-Item project_info.public.json project_info.json
 ```
 
 Linux/macOS:
 ```bash
-cp project_info.example.json project_info.json
+cp project_info.public.json project_info.json
 ```
 
 سپس مقادیر داخل آن را کامل کرده و اجرا کنید:
