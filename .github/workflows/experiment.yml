@@ -19,12 +19,17 @@ jobs:
         run: python -m pip install --upgrade pip
       - name: Install project
         run: python -m pip install -e .
+      - name: Clean generated outputs
+        run: |
+          rm -rf results
+          rm -f best_weights.json
+          mkdir -p results
       - name: Train Genetic Agent
         run: python train_genetic.py --regenerate-training-maps
       - name: Run Full Experiment
         run: python experiment.py
       - name: Upload experiment artifacts
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: wumpus-world-experiment
@@ -33,3 +38,11 @@ jobs:
             best_weights.json
           if-no-files-found: warn
           retention-days: 14
+      - name: Upload partial outputs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partial-experiment-output
+          path: results/
+          if-no-files-found: ignore
+          retention-days: 5
