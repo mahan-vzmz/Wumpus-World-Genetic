@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import html
 import json
@@ -7,6 +8,7 @@ import shutil
 import subprocess
 from importlib.metadata import version
 from pathlib import Path
+from typing import Any
 
 PROJECT_VERSION = version("wumpus-world-genetic")
 
@@ -15,6 +17,32 @@ DOCS = ROOT / "docs"
 ASSETS = DOCS / "assets"
 REPORT_DIR = DOCS / "final_report"
 RESULTS = ROOT / "results" / "final"
+
+VALID_MODES = {"public", "academic"}
+
+REQUIRED_PUBLIC = {
+    "project_title",
+    "author_name",
+    "course_name",
+}
+
+REQUIRED_ACADEMIC = {
+    "student_name",
+    "student_id",
+    "course_name",
+    "instructor_name",
+    "university_name",
+    "submission_date",
+}
+
+PLACEHOLDER_VALUES = {
+    "Your Name",
+    "Your Student ID",
+    "Instructor Name",
+    "University Name",
+    "YYYY-MM-DD",
+    "Project Title",
+}
 
 
 def read_csv(path: Path) -> list[dict[str, str]]:
@@ -46,47 +74,75 @@ def copy_assets() -> None:
                 raise RuntimeError(f"Unable to update report asset {dest}: {exc}") from exc
 
 
-def load_run_metadata() -> dict[str, str | float | int]:
+def load_run_metadata() -> dict[str, Any]:
     meta_path = RESULTS / "run_metadata.json"
-    if meta_path.exists():
-        try:
-            data = json.loads(meta_path.read_text(encoding="utf-8"))
-            if "seed" not in data:
-                data["seed"] = data.get("training_seed", 17)
-            return data
-        except Exception:
-            pass
+    if not meta_path.exists():
+        raise FileNotFoundError("Missing results/final/run_metadata.json. Run experiment.py first.")
 
-    # Fallbacks
-    training_summary_path = ROOT / "results" / "genetic_training_summary.json"
-    training_maps = 12
-    population = 24
-    generations = 24
-    mutation_rate = 0.10
-    seed = 17
-    best_fitness = 1840.67
+    try:
+        data = json.loads(meta_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise ValueError(f"Invalid run metadata format in {meta_path}: {exc}") from exc
 
-    if training_summary_path.exists():
-        try:
-            ts = json.loads(training_summary_path.read_text(encoding="utf-8"))
-            best_fitness = float(ts.get("best_fitness", best_fitness))
-            seed = int(ts.get("seed", seed))
-            training_maps = int(ts.get("map_count", training_maps))
-            generations = int(ts.get("generations_run", generations))
-        except Exception:
-            pass
+    required_keys = [
+        "project_version",
+        "source_commit",
+        "training_maps",
+        "test_maps",
+        "maps_per_difficulty",
+        "population",
+        "generations",
+        "mutation_rate",
+        "elite_count",
+        "tournament_size",
+        "max_steps",
+        "timing_repeats",
+        "weights_sha256",
+        "best_fitness",
+    ]
+    missing = [k for k in required_keys if k not in data]
+    if missing:
+        raise ValueError(f"run_metadata.json missing required keys: {missing}")
 
-    return {
-        "project_version": PROJECT_VERSION,
-        "training_maps": training_maps,
-        "test_maps": 30,
-        "maps_per_difficulty": 10,
-        "population": population,
-        "generations": generations,
-        "mutation_rate": mutation_rate,
-        "seed": seed,
-        "best_fitness": best_fitness,
-    }
+    return data
+
+
+def load_project_info(path: Path | str | None = None) -> dict[str, str]:
+    if path is not None:
+        info_path = Path(path)
+    elif (ROOT / "project_info.json").exists():
+        info_path = ROOT / "project_info.json"
+    elif (ROOT / "project_info.public.json").exists():
+        info_path = ROOT / "project_info.public.json"
+    else:
+        raise FileNotFoundError(
+            "Missing project_info.json and project_info.public.json. "
+            "Copy project_info.example.json to project_info.json or project_info.public.json."
+        )
+
+    if not info_path.exists():
+        raise FileNotFoundError(f"Specified info file does not exist: {info_path}")
+
+    try:
+        info = json.loads(info_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise ValueError(f"Invalid JSON in {info_path}: {exc}") from exc
+
+    mode = info.get("report_mode", "academic").lower()
+    if mode not in VALID_MODES:
+        raise ValueError(f"report_mode in {info_path.name} must be one of {sorted(VALID_MODES)}; got '{mode}'")
+
+    required = REQUIRED_PUBLIC if mode == "public" else REQUIRED_ACADEMIC
+    missing = [field for field in required if not info.get(field)]
+    if missing:
+        raise ValueError(f"Missing required fields for '{mode}' mode in {info_path.name}: {', '.join(sorted(missing))}")
+
+    invalid = {key: value for key, value in info.items() if value in PLACEHOLDER_VALUES}
+    if invalid:
+        fields = ", ".join(sorted(invalid))
+        raise ValueError(f"Complete placeholder fields in {info_path.name}: {fields}")
+
+    return info
 
 
 def build_report(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
@@ -126,14 +182,22 @@ def build_report(info: dict[str, str], summary: list[dict[str, str]]) -> Path:
             f"<p><b>دانشگاه:</b> {html.escape(info.get('university_name', ''))}</p>"
         )
 
+    summary_by_agent = {row["agent"]: row for row in summary}
+    astar_rate = summary_by_agent.get("astar", {}).get("success_rate", "0")
+    rule_rate = summary_by_agent.get("rule", {}).get("success_rate", "0")
+    genetic_rate = summary_by_agent.get("genetic", {}).get("success_rate", "0")
+
     best_fit = f"{float(run_meta['best_fitness']):.2f}"
     training_maps = run_meta["training_maps"]
     pop_size = run_meta["population"]
     max_gens = run_meta["generations"]
     mut_rate = run_meta["mutation_rate"]
-    seed_val = run_meta["seed"]
+    elitism = run_meta["elite_count"]
+    tournament_size = run_meta["tournament_size"]
+    seed_val = run_meta["training_seed"]
     test_maps = run_meta["test_maps"]
     per_diff = run_meta.get("maps_per_difficulty", 10)
+    timing_repeats = run_meta.get("timing_repeats", 3)
 
     html_text = f"""<!doctype html>
 <html lang="fa" dir="rtl">
@@ -174,7 +238,7 @@ ul {{ margin-right:20px; }}
 
 <h2>چکیده</h2>
 <p>در این پروژه محیط Wumpus World روی گرید 8×8 پیاده‌سازی شد و سه روش متفاوت روی یک محیط و مجموعه معیار مشترک مقایسه شدند. A-Star به کل نقشه دسترسی دارد و نقش Oracle را ایفا می‌کند. عامل قاعده‌محور و عامل ژنتیکی ترکیبی فقط از ادراک‌های محلی، حافظه و مختصات عمومی خروج استفاده می‌کنند. وزن‌های روش ژنتیکی روی {training_maps} نقشه آموزش تکامل یافتند و ارزیابی نهایی روی {test_maps} نقشه تست جداگانه انجام شد.</p>
-<div class="callout">نتیجه اصلی: A-Star به 100٪، Rule-Based به 90٪ و Hybrid Genetic به 83.33٪ موفقیت رسید. در میان عامل‌های آنلاین، Rule-Based مطمئن‌تر و Hybrid Genetic در اپیزودهای موفق کوتاه‌مسیرتر بود.</div>
+<div class="callout">نتیجه اصلی: A-Star به {astar_rate}٪، Rule-Based به {rule_rate}٪ و Hybrid Genetic به {genetic_rate}٪ موفقیت رسید. در میان عامل‌های آنلاین، Rule-Based مطمئن‌تر و Hybrid Genetic در اپیزودهای موفق کوتاه‌مسیرتر بود.</div>
 
 <h2>۱. تعریف مسئله و قوانین</h2>
 <p>عامل از خانه (1,1) شروع می‌کند، باید حداقل یک طلا جمع‌آوری کند و پیش از تمام‌شدن جان به خروج برسد. هر تلاش برای حرکت یک واحد جان کم می‌کند. دیوار حرکت را مسدود می‌کند، چاه پس از هزینه حرکت جان را نصف می‌کند، غول مرگ فوری ایجاد می‌کند و خروج بدون طلا شکست است.</p>
@@ -194,11 +258,11 @@ ul {{ margin-right:20px; }}
 <p class="code">score(action) = Σ weight_i × feature_i(action)</p>
 
 <h2>۶. آموزش الگوریتم ژنتیک</h2>
-<ul><li>{training_maps} نقشه آموزش جدا</li><li>Population = {pop_size}</li><li>Maximum generations = {max_gens}</li><li>Elitism = 2</li><li>Tournament size = 3</li><li>Mutation rate = {mut_rate}</li><li>Seed = {seed_val}</li><li>Best fitness = {best_fit}</li></ul>
+<ul><li>{training_maps} نقشه آموزش جدا</li><li>Population = {pop_size}</li><li>Maximum generations = {max_gens}</li><li>Elitism = {elitism}</li><li>Tournament size = {tournament_size}</li><li>Mutation rate = {mut_rate}</li><li>Seed = {seed_val}</li><li>Best fitness = {best_fit}</li></ul>
 <figure><img src="../assets/genetic_fitness.png"><figcaption>روند بهترین و میانگین Fitness در طول آموزش</figcaption></figure>
 
 <h2>۷. طراحی آزمایش</h2>
-<p>{test_maps} نقشه تست دیده‌نشده شامل {per_diff} نقشه آسان، {per_diff} متوسط و {per_diff} سخت با seed ثابت تولید شدند. خروج، محل طلا و طول مسیرها متنوع است. جان اولیه همه سطوح برابر 120 است تا امتیاز بین دشواری‌ها قابل مقایسه باشد. زمان اجرا median سه اجرای کامل است و تعداد حرکت موفق جداگانه گزارش می‌شود.</p>
+<p>{test_maps} نقشه تست دیده‌نشده شامل {per_diff} نقشه آسان، {per_diff} متوسط و {per_diff} سخت با seed ثابت تولید شدند. خروج، محل طلا و طول مسیرها متنوع است. جان اولیه همه سطوح برابر 120 است تا امتیاز بین دشواری‌ها قابل مقایسه باشد. زمان اجرا median {timing_repeats} اجرای کامل است و تعداد حرکت موفق جداگانه گزارش می‌شود.</p>
 
 <h2>۸. نتایج کلی</h2>
 <table><thead><tr><th>Agent</th><th>Success</th><th>Score all</th><th>Steps all</th><th>Steps success</th><th>Health</th><th>Pit entries</th><th>Wumpus deaths</th></tr></thead><tbody>{rows}</tbody></table>
@@ -267,50 +331,12 @@ ul {{ margin-right:20px; }}
     raise RuntimeError("Unable to generate PDF.\n" + "\n".join(errors))
 
 
-def load_project_info(path: Path | None = None) -> dict[str, str]:
-    info_path = path or ROOT / "project_info.json"
-
-    if not info_path.exists():
-        raise FileNotFoundError(
-            "Missing project_info.json. Copy project_info.example.json "
-            "to project_info.json and complete the required fields."
-        )
-
-    info = json.loads(info_path.read_text(encoding="utf-8"))
-    mode = info.get("report_mode", "academic").lower()
-
-    if mode == "public":
-        PLACEHOLDER_VALUES = {
-            "Your Name",
-            "Project Title",
-            "YYYY-MM-DD",
-        }
-        invalid = {key: value for key, value in info.items() if value in PLACEHOLDER_VALUES}
-        if invalid:
-            fields = ", ".join(sorted(invalid))
-            raise ValueError(f"Complete placeholder fields in project_info.json: {fields}")
-        student_name = info.get("student_name", "")
-        author_name = info.get("author_name", "")
-        if student_name == "Your Name" or author_name == "Your Name":
-            raise ValueError("student_name/author_name cannot be 'Your Name'")
-    else:
-        PLACEHOLDER_VALUES = {
-            "Your Name",
-            "Your Student ID",
-            "Instructor Name",
-            "University Name",
-            "YYYY-MM-DD",
-        }
-        invalid = {key: value for key, value in info.items() if value in PLACEHOLDER_VALUES}
-        if invalid:
-            fields = ", ".join(sorted(invalid))
-            raise ValueError(f"Complete placeholder fields in project_info.json: {fields}")
-
-    return info
-
-
 def main() -> None:
-    info = load_project_info()
+    parser = argparse.ArgumentParser(description="Build Wumpus World final HTML/PDF report.")
+    parser.add_argument("--info", default=None, help="Path to project info JSON file.")
+    args = parser.parse_args()
+
+    info = load_project_info(args.info)
     summary = read_csv(RESULTS / "summary_results.csv")
     copy_assets()
     report = build_report(info, summary)

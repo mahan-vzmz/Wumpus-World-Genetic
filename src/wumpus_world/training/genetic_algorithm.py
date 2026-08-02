@@ -43,6 +43,13 @@ class TrainingResult:
     history: tuple[GenerationRecord, ...]
     seed: int
     map_count: int
+    population_size: int = 24
+    generations: int = 24
+    mutation_rate: float = 0.10
+    mutation_sigma: float = 2.0
+    elite_count: int = 2
+    tournament_size: int = 3
+    max_steps: int = 250
 
 
 class GeneticTrainer:
@@ -151,6 +158,13 @@ class GeneticTrainer:
             history=tuple(history),
             seed=self.seed,
             map_count=len(self.configs),
+            population_size=self.population_size,
+            generations=self.generations,
+            mutation_rate=self.mutation_rate,
+            mutation_sigma=self.mutation_sigma,
+            elite_count=self.elite_count,
+            tournament_size=self.tournament_size,
+            max_steps=self.max_steps,
         )
 
     def evaluate_genome(self, genome: Sequence[float]) -> float:
@@ -324,6 +338,13 @@ def save_training_artifacts(
         "seed": result.seed,
         "map_count": result.map_count,
         "generations_run": len(result.history),
+        "requested_generations": result.generations,
+        "population": result.population_size,
+        "mutation_rate": result.mutation_rate,
+        "mutation_sigma": result.mutation_sigma,
+        "elite_count": result.elite_count,
+        "tournament_size": result.tournament_size,
+        "max_steps": result.max_steps,
         "best_weights": {name: getattr(result.best_weights, name) for name in GENE_NAMES},
     }
     summary_path = Path(summary_json_path)

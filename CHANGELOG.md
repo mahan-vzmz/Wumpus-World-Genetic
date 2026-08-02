@@ -1,5 +1,22 @@
 # Changelog
 
+## Version 8.1.1
+
+### Fixed
+
+- Synchronized root source and packaged genetic weights hash.
+- Added strict experiment metadata validation and tracked `source_commit`.
+- Fixed report data drift: all success rates and training parameters are now generated dynamically from results.
+- Fixed Matplotlib headless backend initialization order (`MPLBACKEND` / `matplotlib.use("Agg")`).
+- Separated public (`project_info.public.json`) and local academic (`project_info.json`) report metadata.
+
+### Added
+
+- Added `tools/sync_packaged_weights.py` to synchronize packaged data weights.
+- Added comprehensive repository consistency checks in `tools/check_repository_consistency.py`.
+- Added wheel installation validation and delivery verification jobs in CI.
+- Packaged default maps and trained weights into wheel data.
+
 ## Version 8.1.0
 
 ### Added

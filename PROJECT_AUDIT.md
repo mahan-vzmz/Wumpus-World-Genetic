@@ -40,4 +40,4 @@
 | Rule-Based | 90.00% | 117.93 | 32.30 |
 | Hybrid Genetic | 83.33% | 120.97 | 24.60 |
 
-Submission metadata does not affect the source code, automated tests, agent behavior, or experiment results. It only affects the generated report cover and must remain in the untracked `project_info.json` file.
+Submission metadata does not affect the source code, automated tests, agent behavior, or experiment results. Public metadata is tracked in `project_info.public.json` while personal academic submission metadata remains in the untracked `project_info.json` file.

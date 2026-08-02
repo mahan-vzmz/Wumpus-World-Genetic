@@ -3,6 +3,13 @@
   "seed": 17,
   "map_count": 12,
   "generations_run": 24,
+  "requested_generations": 24,
+  "population": 24,
+  "mutation_rate": 0.1,
+  "mutation_sigma": 2.0,
+  "elite_count": 2,
+  "tournament_size": 3,
+  "max_steps": 250,
   "best_weights": {
     "safe_bonus": 10.625620633750929,
     "unvisited_bonus": 11.639006121499282,

@@ -24,6 +24,7 @@ Thumbs.db
 # Temporary artifact renders
 _artifact_build/
 _renders/
+project_info.json
 
 # Results tracking policy
 results/*

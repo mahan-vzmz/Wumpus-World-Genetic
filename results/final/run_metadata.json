@@ -1,6 +1,6 @@
 {
   "project_version": "8.1.0",
-  "git_commit": "unknown",
+  "source_commit": "13695651fcffa91389808b8b4340b412c61f1bda",
   "training_seed": 17,
   "training_map_seed": 1701,
   "test_seed": 20260730,
@@ -10,8 +10,10 @@
   "population": 24,
   "generations": 24,
   "mutation_rate": 0.1,
+  "elite_count": 2,
+  "tournament_size": 3,
   "max_steps": 250,
   "timing_repeats": 3,
-  "weights_sha256": "43926bd001b97950c4062a71d79712be17ee0fafe9d05e3e26090e551f3ea4d6",
+  "weights_sha256": "b2b1ea36d0f53f5fb12f9a873d4905880c14d5779030dff265d93b76e8ea9348",
   "best_fitness": 1840.6666666666667
 }

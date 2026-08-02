@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import os
+
+os.environ.setdefault("MPLBACKEND", "Agg")
+
 import argparse
 import csv
 import hashlib
@@ -13,12 +17,12 @@ from pathlib import Path
 from typing import Any, Iterable
 
 import matplotlib
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from wumpus_world.map_generator import generate_test_suite
 from wumpus_world.runner import run_episode
-
-matplotlib.use("Agg")
 
 PROJECT_VERSION = version("wumpus-world-genetic")
 
@@ -320,18 +324,22 @@ def write_run_metadata(
     weights_path: str = "best_weights.json",
 ) -> None:
     results_dir.mkdir(parents=True, exist_ok=True)
-    git_commit = "unknown"
-    try:
-        proc = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if proc.returncode == 0 and proc.stdout.strip():
-            git_commit = proc.stdout.strip()
-    except Exception:
-        pass
+
+    source_commit = os.getenv("GITHUB_SHA", "").strip()
+    if not source_commit:
+        try:
+            proc = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if proc.returncode == 0 and proc.stdout.strip():
+                source_commit = proc.stdout.strip()
+        except Exception:
+            pass
+    if not source_commit:
+        source_commit = "unknown"
 
     weights_file = Path(weights_path)
     weights_sha256 = ""
@@ -345,18 +353,45 @@ def write_run_metadata(
         except Exception:
             pass
 
+    training_seed = 17
+    training_map_seed = 1701
+    training_maps = 12
+    population = 24
+    generations = 24
+    mutation_rate = 0.1
+    elite_count = 2
+    tournament_size = 3
+
+    training_summary_path = Path("results/genetic_training_summary.json")
+    if training_summary_path.exists():
+        try:
+            ts = json.loads(training_summary_path.read_text(encoding="utf-8"))
+            training_seed = int(ts.get("seed", training_seed))
+            training_maps = int(ts.get("map_count", training_maps))
+            population = int(ts.get("population", population))
+            generations = int(ts.get("generations_run", generations))
+            mutation_rate = float(ts.get("mutation_rate", mutation_rate))
+            elite_count = int(ts.get("elite_count", elite_count))
+            tournament_size = int(ts.get("tournament_size", tournament_size))
+            if best_fitness == 0.0:
+                best_fitness = float(ts.get("best_fitness", 0.0))
+        except Exception:
+            pass
+
     metadata = {
         "project_version": PROJECT_VERSION,
-        "git_commit": git_commit,
-        "training_seed": 17,
-        "training_map_seed": 1701,
+        "source_commit": source_commit,
+        "training_seed": training_seed,
+        "training_map_seed": training_map_seed,
         "test_seed": test_seed,
-        "training_maps": 12,
+        "training_maps": training_maps,
         "test_maps": per_difficulty * 3,
         "maps_per_difficulty": per_difficulty,
-        "population": 24,
-        "generations": 24,
-        "mutation_rate": 0.1,
+        "population": population,
+        "generations": generations,
+        "mutation_rate": mutation_rate,
+        "elite_count": elite_count,
+        "tournament_size": tournament_size,
         "max_steps": max_steps,
         "timing_repeats": timing_repeats,
         "weights_sha256": weights_sha256,

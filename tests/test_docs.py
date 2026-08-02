@@ -9,16 +9,17 @@ from docs.build_artifacts import copy_assets, load_project_info, read_csv
 
 
 def test_missing_project_info_has_clear_error(tmp_path: Path) -> None:
-    missing = tmp_path / "project_info.json"
+    missing = tmp_path / "missing_info.json"
 
-    with pytest.raises(FileNotFoundError, match="project_info.example.json"):
+    with pytest.raises(FileNotFoundError, match="Specified info file does not exist"):
         load_project_info(missing)
 
 
 def test_placeholder_project_info_is_rejected(tmp_path: Path) -> None:
     path = tmp_path / "project_info.json"
     path.write_text(
-        '{"student_name": "Your Name", "course_name": "AI", "instructor_name": "Prof", "university_name": "Uni"}',
+        '{"report_mode": "academic", "student_name": "Your Name", "student_id": "123", '
+        '"course_name": "AI", "instructor_name": "Prof", "university_name": "Uni", "submission_date": "2026-08-03"}',
         encoding="utf-8",
     )
 
@@ -26,10 +27,21 @@ def test_placeholder_project_info_is_rejected(tmp_path: Path) -> None:
         load_project_info(path)
 
 
+def test_invalid_report_mode_is_rejected(tmp_path: Path) -> None:
+    path = tmp_path / "project_info.json"
+    path.write_text(
+        '{"report_mode": "publci", "project_title": "Wumpus", "author_name": "Author", "course_name": "AI"}',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="report_mode"):
+        load_project_info(path)
+
+
 def test_valid_public_metadata_is_accepted(tmp_path: Path) -> None:
     path = tmp_path / "project_info.json"
     path.write_text(
-        '{"report_mode": "public", "project_title": "Wumpus", "author_name": "Author"}',
+        '{"report_mode": "public", "project_title": "Wumpus", "author_name": "Author", "course_name": "AI"}',
         encoding="utf-8",
     )
 
