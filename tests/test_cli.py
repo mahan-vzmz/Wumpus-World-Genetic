@@ -220,26 +220,22 @@ def test_regenerate_works_without_existing_maps(tmp_path: Path) -> None:
     generated_maps = list(maps_dir.glob("training_*.txt"))
     assert len(generated_maps) == 12
 
+
 def test_maps_and_regenerate_mutually_exclusive(tmp_path: Path) -> None:
     project_root = Path(__file__).resolve().parents[1]
     train_script = project_root / "train_genetic.py"
-    
+
     env = dict(os.environ)
     env["PYTHONPATH"] = str(project_root / "src")
 
     result = subprocess.run(
-        [
-            sys.executable,
-            str(train_script),
-            "--regenerate-training-maps",
-            "--maps", "custom1.txt", "custom2.txt"
-        ],
+        [sys.executable, str(train_script), "--regenerate-training-maps", "--maps", "custom1.txt", "custom2.txt"],
         cwd=tmp_path,
         env=env,
         capture_output=True,
         text=True,
-        check=False
+        check=False,
     )
-    
+
     assert result.returncode != 0
     assert "not allowed with argument" in result.stderr
