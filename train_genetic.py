@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 from pathlib import Path
 
 from wumpus_world.map_generator import generate_training_suite
@@ -31,11 +32,25 @@ def main() -> None:
     parser.add_argument("--regenerate-training-maps", action="store_true")
     args = parser.parse_args()
 
+    provenance = {}
     if args.regenerate_training_maps:
         generate_training_suite()
+        provenance["training_map_source"] = "generated"
+        provenance["training_map_seed"] = 1701  # Assuming default from generator
+        manifest_path = Path("maps/training/manifest.json")
+        if manifest_path.exists():
+            provenance["training_map_manifest_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    else:
+        provenance["training_map_source"] = "custom"
+        provenance["training_map_seed"] = None
+        manifest_path = Path("maps/training/manifest.json")
+        if manifest_path.exists():
+            provenance["training_map_manifest_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+
     paths = args.maps or [str(path) for path in sorted(Path("maps/training").glob("training_*.txt"))]
     if not paths:
         raise SystemExit("No training maps found. Run with --regenerate-training-maps first.")
+    provenance["training_map_count"] = len(paths)
 
     trainer = GeneticTrainer(
         load_training_configs(paths),
@@ -55,6 +70,7 @@ def main() -> None:
         weights_path=args.output,
         history_csv_path=args.history,
         summary_json_path=args.summary,
+        provenance=provenance,
     )
     plot_history(result, args.plot)
     print("\nTraining complete")

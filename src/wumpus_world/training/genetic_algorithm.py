@@ -7,7 +7,7 @@ import random
 from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean
-from typing import Iterable, Sequence
+from typing import Any, Iterable, Sequence
 
 from wumpus_world.agents.genetic_agent import GENE_BOUNDS, GENE_NAMES, GeneticAgent, GeneticWeights
 from wumpus_world.environment import WumpusEnvironment
@@ -303,15 +303,22 @@ def save_training_artifacts(
     weights_path: str | Path,
     history_csv_path: str | Path,
     summary_json_path: str | Path,
+    provenance: dict[str, Any] | None = None,
 ) -> None:
+    meta = {
+        "best_fitness": result.best_fitness,
+        "seed": result.seed,
+        "map_count": result.map_count,
+        "generations_run": len(result.history),
+        "crossover_rate": result.crossover_rate,
+        "patience": result.patience,
+    }
+    if provenance:
+        meta.update(provenance)
+
     result.best_weights.save(
         weights_path,
-        metadata={
-            "best_fitness": result.best_fitness,
-            "seed": result.seed,
-            "map_count": result.map_count,
-            "generations_run": len(result.history),
-        },
+        metadata=meta,
     )
 
     history_path = Path(history_csv_path)
@@ -346,11 +353,16 @@ def save_training_artifacts(
         "population": result.population_size,
         "mutation_rate": result.mutation_rate,
         "mutation_sigma": result.mutation_sigma,
+        "crossover_rate": result.crossover_rate,
+        "patience": result.patience,
         "elite_count": result.elite_count,
         "tournament_size": result.tournament_size,
         "max_steps": result.max_steps,
         "best_weights": {name: getattr(result.best_weights, name) for name in GENE_NAMES},
     }
+    if provenance:
+        summary.update(provenance)
+
     summary_path = Path(summary_json_path)
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     summary_path.write_text(

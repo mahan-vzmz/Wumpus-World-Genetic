@@ -364,9 +364,11 @@ def write_run_metadata(
     except json.JSONDecodeError as exc:
         raise ValueError(f"Invalid training summary JSON in {training_summary_path}: {exc}") from exc
 
-    training_seed = int(ts.get("seed", 17))
-    training_map_seed = 1701
-    training_maps = int(ts.get("map_count", 12))
+    training_seed = ts.get("seed", 17)
+    training_map_source = ts.get("training_map_source", "unknown")
+    training_map_seed = ts.get("training_map_seed", 1701)
+    training_maps = ts.get("map_count", 12)
+    training_map_manifest_sha256 = ts.get("training_map_manifest_sha256", "")
     population = int(ts.get("population", 24))
     requested_generations = int(ts.get("requested_generations", ts.get("generations_run", 24)))
     generations_run = int(ts.get("generations_run", 24))
@@ -376,6 +378,7 @@ def write_run_metadata(
     patience = ts.get("patience", 8)
     elite_count = int(ts.get("elite_count", 2))
     tournament_size = int(ts.get("tournament_size", 3))
+    training_max_steps = int(ts.get("max_steps", 250))
     if best_fitness == 0.0:
         best_fitness = float(ts.get("best_fitness", 0.0))
 
@@ -383,7 +386,9 @@ def write_run_metadata(
         "project_version": PROJECT_VERSION,
         "source_commit": source_commit,
         "training_seed": training_seed,
+        "training_map_source": training_map_source,
         "training_map_seed": training_map_seed,
+        "training_map_manifest_sha256": training_map_manifest_sha256,
         "test_seed": test_seed,
         "training_maps": training_maps,
         "test_maps": per_difficulty * 3,
@@ -397,7 +402,8 @@ def write_run_metadata(
         "patience": patience,
         "elite_count": elite_count,
         "tournament_size": tournament_size,
-        "max_steps": max_steps,
+        "training_max_steps": training_max_steps,
+        "benchmark_max_steps": max_steps,
         "timing_repeats": timing_repeats,
         "weights_sha256": weights_sha256,
         "best_fitness": best_fitness,

@@ -125,7 +125,7 @@ def check_training_metadata_consistency(errors: list[str]) -> None:
         "patience": "patience",
         "elite_count": "elite_count",
         "tournament_size": "tournament_size",
-        "max_steps": "max_steps",
+        "max_steps": "training_max_steps",
     }
 
     for training_key, run_key in field_pairs.items():
