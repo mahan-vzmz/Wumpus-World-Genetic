@@ -1,4 +1,7 @@
 {
-  "fingerprint": "55b2616bb0b8f1716c030a20ea4a5218ed0d56e0f82c4001d5520a2ae969ddfd",
-  "version": "8.1.1"
+  "source_fingerprint": "8e671cb51827ba54ac5a85e6bdfdca5b4d88a8e448cec838603fa7a58a951aa7",
+  "pdf_sha256": "60c6cf445a1358716931e6b8539e5a050c090b0b3e55acc237ab8c9a158480db",
+  "version": "8.1.1",
+  "renderer": "browser",
+  "page_count": 7
 }

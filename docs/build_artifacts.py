@@ -207,7 +207,7 @@ def preflight_pdf(pdf_path: Path) -> int:
     pages = len(reader.pages)
     if pages < 1:
         raise ValueError("PDF report has 0 pages.")
-    
+
     return pages
 
 

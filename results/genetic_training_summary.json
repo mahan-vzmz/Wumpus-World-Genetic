@@ -23,5 +23,9 @@
     "reverse_penalty": -9.973984747728005,
     "frontier_bonus": 2.4071499628129733,
     "health_caution_penalty": -15.134155289074585
-  }
+  },
+  "training_map_source": "custom",
+  "training_map_seed": null,
+  "training_map_manifest_sha256": "46bec204d69e22c69cba70e484396e8cb73d9933e125fecb088fb397aa9da635",
+  "training_map_count": 12
 }

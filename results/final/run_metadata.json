@@ -1,8 +1,10 @@
 {
   "project_version": "8.1.1",
-  "source_commit": "f1c0bfc2061d462cd0131e0904d15866bcab1922",
+  "source_commit": "9ff75f85c273173e45e37bb792f5e3e60dc83efd",
   "training_seed": 17,
-  "training_map_seed": 1701,
+  "training_map_source": "custom",
+  "training_map_seed": null,
+  "training_map_manifest_sha256": "46bec204d69e22c69cba70e484396e8cb73d9933e125fecb088fb397aa9da635",
   "test_seed": 20260730,
   "training_maps": 12,
   "test_maps": 30,
@@ -16,8 +18,9 @@
   "patience": 8,
   "elite_count": 2,
   "tournament_size": 3,
-  "max_steps": 250,
+  "training_max_steps": 250,
+  "benchmark_max_steps": 250,
   "timing_repeats": 3,
-  "weights_sha256": "b2b1ea36d0f53f5fb12f9a873d4905880c14d5779030dff265d93b76e8ea9348",
+  "weights_sha256": "de927606f7c86ce0c92ac18ed5978a9b020ddeb50d301f33591869595094ab7f",
   "best_fitness": 1840.6666666666667
 }

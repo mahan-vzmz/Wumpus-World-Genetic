@@ -65,7 +65,12 @@ def test_asset_copy_failure_is_not_ignored(tmp_path: Path) -> None:
 
 
 def test_retrain_summary_preserves_all_hyperparameters(tmp_path: Path) -> None:
-    from wumpus_world.training.genetic_algorithm import TrainingResult, save_training_artifacts, GeneticWeights, GenerationRecord
+    from wumpus_world.training.genetic_algorithm import (
+        GenerationRecord,
+        GeneticWeights,
+        TrainingResult,
+        save_training_artifacts,
+    )
     result = TrainingResult(
         best_weights=GeneticWeights(),
         best_fitness=100.0,
@@ -78,7 +83,7 @@ def test_retrain_summary_preserves_all_hyperparameters(tmp_path: Path) -> None:
     weights_path = tmp_path / "weights.json"
     history_path = tmp_path / "history.csv"
     summary_path = tmp_path / "summary.json"
-    
+
     save_training_artifacts(
         result,
         weights_path=weights_path,
@@ -86,13 +91,13 @@ def test_retrain_summary_preserves_all_hyperparameters(tmp_path: Path) -> None:
         summary_json_path=summary_path,
         provenance={"training_map_source": "test"}
     )
-    
+
     import json
     summary = json.loads(summary_path.read_text())
     assert summary["crossover_rate"] == 0.75
     assert summary["patience"] == 5
     assert summary["training_map_source"] == "test"
-    
+
     meta = json.loads(weights_path.read_text())["metadata"]
     assert meta["crossover_rate"] == 0.75
     assert meta["patience"] == 5
@@ -103,7 +108,7 @@ def test_asset_change_changes_report_fingerprint(tmp_path: Path) -> None:
     asset = tmp_path / "asset.png"
     asset.write_bytes(b"data1")
     fp1 = report_fingerprint("html", [asset], {"key": "value"})
-    
+
     asset.write_bytes(b"data2")
     fp2 = report_fingerprint("html", [asset], {"key": "value"})
     assert fp1 != fp2
@@ -111,6 +116,7 @@ def test_asset_change_changes_report_fingerprint(tmp_path: Path) -> None:
 
 def test_pdf_hash_mismatch_forces_rebuild(tmp_path: Path) -> None:
     import json
+
     from docs.build_artifacts import build_report
     with patch("docs.build_artifacts.REPORT_DIR", tmp_path):
         manifest_path = tmp_path / "report_manifest.json"
@@ -119,10 +125,9 @@ def test_pdf_hash_mismatch_forces_rebuild(tmp_path: Path) -> None:
         html_path.write_text("<html></html>")
         pdf_path = tmp_path / "final_report.pdf"
         pdf_path.write_bytes(b"%PDF-1.4\n%%EOF\n")
-        
+
         with patch("docs.build_artifacts.report_fingerprint", return_value="mock_fp"):
             with patch("docs.build_artifacts.preflight_pdf", return_value=1):
-                import sys
                 from unittest.mock import MagicMock
                 mock_weasyprint = MagicMock()
                 with patch.dict("sys.modules", {"weasyprint": mock_weasyprint}):

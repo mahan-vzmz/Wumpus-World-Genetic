@@ -8,7 +8,6 @@ import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
-from statistics import mean
 
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_WEIGHTS = ROOT / "best_weights.json"
