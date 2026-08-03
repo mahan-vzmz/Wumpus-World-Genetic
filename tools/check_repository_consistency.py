@@ -264,11 +264,13 @@ def _safe_float(val: str | None) -> float:
     except (ValueError, TypeError):
         return 0.0
 
+
 def _safe_int(val: str | None) -> int:
     try:
         return int(float(val)) if val else 0
     except (ValueError, TypeError):
         return 0
+
 
 def check_result_consistency(errors: list[str]) -> None:
     test_manifest_path = ROOT / "maps" / "test" / "manifest.json"
@@ -315,7 +317,12 @@ def check_result_consistency(errors: list[str]) -> None:
             "average_steps_success": round(_mean(successes, "steps"), 2),
             "average_score_success": round(_mean(successes, "score"), 2),
             "average_pit_entries": round(_mean(group, "pit_entries"), 3),
-            "wumpus_deaths": sum(1 for r in group if str(r.get("wumpus_death", "")).lower() in ("1", "true") or r.get("termination_reason") == "wumpus_killed"),
+            "wumpus_deaths": sum(
+                1
+                for r in group
+                if str(r.get("wumpus_death", "")).lower() in ("1", "true")
+                or r.get("termination_reason") == "wumpus_killed"
+            ),
             "max_steps_failures": sum(1 for r in group if r.get("termination_reason") == "max_steps"),
             "average_runtime_ms": round(_mean(group, "runtime_ms"), 4),
             "average_expanded_nodes": round(_mean(group, "expanded_nodes"), 2),
@@ -341,7 +348,9 @@ def check_result_consistency(errors: list[str]) -> None:
                 calc_val = float(comp[field])
                 tolerance = 1.0 if field == "average_runtime_ms" else 1e-2
                 if abs(csv_val - calc_val) > tolerance:
-                    errors.append(f"{name} metric mismatch for '{key}' field '{field}': CSV={csv_val}, computed={calc_val}")
+                    errors.append(
+                        f"{name} metric mismatch for '{key}' field '{field}': CSV={csv_val}, computed={calc_val}"
+                    )
 
     validate_csv(SUMMARY_CSV_PATH, computed_summary, lambda r: r["agent"], "Summary CSV")
 

@@ -71,6 +71,7 @@ def test_retrain_summary_preserves_all_hyperparameters(tmp_path: Path) -> None:
         TrainingResult,
         save_training_artifacts,
     )
+
     result = TrainingResult(
         best_weights=GeneticWeights(),
         best_fitness=100.0,
@@ -89,10 +90,11 @@ def test_retrain_summary_preserves_all_hyperparameters(tmp_path: Path) -> None:
         weights_path=weights_path,
         history_csv_path=history_path,
         summary_json_path=summary_path,
-        provenance={"training_map_source": "test"}
+        provenance={"training_map_source": "test"},
     )
 
     import json
+
     summary = json.loads(summary_path.read_text())
     assert summary["crossover_rate"] == 0.75
     assert summary["patience"] == 5
@@ -105,6 +107,7 @@ def test_retrain_summary_preserves_all_hyperparameters(tmp_path: Path) -> None:
 
 def test_asset_change_changes_report_fingerprint(tmp_path: Path) -> None:
     from docs.build_artifacts import report_fingerprint
+
     asset = tmp_path / "asset.png"
     asset.write_bytes(b"data1")
     fp1 = report_fingerprint("html", [asset], {"key": "value"})
@@ -118,6 +121,7 @@ def test_pdf_hash_mismatch_forces_rebuild(tmp_path: Path) -> None:
     import json
 
     from docs.build_artifacts import build_report
+
     with patch("docs.build_artifacts.REPORT_DIR", tmp_path):
         manifest_path = tmp_path / "report_manifest.json"
         manifest_path.write_text(json.dumps({"source_fingerprint": "mock_fp", "pdf_sha256": "bad_hash"}))
@@ -129,6 +133,7 @@ def test_pdf_hash_mismatch_forces_rebuild(tmp_path: Path) -> None:
         with patch("docs.build_artifacts.report_fingerprint", return_value="mock_fp"):
             with patch("docs.build_artifacts.preflight_pdf", return_value=1):
                 from unittest.mock import MagicMock
+
                 mock_weasyprint = MagicMock()
                 with patch.dict("sys.modules", {"weasyprint": mock_weasyprint}):
                     try:
@@ -140,6 +145,7 @@ def test_pdf_hash_mismatch_forces_rebuild(tmp_path: Path) -> None:
 
 def test_invalid_pdf_header_is_rejected(tmp_path: Path) -> None:
     from docs.build_artifacts import preflight_pdf
+
     pdf = tmp_path / "bad.pdf"
     pdf.write_bytes(b"NOT_A_PDF%%EOF")
     with pytest.raises(ValueError, match="PDF file header invalid"):
@@ -148,6 +154,7 @@ def test_invalid_pdf_header_is_rejected(tmp_path: Path) -> None:
 
 def test_pdf_without_eof_is_rejected(tmp_path: Path) -> None:
     from docs.build_artifacts import preflight_pdf
+
     pdf = tmp_path / "bad.pdf"
     pdf.write_bytes(b"%PDF-1.4\nMissing EOF marker")
     with pytest.raises(ValueError, match="PDF file trailer invalid"):
@@ -162,6 +169,7 @@ def test_academic_cover_contains_student_id_and_date(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     from docs.build_artifacts import load_project_info
+
     info = load_project_info(path)
     assert info["student_id"] == "12345"
     assert info["submission_date"] == "2026-08-03"

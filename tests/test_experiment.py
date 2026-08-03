@@ -109,27 +109,53 @@ def test_missing_gene_is_detected(tmp_path: Path) -> None:
     root_weights.write_text(json.dumps({"genes": {"gene1": 1.0, "gene2": 2.0}}))
 
     training_summary = tmp_path / "summary.json"
-    training_summary.write_text(json.dumps({
-        "seed": 1, "map_count": 1, "population": 1, "requested_generations": 1,
-        "generations_run": 1, "mutation_rate": 0.1, "mutation_sigma": 0.1,
-        "crossover_rate": 0.1, "patience": 1, "elite_count": 1, "tournament_size": 1,
-        "max_steps": 1, "best_fitness": 1.0,
-        "best_weights": {"gene1": 1.0}
-    }))
+    training_summary.write_text(
+        json.dumps(
+            {
+                "seed": 1,
+                "map_count": 1,
+                "population": 1,
+                "requested_generations": 1,
+                "generations_run": 1,
+                "mutation_rate": 0.1,
+                "mutation_sigma": 0.1,
+                "crossover_rate": 0.1,
+                "patience": 1,
+                "elite_count": 1,
+                "tournament_size": 1,
+                "max_steps": 1,
+                "best_fitness": 1.0,
+                "best_weights": {"gene1": 1.0},
+            }
+        )
+    )
 
     run_meta = tmp_path / "run_meta.json"
-    run_meta.write_text(json.dumps({
-        "training_seed": 1, "training_maps": 1, "population": 1,
-        "requested_generations": 1, "generations_run": 1, "mutation_rate": 0.1,
-        "mutation_sigma": 0.1, "crossover_rate": 0.1, "patience": 1,
-        "elite_count": 1, "tournament_size": 1, "training_max_steps": 1,
-        "best_fitness": 1.0
-    }))
+    run_meta.write_text(
+        json.dumps(
+            {
+                "training_seed": 1,
+                "training_maps": 1,
+                "population": 1,
+                "requested_generations": 1,
+                "generations_run": 1,
+                "mutation_rate": 0.1,
+                "mutation_sigma": 0.1,
+                "crossover_rate": 0.1,
+                "patience": 1,
+                "elite_count": 1,
+                "tournament_size": 1,
+                "training_max_steps": 1,
+                "best_fitness": 1.0,
+            }
+        )
+    )
 
-    with patch("tools.check_repository_consistency.ROOT_WEIGHTS", root_weights), \
-         patch("tools.check_repository_consistency.TRAINING_SUMMARY_PATH", training_summary), \
-         patch("tools.check_repository_consistency.RUN_METADATA_PATH", run_meta):
-
+    with (
+        patch("tools.check_repository_consistency.ROOT_WEIGHTS", root_weights),
+        patch("tools.check_repository_consistency.TRAINING_SUMMARY_PATH", training_summary),
+        patch("tools.check_repository_consistency.RUN_METADATA_PATH", run_meta),
+    ):
         errors = []
         check_training_metadata_consistency(errors)
         assert any("Weight genes mismatch" in e for e in errors)
@@ -137,9 +163,32 @@ def test_missing_gene_is_detected(tmp_path: Path) -> None:
 
 def test_difficulty_summary_matches_raw_rows() -> None:
     from experiment import _summary_row
+
     rows = [
-        {"success": 1, "score": 10, "score_delta": -1, "remaining_health": 10, "steps": 5, "pit_entries": 0, "wumpus_death": 0, "termination_reason": "won", "runtime_ms": 1, "expanded_nodes": 1},
-        {"success": 0, "score": 0, "score_delta": -10, "remaining_health": 0, "steps": 2, "pit_entries": 0, "wumpus_death": 1, "termination_reason": "wumpus", "runtime_ms": 1, "expanded_nodes": 1},
+        {
+            "success": 1,
+            "score": 10,
+            "score_delta": -1,
+            "remaining_health": 10,
+            "steps": 5,
+            "pit_entries": 0,
+            "wumpus_death": 0,
+            "termination_reason": "won",
+            "runtime_ms": 1,
+            "expanded_nodes": 1,
+        },
+        {
+            "success": 0,
+            "score": 0,
+            "score_delta": -10,
+            "remaining_health": 0,
+            "steps": 2,
+            "pit_entries": 0,
+            "wumpus_death": 1,
+            "termination_reason": "wumpus",
+            "runtime_ms": 1,
+            "expanded_nodes": 1,
+        },
     ]
     summary = _summary_row("agent", rows)
     assert summary["episodes"] == 2
@@ -149,6 +198,7 @@ def test_difficulty_summary_matches_raw_rows() -> None:
     assert summary["average_steps_all"] == 3.5
     assert summary["average_steps_success"] == 5.0
     assert summary["wumpus_deaths"] == 1
+
 
 def test_duplicate_map_agent_row_is_rejected(tmp_path: Path) -> None:
     import csv
@@ -162,15 +212,98 @@ def test_duplicate_map_agent_row_is_rejected(tmp_path: Path) -> None:
 
     exp_csv = tmp_path / "experiment.csv"
     with exp_csv.open("w", newline="") as h:
-        writer = csv.DictWriter(h, fieldnames=["agent", "difficulty", "map", "success", "score", "score_delta", "remaining_health", "steps", "pit_entries", "wumpus_death", "termination_reason", "runtime_ms", "expanded_nodes"])
+        writer = csv.DictWriter(
+            h,
+            fieldnames=[
+                "agent",
+                "difficulty",
+                "map",
+                "success",
+                "score",
+                "score_delta",
+                "remaining_health",
+                "steps",
+                "pit_entries",
+                "wumpus_death",
+                "termination_reason",
+                "runtime_ms",
+                "expanded_nodes",
+            ],
+        )
         writer.writeheader()
-        writer.writerow({"agent": "astar", "difficulty": "easy", "map": "m1.txt", "success": 1, "score": 10, "score_delta": 0, "remaining_health": 10, "steps": 1, "pit_entries": 0, "wumpus_death": 0, "termination_reason": "", "runtime_ms": 1, "expanded_nodes": 1})
-        writer.writerow({"agent": "astar", "difficulty": "easy", "map": "m1.txt", "success": 1, "score": 10, "score_delta": 0, "remaining_health": 10, "steps": 1, "pit_entries": 0, "wumpus_death": 0, "termination_reason": "", "runtime_ms": 1, "expanded_nodes": 1})
-        writer.writerow({"agent": "rule", "difficulty": "easy", "map": "m1.txt", "success": 1, "score": 10, "score_delta": 0, "remaining_health": 10, "steps": 1, "pit_entries": 0, "wumpus_death": 0, "termination_reason": "", "runtime_ms": 1, "expanded_nodes": 1})
-        writer.writerow({"agent": "genetic", "difficulty": "easy", "map": "m1.txt", "success": 1, "score": 10, "score_delta": 0, "remaining_health": 10, "steps": 1, "pit_entries": 0, "wumpus_death": 0, "termination_reason": "", "runtime_ms": 1, "expanded_nodes": 1})
+        writer.writerow(
+            {
+                "agent": "astar",
+                "difficulty": "easy",
+                "map": "m1.txt",
+                "success": 1,
+                "score": 10,
+                "score_delta": 0,
+                "remaining_health": 10,
+                "steps": 1,
+                "pit_entries": 0,
+                "wumpus_death": 0,
+                "termination_reason": "",
+                "runtime_ms": 1,
+                "expanded_nodes": 1,
+            }
+        )
+        writer.writerow(
+            {
+                "agent": "astar",
+                "difficulty": "easy",
+                "map": "m1.txt",
+                "success": 1,
+                "score": 10,
+                "score_delta": 0,
+                "remaining_health": 10,
+                "steps": 1,
+                "pit_entries": 0,
+                "wumpus_death": 0,
+                "termination_reason": "",
+                "runtime_ms": 1,
+                "expanded_nodes": 1,
+            }
+        )
+        writer.writerow(
+            {
+                "agent": "rule",
+                "difficulty": "easy",
+                "map": "m1.txt",
+                "success": 1,
+                "score": 10,
+                "score_delta": 0,
+                "remaining_health": 10,
+                "steps": 1,
+                "pit_entries": 0,
+                "wumpus_death": 0,
+                "termination_reason": "",
+                "runtime_ms": 1,
+                "expanded_nodes": 1,
+            }
+        )
+        writer.writerow(
+            {
+                "agent": "genetic",
+                "difficulty": "easy",
+                "map": "m1.txt",
+                "success": 1,
+                "score": 10,
+                "score_delta": 0,
+                "remaining_health": 10,
+                "steps": 1,
+                "pit_entries": 0,
+                "wumpus_death": 0,
+                "termination_reason": "",
+                "runtime_ms": 1,
+                "expanded_nodes": 1,
+            }
+        )
 
-    with patch("tools.check_repository_consistency.ROOT", tmp_path), \
-         patch("tools.check_repository_consistency.EXPERIMENT_CSV_PATH", exp_csv):
+    with (
+        patch("tools.check_repository_consistency.ROOT", tmp_path),
+        patch("tools.check_repository_consistency.EXPERIMENT_CSV_PATH", exp_csv),
+    ):
         errors = []
         check_result_consistency(errors)
         assert any("Expected 3 experiment rows (1 maps * 3 agents); found 4" in e for e in errors)
