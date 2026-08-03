@@ -387,18 +387,23 @@ def test_custom_maps_provenance_hash(tmp_path: Path) -> None:
 def test_training_max_steps_propagation(tmp_path: Path) -> None:
     import json
     from unittest.mock import patch
+
     from experiment import write_run_metadata
 
-    mock_summary = json.dumps({
-        "training_max_steps": 120,
-        "max_steps": 250, # older schema
-    })
+    mock_summary = json.dumps(
+        {
+            "training_max_steps": 120,
+            "max_steps": 250,  # older schema
+        }
+    )
 
-    with patch("pathlib.Path.exists", return_value=True), \
-         patch("pathlib.Path.read_text", return_value=mock_summary), \
-         patch("pathlib.Path.read_bytes", return_value=b"{}"):
+    with (
+        patch("pathlib.Path.exists", return_value=True),
+        patch("pathlib.Path.read_text", return_value=mock_summary),
+        patch("pathlib.Path.read_bytes", return_value=b"{}"),
+    ):
         write_run_metadata(tmp_path, max_steps=200)
-        
+
     run_meta = json.loads((tmp_path / "run_metadata.json").read_text(encoding="utf-8"))
     assert run_meta["training_max_steps"] == 120
     assert run_meta["benchmark_max_steps"] == 200
