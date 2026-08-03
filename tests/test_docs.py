@@ -134,7 +134,11 @@ def test_pdf_hash_mismatch_forces_rebuild(tmp_path: Path) -> None:
             with patch("docs.build_artifacts.preflight_pdf", return_value=1):
                 from unittest.mock import MagicMock
 
+                def mock_write_pdf(path):
+                    Path(path).write_bytes(b"%PDF-1.4\n%%EOF\n")
+
                 mock_weasyprint = MagicMock()
+                mock_weasyprint.HTML.return_value.write_pdf.side_effect = mock_write_pdf
                 with patch.dict("sys.modules", {"weasyprint": mock_weasyprint}):
                     build_report({}, [], [])
                     mock_weasyprint.HTML.assert_called()
@@ -175,7 +179,11 @@ def test_academic_cover_contains_student_id_and_date(tmp_path: Path) -> None:
         with patch("docs.build_artifacts.preflight_pdf", return_value=1):
             from unittest.mock import MagicMock
 
+            def mock_write_pdf(path):
+                Path(path).write_bytes(b"%PDF-1.4\n%%EOF\n")
+
             mock_weasyprint = MagicMock()
+            mock_weasyprint.HTML.return_value.write_pdf.side_effect = mock_write_pdf
             with patch.dict("sys.modules", {"weasyprint": mock_weasyprint}):
                 build_report(info, [], [])
 
