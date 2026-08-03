@@ -178,7 +178,30 @@ def check_run_metadata(errors: list[str]) -> None:
             check=False,
         )
         if proc.returncode != 0:
-            errors.append(f"source_commit '{source_commit}' does not exist in local Git object database")
+            shallow_proc = subprocess.run(
+                ["git", "rev-parse", "--is-shallow-repository"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if shallow_proc.returncode == 0 and shallow_proc.stdout.strip() == "true":
+                subprocess.run(
+                    ["git", "fetch", "--depth=1", "origin", source_commit],
+                    cwd=ROOT,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                proc = subprocess.run(
+                    ["git", "cat-file", "-e", f"{source_commit}^{{commit}}"],
+                    cwd=ROOT,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+            if proc.returncode != 0:
+                errors.append(f"source_commit '{source_commit}' does not exist in local Git object database")
 
     meta_version = data.get("project_version", "")
     expected_version = get_pyproject_version()
