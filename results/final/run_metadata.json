@@ -21,6 +21,6 @@
   "training_max_steps": 250,
   "benchmark_max_steps": 250,
   "timing_repeats": 3,
-  "weights_sha256": "de927606f7c86ce0c92ac18ed5978a9b020ddeb50d301f33591869595094ab7f",
+  "weights_sha256": "be360f8c9fe3172ed2769e8551197e9ad064052b0d5230a3537baca0f8ac6b28",
   "best_fitness": 1840.6666666666667
 }

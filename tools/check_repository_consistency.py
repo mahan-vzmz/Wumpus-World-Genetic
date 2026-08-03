@@ -24,7 +24,10 @@ CHANGELOG_PATH = ROOT / "CHANGELOG.md"
 def sha256_file(path: Path) -> str:
     if not path.exists():
         return ""
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    raw_bytes = path.read_bytes()
+    # Normalize CRLF to LF to ensure consistent hashes across OSes (Git on Windows may convert to CRLF)
+    normalized_bytes = raw_bytes.replace(b"\r\n", b"\n")
+    return hashlib.sha256(normalized_bytes).hexdigest()
 
 
 def get_pyproject_version() -> str:
