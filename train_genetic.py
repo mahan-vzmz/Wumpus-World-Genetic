@@ -15,7 +15,10 @@ from wumpus_world.training.genetic_algorithm import (
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train Wumpus hybrid genetic weights.")
-    parser.add_argument("--maps", nargs="+")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--maps", nargs="+")
+    group.add_argument("--regenerate-training-maps", action="store_true")
+    
     parser.add_argument("--population", type=int, default=24)
     parser.add_argument("--generations", type=int, default=24)
     parser.add_argument("--mutation-rate", type=float, default=0.10)
@@ -29,7 +32,7 @@ def main() -> None:
     parser.add_argument("--history", default="results/genetic_history.csv")
     parser.add_argument("--summary", default="results/genetic_training_summary.json")
     parser.add_argument("--plot", default="results/genetic_fitness.png")
-    parser.add_argument("--regenerate-training-maps", action="store_true")
+    
     args = parser.parse_args()
 
     if args.regenerate_training_maps:

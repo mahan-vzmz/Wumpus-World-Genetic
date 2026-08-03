@@ -95,6 +95,7 @@ def load_run_metadata() -> dict[str, Any]:
     required_keys = [
         "project_version",
         "source_commit",
+        "source_tree_clean",
         "training_seed",
         "training_map_seed",
         "test_seed",

@@ -233,6 +233,11 @@ def check_run_metadata(errors: list[str]) -> None:
             if proc.returncode != 0:
                 errors.append(f"source_commit '{source_commit}' does not exist in local Git object database")
 
+    if "source_tree_clean" not in data:
+        errors.append("run_metadata.json is missing source_tree_clean")
+    elif data["source_tree_clean"] is not True:
+        errors.append("Experiment artifacts were generated from a dirty source tree.")
+
     meta_version = data.get("project_version", "")
     expected_version = get_pyproject_version()
     if meta_version != expected_version:

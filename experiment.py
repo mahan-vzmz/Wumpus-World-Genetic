@@ -315,16 +315,7 @@ def write_report(
     (results_dir / "experiment_summary.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def write_run_metadata(
-    results_dir: Path,
-    test_seed: int = 20260730,
-    per_difficulty: int = 10,
-    max_steps: int = 250,
-    timing_repeats: int = 3,
-    weights_path: str = "best_weights.json",
-) -> None:
-    results_dir.mkdir(parents=True, exist_ok=True)
-
+def capture_source_state() -> tuple[str, bool]:
     source_commit = os.getenv("GITHUB_SHA", "").strip()
     if not source_commit:
         try:
@@ -353,6 +344,22 @@ def write_run_metadata(
             source_tree_clean = False
     except Exception:
         pass
+
+    return source_commit, source_tree_clean
+
+
+def write_run_metadata(
+    results_dir: str | Path,
+    test_seed: int = 20260730,
+    per_difficulty: int = 10,
+    max_steps: int = 250,
+    timing_repeats: int = 3,
+    weights_path: str = "best_weights.json",
+    source_commit: str = "unknown",
+    source_tree_clean: bool = False,
+) -> None:
+    results_dir = Path(results_dir)
+    results_dir.mkdir(parents=True, exist_ok=True)
 
     weights_file = Path(weights_path)
     weights_canonical_sha256 = ""
@@ -439,6 +446,8 @@ def analyze_and_export(
     max_steps: int = 250,
     timing_repeats: int = 3,
     weights_path: str = "best_weights.json",
+    source_commit: str = "unknown",
+    source_tree_clean: bool = False,
 ) -> None:
     results_dir = Path(results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -480,6 +489,8 @@ def analyze_and_export(
         max_steps=max_steps,
         timing_repeats=timing_repeats,
         weights_path=weights_path,
+        source_commit=source_commit,
+        source_tree_clean=source_tree_clean,
     )
 
 
@@ -494,6 +505,8 @@ def main() -> None:
     parser.add_argument("--timing-repeats", type=int, default=3)
     parser.add_argument("--skip-generate", action="store_true")
     args = parser.parse_args()
+
+    source_commit, source_tree_clean = capture_source_state()
 
     if not args.skip_generate:
         manifest = generate_test_suite(
@@ -518,6 +531,8 @@ def main() -> None:
         max_steps=args.max_steps,
         timing_repeats=args.timing_repeats,
         weights_path=args.weights,
+        source_commit=source_commit,
+        source_tree_clean=source_tree_clean,
     )
     print(f"Completed {len(rows)} episodes.")
     print(f"Results saved in {args.results_dir}")
