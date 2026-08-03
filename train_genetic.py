@@ -32,6 +32,9 @@ def main() -> None:
     parser.add_argument("--regenerate-training-maps", action="store_true")
     args = parser.parse_args()
 
+    if args.regenerate_training_maps:
+        generate_training_suite()
+
     paths = args.maps or [str(path) for path in sorted(Path("maps/training").glob("training_*.txt"))]
     if not paths:
         raise SystemExit("No training maps found. Run with --regenerate-training-maps first.")
@@ -39,30 +42,33 @@ def main() -> None:
     default_training_dir = Path("maps/training").resolve()
     is_default_suite = not args.maps and all(Path(path).resolve().parent == default_training_dir for path in paths)
 
+    def hash_training_suite(map_paths: list[str], manifest: Path | None = None) -> str:
+        digest = hashlib.sha256()
+        if manifest and manifest.exists():
+            digest.update(b"manifest.json\0")
+            digest.update(manifest.read_bytes())
+        for path_text in sorted(map_paths):
+            p = Path(path_text)
+            digest.update(p.name.encode("utf-8"))
+            digest.update(b"\0")
+            digest.update(p.read_bytes())
+        return digest.hexdigest()
+
     provenance = {}
     if args.regenerate_training_maps:
-        generate_training_suite()
-        paths = args.maps or [str(path) for path in sorted(Path("maps/training").glob("training_*.txt"))]
         provenance["training_map_source"] = "generated_now"
         provenance["training_map_seed"] = 1701  # Assuming default from generator
         manifest_path = Path("maps/training/manifest.json")
-        if manifest_path.exists():
-            provenance["training_map_manifest_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+        provenance["training_suite_sha256"] = hash_training_suite(paths, manifest_path)
     elif is_default_suite:
         provenance["training_map_source"] = "tracked_generated_suite"
         provenance["training_map_seed"] = 1701
         manifest_path = Path("maps/training/manifest.json")
-        if manifest_path.exists():
-            provenance["training_map_manifest_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+        provenance["training_suite_sha256"] = hash_training_suite(paths, manifest_path)
     else:
         provenance["training_map_source"] = "custom"
         provenance["training_map_seed"] = None
-        digest = hashlib.sha256()
-        for path_text in sorted(paths):
-            path = Path(path_text)
-            digest.update(path.name.encode("utf-8"))
-            digest.update(path.read_bytes())
-        provenance["training_map_manifest_sha256"] = digest.hexdigest()
+        provenance["training_suite_sha256"] = hash_training_suite(paths, None)
 
     provenance["training_map_count"] = len(paths)
 

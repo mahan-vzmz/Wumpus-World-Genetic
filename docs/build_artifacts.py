@@ -99,7 +99,7 @@ def load_run_metadata() -> dict[str, Any]:
         "training_map_seed",
         "test_seed",
         "training_map_source",
-        "training_map_manifest_sha256",
+        "training_suite_sha256",
         "training_maps",
         "test_maps",
         "maps_per_difficulty",

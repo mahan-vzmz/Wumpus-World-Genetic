@@ -1,10 +1,11 @@
 {
   "project_version": "8.1.1",
-  "source_commit": "a3b892b2eb660d16e0c9fb6646fe3d5710070593",
+  "source_commit": "4042a48767005ce3710f11b2c701816c27a5df88",
+  "source_tree_clean": false,
   "training_seed": 17,
   "training_map_source": "tracked_generated_suite",
   "training_map_seed": 1701,
-  "training_map_manifest_sha256": "46bec204d69e22c69cba70e484396e8cb73d9933e125fecb088fb397aa9da635",
+  "training_suite_sha256": "d76a516e4297ecea527782d9de9073244c5a3de27d9c5adb9f88bf12176e64e4",
   "test_seed": 20260730,
   "training_maps": 12,
   "test_maps": 30,
@@ -21,6 +22,6 @@
   "training_max_steps": 250,
   "benchmark_max_steps": 250,
   "timing_repeats": 3,
-  "weights_canonical_sha256": "dbd34ad2be8b8af4e36b51de806f2767f756a64ef6514115e00f81eb93728066",
+  "weights_canonical_sha256": "41eb8d1e26071ac2c4e573ad5f24f2dc6c74602e2c8d8bdb4c19dfbb44e9abdc",
   "best_fitness": 1840.6666666666667
 }

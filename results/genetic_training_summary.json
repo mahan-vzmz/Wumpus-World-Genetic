@@ -26,6 +26,6 @@
   },
   "training_map_source": "tracked_generated_suite",
   "training_map_seed": 1701,
-  "training_map_manifest_sha256": "46bec204d69e22c69cba70e484396e8cb73d9933e125fecb088fb397aa9da635",
+  "training_suite_sha256": "d76a516e4297ecea527782d9de9073244c5a3de27d9c5adb9f88bf12176e64e4",
   "training_map_count": 12
 }

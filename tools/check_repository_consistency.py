@@ -137,6 +137,9 @@ def check_training_metadata_consistency(errors: list[str]) -> None:
         "elite_count": "elite_count",
         "tournament_size": "tournament_size",
         "training_max_steps": "training_max_steps",
+        "training_map_source": "training_map_source",
+        "training_map_seed": "training_map_seed",
+        "training_suite_sha256": "training_suite_sha256",
     }
 
     for training_key, run_key in field_pairs.items():
@@ -401,9 +404,11 @@ def check_result_consistency(errors: list[str]) -> None:
             comp = expected.get(key)
             if not comp:
                 continue
+            missing_fields = set(comp) - set(row)
+            if missing_fields:
+                errors.append(f"{name} row '{key}' is missing fields: {sorted(missing_fields)}")
+                continue
             for field in comp:
-                if field not in row:
-                    continue
                 csv_val = float(row[field])
                 calc_val = float(comp[field])
                 tolerance = 1.0 if field == "average_runtime_ms" else 1e-2
@@ -415,9 +420,8 @@ def check_result_consistency(errors: list[str]) -> None:
     validate_csv(SUMMARY_CSV_PATH, computed_summary, lambda r: r["agent"], "Summary CSV")
 
     diff_path = ROOT / "results" / "final" / "difficulty_results.csv"
-    if diff_path.exists():
-        computed_diff = {f"{agent}-{diff}": compute_summary(agent, group) for (agent, diff), group in by_diff.items()}
-        validate_csv(diff_path, computed_diff, lambda r: f"{r['agent']}-{r['difficulty']}", "Difficulty CSV")
+    computed_diff = {f"{agent}-{diff}": compute_summary(agent, group) for (agent, diff), group in by_diff.items()}
+    validate_csv(diff_path, computed_diff, lambda r: f"{r['agent']}-{r['difficulty']}", "Difficulty CSV")
 
     if FINAL_REPORT_HTML.exists():
         html_text = FINAL_REPORT_HTML.read_text(encoding="utf-8")

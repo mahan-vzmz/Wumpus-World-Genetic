@@ -341,6 +341,19 @@ def write_run_metadata(
     if not source_commit:
         source_commit = "unknown"
 
+    source_tree_clean = True
+    try:
+        proc = subprocess.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode == 0 and proc.stdout.strip():
+            source_tree_clean = False
+    except Exception:
+        pass
+
     weights_file = Path(weights_path)
     weights_canonical_sha256 = ""
     best_fitness = 0.0
@@ -374,7 +387,7 @@ def write_run_metadata(
     training_map_source = ts.get("training_map_source", "unknown")
     training_map_seed = ts.get("training_map_seed", 1701)
     training_maps = ts.get("map_count", 12)
-    training_map_manifest_sha256 = ts.get("training_map_manifest_sha256", "")
+    training_suite_sha256 = ts.get("training_suite_sha256", ts.get("training_map_manifest_sha256", ""))
     population = int(ts.get("population", 24))
     requested_generations = int(ts.get("requested_generations", ts.get("generations_run", 24)))
     generations_run = int(ts.get("generations_run", 24))
@@ -384,17 +397,18 @@ def write_run_metadata(
     patience = ts.get("patience", 8)
     elite_count = int(ts.get("elite_count", 2))
     tournament_size = int(ts.get("tournament_size", 3))
-    training_max_steps = int(ts.get("max_steps", 250))
+    training_max_steps = int(ts.get("training_max_steps", ts.get("max_steps", 250)))
     if best_fitness == 0.0:
         best_fitness = float(ts.get("best_fitness", 0.0))
 
     metadata = {
         "project_version": PROJECT_VERSION,
         "source_commit": source_commit,
+        "source_tree_clean": source_tree_clean,
         "training_seed": training_seed,
         "training_map_source": training_map_source,
         "training_map_seed": training_map_seed,
-        "training_map_manifest_sha256": training_map_manifest_sha256,
+        "training_suite_sha256": training_suite_sha256,
         "test_seed": test_seed,
         "training_maps": training_maps,
         "test_maps": per_difficulty * 3,

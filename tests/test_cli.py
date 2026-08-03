@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
@@ -186,3 +187,35 @@ def test_default_genetic_agent_loads_packaged_weights(tmp_path: Path) -> None:
         check=False,
     )
     assert result.returncode == 0, f"stdout: {result.stdout}\nstderr: {result.stderr}"
+
+
+def test_regenerate_works_without_existing_maps(tmp_path: Path) -> None:
+    # Set up a fake project structure
+    maps_dir = tmp_path / "maps" / "training"
+    # Ensure it's empty/doesn't exist
+    assert not maps_dir.exists()
+
+    # We need to run train_genetic.py directly
+    project_root = Path(__file__).resolve().parents[1]
+    train_script = project_root / "train_genetic.py"
+
+    # Copy src code so imports work?
+    # No, just run with PYTHONPATH
+    env = dict(os.environ)
+    env["PYTHONPATH"] = str(project_root / "src")
+
+    # Run the training script, but only for 1 generation so it's fast
+    result = subprocess.run(
+        [sys.executable, str(train_script), "--regenerate-training-maps", "--generations", "1", "--population", "4"],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, f"stdout: {result.stdout}\nstderr: {result.stderr}"
+
+    # Verify that it created maps
+    generated_maps = list(maps_dir.glob("training_*.txt"))
+    assert len(generated_maps) == 12
