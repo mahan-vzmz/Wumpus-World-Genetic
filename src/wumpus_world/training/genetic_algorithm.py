@@ -309,9 +309,16 @@ def save_training_artifacts(
         "best_fitness": result.best_fitness,
         "seed": result.seed,
         "map_count": result.map_count,
+        "population": result.population_size,
+        "requested_generations": result.generations,
         "generations_run": len(result.history),
+        "mutation_rate": result.mutation_rate,
+        "mutation_sigma": result.mutation_sigma,
         "crossover_rate": result.crossover_rate,
         "patience": result.patience,
+        "elite_count": result.elite_count,
+        "tournament_size": result.tournament_size,
+        "training_max_steps": result.max_steps,
     }
     if provenance:
         meta.update(provenance)
@@ -357,7 +364,7 @@ def save_training_artifacts(
         "patience": result.patience,
         "elite_count": result.elite_count,
         "tournament_size": result.tournament_size,
-        "max_steps": result.max_steps,
+        "training_max_steps": result.max_steps,
         "best_weights": {name: getattr(result.best_weights, name) for name in GENE_NAMES},
     }
     if provenance:

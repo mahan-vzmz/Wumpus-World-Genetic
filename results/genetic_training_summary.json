@@ -11,7 +11,7 @@
   "patience": 8,
   "elite_count": 2,
   "tournament_size": 3,
-  "max_steps": 250,
+  "training_max_steps": 250,
   "best_weights": {
     "safe_bonus": 10.625620633750929,
     "unvisited_bonus": 11.639006121499282,
@@ -24,8 +24,8 @@
     "frontier_bonus": 2.4071499628129733,
     "health_caution_penalty": -15.134155289074585
   },
-  "training_map_source": "custom",
-  "training_map_seed": null,
+  "training_map_source": "tracked_generated_suite",
+  "training_map_seed": 1701,
   "training_map_manifest_sha256": "46bec204d69e22c69cba70e484396e8cb73d9933e125fecb088fb397aa9da635",
   "training_map_count": 12
 }

@@ -21,13 +21,22 @@ FINAL_REPORT_HTML = ROOT / "docs" / "final_report" / "final_report.html"
 CHANGELOG_PATH = ROOT / "CHANGELOG.md"
 
 
-def sha256_file(path: Path) -> str:
+def canonical_json_sha256(path: Path) -> str:
     if not path.exists():
         return ""
-    raw_bytes = path.read_bytes()
-    # Normalize CRLF to LF to ensure consistent hashes across OSes (Git on Windows may convert to CRLF)
-    normalized_bytes = raw_bytes.replace(b"\r\n", b"\n")
-    return hashlib.sha256(normalized_bytes).hexdigest()
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        canonical = json.dumps(
+            payload,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        return hashlib.sha256(canonical).hexdigest()
+    except Exception:
+        raw_bytes = path.read_bytes()
+        normalized_bytes = raw_bytes.replace(b"\r\n", b"\n")
+        return hashlib.sha256(normalized_bytes).hexdigest()
 
 
 def get_pyproject_version() -> str:
@@ -78,8 +87,8 @@ def check_weight_integrity(errors: list[str]) -> None:
         errors.append(f"Missing packaged weights file: {PACKAGED_WEIGHTS}")
         return
 
-    root_hash = sha256_file(ROOT_WEIGHTS)
-    packaged_hash = sha256_file(PACKAGED_WEIGHTS)
+    root_hash = canonical_json_sha256(ROOT_WEIGHTS)
+    packaged_hash = canonical_json_sha256(PACKAGED_WEIGHTS)
 
     if root_hash != packaged_hash:
         errors.append(
@@ -90,10 +99,10 @@ def check_weight_integrity(errors: list[str]) -> None:
     if RUN_METADATA_PATH.exists():
         try:
             meta = json.loads(RUN_METADATA_PATH.read_text(encoding="utf-8"))
-            recorded_hash = meta.get("weights_sha256", "")
+            recorded_hash = meta.get("weights_canonical_sha256", "")
             if recorded_hash != root_hash:
                 errors.append(
-                    f"Recorded weights_sha256 ({recorded_hash[:12]}) in run_metadata.json "
+                    f"Recorded weights_canonical_sha256 ({recorded_hash[:12]}) in run_metadata.json "
                     f"does not match best_weights.json ({root_hash[:12]})"
                 )
         except Exception as exc:
@@ -127,7 +136,7 @@ def check_training_metadata_consistency(errors: list[str]) -> None:
         "patience": "patience",
         "elite_count": "elite_count",
         "tournament_size": "tournament_size",
-        "max_steps": "training_max_steps",
+        "training_max_steps": "training_max_steps",
     }
 
     for training_key, run_key in field_pairs.items():
@@ -146,6 +155,18 @@ def check_training_metadata_consistency(errors: list[str]) -> None:
     if ROOT_WEIGHTS.exists():
         try:
             root_weights_json = json.loads(ROOT_WEIGHTS.read_text(encoding="utf-8"))
+
+            root_meta = root_weights_json.get("metadata", {})
+            for key, val in root_meta.items():
+                # For map count, the key in training summary might be map_count but it's matched
+                if key in training:
+                    t_val = training[key]
+                    if isinstance(val, float) or isinstance(t_val, float):
+                        if abs(float(val) - float(t_val)) > 1e-4:
+                            errors.append(f"Weight metadata mismatch for '{key}': weight={val} != summary={t_val}")
+                    elif val != t_val:
+                        errors.append(f"Weight metadata mismatch for '{key}': weight={val} != summary={t_val}")
+
             root_genes = root_weights_json.get("genes", {})
             summary_genes = training.get("best_weights", {})
             if set(summary_genes.keys()) != set(root_genes.keys()):
@@ -296,6 +317,34 @@ def check_result_consistency(errors: list[str]) -> None:
         errors.append(f"Expected {expected_rows} experiment rows ({num_maps} maps * 3 agents); found {len(raw_rows)}")
         return
 
+    expected_pairs = {
+        (entry["map_id"], agent)
+        for entry in test_manifest
+        for agent in ("astar", "rule", "genetic")
+    }
+
+    actual_pairs = [
+        (row["map_id"], row["agent"])
+        for row in raw_rows
+    ]
+
+    if len(actual_pairs) != len(set(actual_pairs)):
+        errors.append("Duplicate map_id/agent rows found.")
+
+    missing_pairs = expected_pairs - set(actual_pairs)
+    extra_pairs = set(actual_pairs) - expected_pairs
+
+    if missing_pairs:
+        errors.append(f"Missing map/agent rows: {missing_pairs}")
+
+    if extra_pairs:
+        errors.append(f"Unexpected map/agent rows: {extra_pairs}")
+
+    manifest_difficulties = {entry["map_id"]: entry["difficulty"] for entry in test_manifest}
+    for row in raw_rows:
+        if row["map_id"] in manifest_difficulties and row["difficulty"] != manifest_difficulties[row["map_id"]]:
+            errors.append(f"Difficulty mismatch for {row['map_id']}: {row['difficulty']} != {manifest_difficulties[row['map_id']]}")
+
     by_agent: dict[str, list[dict[str, str]]] = defaultdict(list)
     by_diff: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
     for r in raw_rows:
@@ -335,14 +384,27 @@ def check_result_consistency(errors: list[str]) -> None:
 
     def validate_csv(path: Path, expected: dict[str, dict[str, float | int]], key_getter: callable, name: str):
         if not path.exists():
+            errors.append(f"Missing required artifact: {path}")
             return
         with path.open(encoding="utf-8", newline="") as h:
             rows = list(csv.DictReader(h))
+
+        actual_keys = [key_getter(row) for row in rows]
+        if len(actual_keys) != len(set(actual_keys)):
+            errors.append(f"{name} contains duplicate keys.")
+
+        missing = set(expected) - set(actual_keys)
+        extra = set(actual_keys) - set(expected)
+
+        if missing:
+            errors.append(f"{name} missing rows: {sorted(missing)}")
+        if extra:
+            errors.append(f"{name} unexpected rows: {sorted(extra)}")
+
         for row in rows:
             key = key_getter(row)
             comp = expected.get(key)
             if not comp:
-                errors.append(f"{name} contains unknown key '{key}'")
                 continue
             for field in comp:
                 if field not in row:

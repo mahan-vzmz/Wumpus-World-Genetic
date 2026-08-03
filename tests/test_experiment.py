@@ -208,16 +208,18 @@ def test_duplicate_map_agent_row_is_rejected(tmp_path: Path) -> None:
 
     test_manifest = tmp_path / "maps" / "test" / "manifest.json"
     test_manifest.parent.mkdir(parents=True)
-    test_manifest.write_text(json.dumps([{"path": "m1.txt"}]))
+    test_manifest.write_text(json.dumps([{"map_id": "m1", "difficulty": "easy"}]))
 
     exp_csv = tmp_path / "experiment.csv"
+
+    # Total expected is 3 rows. We will provide 2 astar and 1 genetic (missing rule)
     with exp_csv.open("w", newline="") as h:
         writer = csv.DictWriter(
             h,
             fieldnames=[
                 "agent",
                 "difficulty",
-                "map",
+                "map_id",
                 "success",
                 "score",
                 "score_delta",
@@ -235,7 +237,7 @@ def test_duplicate_map_agent_row_is_rejected(tmp_path: Path) -> None:
             {
                 "agent": "astar",
                 "difficulty": "easy",
-                "map": "m1.txt",
+                "map_id": "m1",
                 "success": 1,
                 "score": 10,
                 "score_delta": 0,
@@ -252,24 +254,7 @@ def test_duplicate_map_agent_row_is_rejected(tmp_path: Path) -> None:
             {
                 "agent": "astar",
                 "difficulty": "easy",
-                "map": "m1.txt",
-                "success": 1,
-                "score": 10,
-                "score_delta": 0,
-                "remaining_health": 10,
-                "steps": 1,
-                "pit_entries": 0,
-                "wumpus_death": 0,
-                "termination_reason": "",
-                "runtime_ms": 1,
-                "expanded_nodes": 1,
-            }
-        )
-        writer.writerow(
-            {
-                "agent": "rule",
-                "difficulty": "easy",
-                "map": "m1.txt",
+                "map_id": "m1",
                 "success": 1,
                 "score": 10,
                 "score_delta": 0,
@@ -286,7 +271,7 @@ def test_duplicate_map_agent_row_is_rejected(tmp_path: Path) -> None:
             {
                 "agent": "genetic",
                 "difficulty": "easy",
-                "map": "m1.txt",
+                "map_id": "m1",
                 "success": 1,
                 "score": 10,
                 "score_delta": 0,
@@ -306,4 +291,92 @@ def test_duplicate_map_agent_row_is_rejected(tmp_path: Path) -> None:
     ):
         errors = []
         check_result_consistency(errors)
-        assert any("Expected 3 experiment rows (1 maps * 3 agents); found 4" in e for e in errors)
+        assert any("Duplicate map_id/agent rows found." in e for e in errors)
+        assert any("Missing map/agent rows" in e for e in errors)
+
+
+def test_canonical_json_sha256_ignores_crlf(tmp_path: Path) -> None:
+    from tools.check_repository_consistency import canonical_json_sha256
+
+    lf_file = tmp_path / "lf.json"
+    lf_file.write_bytes(b'{"key": "value"}\n')
+    crlf_file = tmp_path / "crlf.json"
+    crlf_file.write_bytes(b'{"key": "value"}\r\n')
+
+    assert canonical_json_sha256(lf_file) == canonical_json_sha256(crlf_file)
+    assert canonical_json_sha256(lf_file) != ""
+
+
+def test_canonical_json_sha256_fallback_ignores_crlf(tmp_path: Path) -> None:
+    from tools.check_repository_consistency import canonical_json_sha256
+
+    lf_file = tmp_path / "lf.txt"
+    lf_file.write_bytes(b'not a json\n')
+    crlf_file = tmp_path / "crlf.txt"
+    crlf_file.write_bytes(b'not a json\r\n')
+
+    assert canonical_json_sha256(lf_file) == canonical_json_sha256(crlf_file)
+    assert canonical_json_sha256(lf_file) != ""
+
+
+def test_custom_maps_provenance_hash(tmp_path: Path) -> None:
+    import json
+    import subprocess
+    import sys
+
+    # Create dummy maps
+    valid_map = (
+        "********\n"
+        "********\n"
+        "********\n"
+        "***G****\n"
+        "********\n"
+        "********\n"
+        "********\n"
+        "********\n"
+        "health=120\n"
+        "gold=50\n"
+        "pit=10\n"
+        "exit=8,8\n"
+    )
+    m1 = tmp_path / "m1.txt"
+    m1.write_text(valid_map)
+    m2 = tmp_path / "m2.txt"
+    m2.write_text(valid_map)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "train_genetic.py",
+            "--maps",
+            str(m1),
+            str(m2),
+            "--generations",
+            "1",
+            "--population",
+            "4",
+            "--summary",
+            str(tmp_path / "summary.json"),
+            "--output",
+            str(tmp_path / "best_weights.json"),
+            "--history",
+            str(tmp_path / "history.csv"),
+            "--plot",
+            str(tmp_path / "plot.png"),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0
+
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert summary["training_map_source"] == "custom"
+
+    import hashlib
+    digest = hashlib.sha256()
+    for p in sorted([m1, m2], key=lambda x: str(x)):
+        digest.update(p.name.encode("utf-8"))
+        digest.update(p.read_bytes())
+
+    assert summary["training_map_manifest_sha256"] == digest.hexdigest()

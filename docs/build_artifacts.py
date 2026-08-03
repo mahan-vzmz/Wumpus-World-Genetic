@@ -115,7 +115,7 @@ def load_run_metadata() -> dict[str, Any]:
         "training_max_steps",
         "benchmark_max_steps",
         "timing_repeats",
-        "weights_sha256",
+        "weights_canonical_sha256",
         "best_fitness",
     ]
     missing = [k for k in required_keys if k not in data]

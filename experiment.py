@@ -342,13 +342,19 @@ def write_run_metadata(
         source_commit = "unknown"
 
     weights_file = Path(weights_path)
-    weights_sha256 = ""
+    weights_canonical_sha256 = ""
     best_fitness = 0.0
     if weights_file.exists():
         data = weights_file.read_bytes()
-        weights_sha256 = hashlib.sha256(data).hexdigest()
         try:
             weights_json = json.loads(data.decode("utf-8"))
+            canonical = json.dumps(
+                weights_json,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+            weights_canonical_sha256 = hashlib.sha256(canonical).hexdigest()
             best_fitness = float(weights_json.get("metadata", {}).get("best_fitness", 0.0))
         except Exception:
             pass
@@ -405,7 +411,7 @@ def write_run_metadata(
         "training_max_steps": training_max_steps,
         "benchmark_max_steps": max_steps,
         "timing_repeats": timing_repeats,
-        "weights_sha256": weights_sha256,
+        "weights_canonical_sha256": weights_canonical_sha256,
         "best_fitness": best_fitness,
     }
     (results_dir / "run_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")

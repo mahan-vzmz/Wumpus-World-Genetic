@@ -1,4 +1,4 @@
 agent,episodes,successes,success_rate,average_score_all,average_score_delta_all,average_remaining_health_all,average_steps_all,average_steps_success,average_score_success,average_pit_entries,wumpus_deaths,max_steps_failures,average_runtime_ms,average_expanded_nodes
-astar,30,30,100.0,157.6,37.6,107.6,12.4,12.4,157.6,0.0,0,0,0.5653,27.0
-rule,30,27,90.0,117.93,-2.07,73.93,32.9,32.3,127.22,0.267,1,0,2.302,0.0
-genetic,30,25,83.33,120.97,0.97,75.63,31.8,24.6,139.96,0.133,2,0,2.8451,0.0
+astar,30,30,100.0,157.6,37.6,107.6,12.4,12.4,157.6,0.0,0,0,0.5434,27.0
+rule,30,27,90.0,117.93,-2.07,73.93,32.9,32.3,127.22,0.267,1,0,2.1974,0.0
+genetic,30,25,83.33,120.97,0.97,75.63,31.8,24.6,139.96,0.133,2,0,2.7181,0.0

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import shutil
 import sys
 from pathlib import Path
@@ -11,10 +12,20 @@ ROOT_WEIGHTS = ROOT / "best_weights.json"
 PACKAGED_WEIGHTS = ROOT / "src" / "wumpus_world" / "data" / "best_weights.json"
 
 
-def sha256_file(path: Path) -> str:
+def canonical_json_sha256(path: Path) -> str:
     if not path.exists():
         return ""
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        canonical = json.dumps(
+            payload,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        return hashlib.sha256(canonical).hexdigest()
+    except Exception:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def main() -> None:
@@ -26,8 +37,8 @@ def main() -> None:
         print(f"Error: Root weights file missing: {ROOT_WEIGHTS}", file=sys.stderr)
         sys.exit(1)
 
-    root_hash = sha256_file(ROOT_WEIGHTS)
-    packaged_hash = sha256_file(PACKAGED_WEIGHTS)
+    root_hash = canonical_json_sha256(ROOT_WEIGHTS)
+    packaged_hash = canonical_json_sha256(PACKAGED_WEIGHTS)
 
     if args.check:
         if root_hash != packaged_hash:
@@ -42,8 +53,8 @@ def main() -> None:
     PACKAGED_WEIGHTS.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT_WEIGHTS, PACKAGED_WEIGHTS)
 
-    root_hash = sha256_file(ROOT_WEIGHTS)
-    packaged_hash = sha256_file(PACKAGED_WEIGHTS)
+    root_hash = canonical_json_sha256(ROOT_WEIGHTS)
+    packaged_hash = canonical_json_sha256(PACKAGED_WEIGHTS)
 
     if root_hash != packaged_hash:
         print(f"Error: Weight synchronization failed ({root_hash} != {packaged_hash})", file=sys.stderr)

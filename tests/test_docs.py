@@ -136,10 +136,7 @@ def test_pdf_hash_mismatch_forces_rebuild(tmp_path: Path) -> None:
 
                 mock_weasyprint = MagicMock()
                 with patch.dict("sys.modules", {"weasyprint": mock_weasyprint}):
-                    try:
-                        build_report({}, [], [])
-                    except Exception:
-                        pass
+                    build_report({}, [], [])
                     mock_weasyprint.HTML.assert_called()
 
 
@@ -168,8 +165,21 @@ def test_academic_cover_contains_student_id_and_date(tmp_path: Path) -> None:
         '"course_name": "AI", "instructor_name": "Prof", "university_name": "Uni", "submission_date": "2026-08-03"}',
         encoding="utf-8",
     )
-    from docs.build_artifacts import load_project_info
+    from docs.build_artifacts import build_report, load_project_info
 
     info = load_project_info(path)
     assert info["student_id"] == "12345"
     assert info["submission_date"] == "2026-08-03"
+
+    with patch("docs.build_artifacts.REPORT_DIR", tmp_path):
+        with patch("docs.build_artifacts.preflight_pdf", return_value=1):
+            from unittest.mock import MagicMock
+            mock_weasyprint = MagicMock()
+            with patch.dict("sys.modules", {"weasyprint": mock_weasyprint}):
+                build_report(info, [], [])
+
+        html_file = tmp_path / "final_report.html"
+        assert html_file.exists()
+        html_content = html_file.read_text(encoding="utf-8")
+        assert "12345" in html_content
+        assert "2026-08-03" in html_content

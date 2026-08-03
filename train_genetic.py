@@ -32,24 +32,41 @@ def main() -> None:
     parser.add_argument("--regenerate-training-maps", action="store_true")
     args = parser.parse_args()
 
+    paths = args.maps or [str(path) for path in sorted(Path("maps/training").glob("training_*.txt"))]
+    if not paths:
+        raise SystemExit("No training maps found. Run with --regenerate-training-maps first.")
+
+    default_training_dir = Path("maps/training").resolve()
+    is_default_suite = (
+        not args.maps
+        and all(Path(path).resolve().parent == default_training_dir for path in paths)
+    )
+
     provenance = {}
     if args.regenerate_training_maps:
         generate_training_suite()
-        provenance["training_map_source"] = "generated"
+        paths = args.maps or [str(path) for path in sorted(Path("maps/training").glob("training_*.txt"))]
+        provenance["training_map_source"] = "generated_now"
         provenance["training_map_seed"] = 1701  # Assuming default from generator
+        manifest_path = Path("maps/training/manifest.json")
+        if manifest_path.exists():
+            provenance["training_map_manifest_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    elif is_default_suite:
+        provenance["training_map_source"] = "tracked_generated_suite"
+        provenance["training_map_seed"] = 1701
         manifest_path = Path("maps/training/manifest.json")
         if manifest_path.exists():
             provenance["training_map_manifest_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
     else:
         provenance["training_map_source"] = "custom"
         provenance["training_map_seed"] = None
-        manifest_path = Path("maps/training/manifest.json")
-        if manifest_path.exists():
-            provenance["training_map_manifest_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+        digest = hashlib.sha256()
+        for path_text in sorted(paths):
+            path = Path(path_text)
+            digest.update(path.name.encode("utf-8"))
+            digest.update(path.read_bytes())
+        provenance["training_map_manifest_sha256"] = digest.hexdigest()
 
-    paths = args.maps or [str(path) for path in sorted(Path("maps/training").glob("training_*.txt"))]
-    if not paths:
-        raise SystemExit("No training maps found. Run with --regenerate-training-maps first.")
     provenance["training_map_count"] = len(paths)
 
     trainer = GeneticTrainer(

@@ -7,9 +7,9 @@ Best online agent: rule (90.00%)
 
 OVERALL RESULTS
 --------------------------------------------------------
-astar    | success=100.00% | score_all= 157.60 | steps_all=  12.40 | steps_success=  12.40 | runtime=  0.5653 ms
-rule     | success= 90.00% | score_all= 117.93 | steps_all=  32.90 | steps_success=  32.30 | runtime=  2.3020 ms
-genetic  | success= 83.33% | score_all= 120.97 | steps_all=  31.80 | steps_success=  24.60 | runtime=  2.8451 ms
+astar    | success=100.00% | score_all= 157.60 | steps_all=  12.40 | steps_success=  12.40 | runtime=  0.5434 ms
+rule     | success= 90.00% | score_all= 117.93 | steps_all=  32.90 | steps_success=  32.30 | runtime=  2.1974 ms
+genetic  | success= 83.33% | score_all= 120.97 | steps_all=  31.80 | steps_success=  24.60 | runtime=  2.7181 ms
 
 INTERPRETATION AND LIMITATIONS
 --------------------------------------------------------
