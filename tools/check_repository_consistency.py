@@ -146,6 +146,10 @@ def check_training_metadata_consistency(errors: list[str]) -> None:
             root_weights_json = json.loads(ROOT_WEIGHTS.read_text(encoding="utf-8"))
             root_genes = root_weights_json.get("genes", {})
             summary_genes = training.get("best_weights", {})
+            if set(summary_genes.keys()) != set(root_genes.keys()):
+                errors.append(
+                    f"Weight genes mismatch: summary genes {set(summary_genes.keys())} != best_weights genes {set(root_genes.keys())}"
+                )
             for key, val in summary_genes.items():
                 if abs(float(val) - float(root_genes.get(key, 0))) > 1e-4:
                     errors.append(
@@ -255,6 +259,18 @@ def check_report_metadata(errors: list[str]) -> None:
         errors.append(f"Placeholder values in project_info.public.json: {', '.join(sorted(invalid))}")
 
 
+def _safe_float(val: str | None) -> float:
+    try:
+        return float(val) if val else 0.0
+    except (ValueError, TypeError):
+        return 0.0
+
+def _safe_int(val: str | None) -> int:
+    try:
+        return int(float(val)) if val else 0
+    except (ValueError, TypeError):
+        return 0
+
 def check_result_consistency(errors: list[str]) -> None:
     test_manifest_path = ROOT / "maps" / "test" / "manifest.json"
     if not test_manifest_path.exists():
@@ -276,68 +292,64 @@ def check_result_consistency(errors: list[str]) -> None:
         errors.append(f"Expected {expected_rows} experiment rows ({num_maps} maps * 3 agents); found {len(raw_rows)}")
         return
 
-    agent_groups: dict[str, list[dict[str, str]]] = defaultdict(list)
+    by_agent: dict[str, list[dict[str, str]]] = defaultdict(list)
+    by_diff: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
     for r in raw_rows:
-        agent_groups[r["agent"]].append(r)
+        by_agent[r["agent"]].append(r)
+        by_diff[(r["agent"], r["difficulty"])].append(r)
 
-    computed_summary: dict[str, dict[str, float | int]] = {}
-    for agent, group in agent_groups.items():
+    def _mean(rows: list[dict[str, str]], key: str) -> float:
+        values = [_safe_float(r.get(key)) for r in rows]
+        return sum(values) / len(values) if values else 0.0
+
+    def compute_summary(agent: str, group: list[dict[str, str]]) -> dict[str, float | int]:
+        successes = [r for r in group if str(r.get("success", "")).lower() in ("1", "true")]
         episodes = len(group)
-        successes = sum(1 for r in group if r["success"] in ("1", "True", "true"))
-        success_rate = round((successes / episodes) * 100.0, 2)
-        scores = [int(r["score"]) for r in group]
-        steps_all = [int(r["steps"]) for r in group]
-        steps_succ = [int(r["steps"]) for r in group if r["success"] in ("1", "True", "true")]
-        healths = [int(r["remaining_health"]) for r in group]
-        pits = [int(r["pit_entries"]) for r in group]
-        deaths = sum(
-            1
-            for r in group
-            if r.get("wumpus_death") in ("1", "True", "true") or r.get("termination_reason") == "wumpus_killed"
-        )
-
-        computed_summary[agent] = {
+        return {
             "episodes": episodes,
-            "successes": successes,
-            "success_rate": success_rate,
-            "average_score_all": round(mean(scores), 2),
-            "average_steps_all": round(mean(steps_all), 2),
-            "average_steps_success": round(mean(steps_succ), 2) if steps_succ else 0.0,
-            "average_remaining_health_all": round(mean(healths), 2),
-            "average_pit_entries": round(mean(pits), 2),
-            "wumpus_deaths": deaths,
+            "successes": len(successes),
+            "success_rate": round(100.0 * len(successes) / episodes, 2) if episodes else 0.0,
+            "average_score_all": round(_mean(group, "score"), 2),
+            "average_score_delta_all": round(_mean(group, "score_delta"), 2),
+            "average_remaining_health_all": round(_mean(group, "remaining_health"), 2),
+            "average_steps_all": round(_mean(group, "steps"), 2),
+            "average_steps_success": round(_mean(successes, "steps"), 2),
+            "average_score_success": round(_mean(successes, "score"), 2),
+            "average_pit_entries": round(_mean(group, "pit_entries"), 3),
+            "wumpus_deaths": sum(1 for r in group if str(r.get("wumpus_death", "")).lower() in ("1", "true") or r.get("termination_reason") == "wumpus_killed"),
+            "max_steps_failures": sum(1 for r in group if r.get("termination_reason") == "max_steps"),
+            "average_runtime_ms": round(_mean(group, "runtime_ms"), 4),
+            "average_expanded_nodes": round(_mean(group, "expanded_nodes"), 2),
         }
 
-    if SUMMARY_CSV_PATH.exists():
-        with SUMMARY_CSV_PATH.open(encoding="utf-8", newline="") as h:
-            summary_rows = list(csv.DictReader(h))
+    computed_summary = {agent: compute_summary(agent, group) for agent, group in by_agent.items()}
 
-        for row in summary_rows:
-            agent = row["agent"]
-            comp = computed_summary.get(agent)
+    def validate_csv(path: Path, expected: dict[str, dict[str, float | int]], key_getter: callable, name: str):
+        if not path.exists():
+            return
+        with path.open(encoding="utf-8", newline="") as h:
+            rows = list(csv.DictReader(h))
+        for row in rows:
+            key = key_getter(row)
+            comp = expected.get(key)
             if not comp:
-                errors.append(f"Summary CSV contains unknown agent '{agent}'")
+                errors.append(f"{name} contains unknown key '{key}'")
                 continue
+            for field in comp:
+                if field not in row:
+                    continue
+                csv_val = float(row[field])
+                calc_val = float(comp[field])
+                tolerance = 1.0 if field == "average_runtime_ms" else 1e-2
+                if abs(csv_val - calc_val) > tolerance:
+                    errors.append(f"{name} metric mismatch for '{key}' field '{field}': CSV={csv_val}, computed={calc_val}")
 
-            for key in (
-                "success_rate",
-                "average_score_all",
-                "average_steps_all",
-                "average_steps_success",
-                "average_remaining_health_all",
-                "average_pit_entries",
-            ):
-                csv_val = float(row[key])
-                calc_val = float(comp[key])
-                if abs(csv_val - calc_val) > 1e-2:
-                    errors.append(
-                        f"Summary metric mismatch for agent '{agent}' field '{key}': CSV={csv_val}, computed={calc_val}"
-                    )
+    validate_csv(SUMMARY_CSV_PATH, computed_summary, lambda r: r["agent"], "Summary CSV")
 
-            if int(row["wumpus_deaths"]) != int(comp["wumpus_deaths"]):
-                errors.append(
-                    f"Summary wumpus_deaths mismatch for agent '{agent}': CSV={row['wumpus_deaths']}, computed={comp['wumpus_deaths']}"
-                )
+    diff_path = ROOT / "results" / "final" / "difficulty_results.csv"
+    if diff_path.exists():
+        computed_diff = {f"{agent}-{diff}": compute_summary(agent, group) for (agent, diff), group in by_diff.items()}
+        validate_csv(diff_path, computed_diff, lambda r: f"{r['agent']}-{r['difficulty']}", "Difficulty CSV")
 
     if FINAL_REPORT_HTML.exists():
         html_text = FINAL_REPORT_HTML.read_text(encoding="utf-8")

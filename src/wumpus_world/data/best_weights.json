@@ -16,6 +16,12 @@
     "best_fitness": 1840.6666666666667,
     "seed": 17,
     "map_count": 12,
-    "generations_run": 24
+    "generations_run": 24,
+    "crossover_rate": 0.9,
+    "patience": 8,
+    "training_map_source": "custom",
+    "training_map_seed": null,
+    "training_map_manifest_sha256": "46bec204d69e22c69cba70e484396e8cb73d9933e125fecb088fb397aa9da635",
+    "training_map_count": 12
   }
 }
