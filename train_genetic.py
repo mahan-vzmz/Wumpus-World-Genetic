@@ -37,10 +37,7 @@ def main() -> None:
         raise SystemExit("No training maps found. Run with --regenerate-training-maps first.")
 
     default_training_dir = Path("maps/training").resolve()
-    is_default_suite = (
-        not args.maps
-        and all(Path(path).resolve().parent == default_training_dir for path in paths)
-    )
+    is_default_suite = not args.maps and all(Path(path).resolve().parent == default_training_dir for path in paths)
 
     provenance = {}
     if args.regenerate_training_maps:

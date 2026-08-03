@@ -174,6 +174,7 @@ def test_academic_cover_contains_student_id_and_date(tmp_path: Path) -> None:
     with patch("docs.build_artifacts.REPORT_DIR", tmp_path):
         with patch("docs.build_artifacts.preflight_pdf", return_value=1):
             from unittest.mock import MagicMock
+
             mock_weasyprint = MagicMock()
             with patch.dict("sys.modules", {"weasyprint": mock_weasyprint}):
                 build_report(info, [], [])

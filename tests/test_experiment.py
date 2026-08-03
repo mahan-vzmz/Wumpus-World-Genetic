@@ -311,9 +311,9 @@ def test_canonical_json_sha256_fallback_ignores_crlf(tmp_path: Path) -> None:
     from tools.check_repository_consistency import canonical_json_sha256
 
     lf_file = tmp_path / "lf.txt"
-    lf_file.write_bytes(b'not a json\n')
+    lf_file.write_bytes(b"not a json\n")
     crlf_file = tmp_path / "crlf.txt"
-    crlf_file.write_bytes(b'not a json\r\n')
+    crlf_file.write_bytes(b"not a json\r\n")
 
     assert canonical_json_sha256(lf_file) == canonical_json_sha256(crlf_file)
     assert canonical_json_sha256(lf_file) != ""
@@ -374,6 +374,7 @@ def test_custom_maps_provenance_hash(tmp_path: Path) -> None:
     assert summary["training_map_source"] == "custom"
 
     import hashlib
+
     digest = hashlib.sha256()
     for p in sorted([m1, m2], key=lambda x: str(x)):
         digest.update(p.name.encode("utf-8"))

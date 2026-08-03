@@ -317,16 +317,9 @@ def check_result_consistency(errors: list[str]) -> None:
         errors.append(f"Expected {expected_rows} experiment rows ({num_maps} maps * 3 agents); found {len(raw_rows)}")
         return
 
-    expected_pairs = {
-        (entry["map_id"], agent)
-        for entry in test_manifest
-        for agent in ("astar", "rule", "genetic")
-    }
+    expected_pairs = {(entry["map_id"], agent) for entry in test_manifest for agent in ("astar", "rule", "genetic")}
 
-    actual_pairs = [
-        (row["map_id"], row["agent"])
-        for row in raw_rows
-    ]
+    actual_pairs = [(row["map_id"], row["agent"]) for row in raw_rows]
 
     if len(actual_pairs) != len(set(actual_pairs)):
         errors.append("Duplicate map_id/agent rows found.")
@@ -343,7 +336,9 @@ def check_result_consistency(errors: list[str]) -> None:
     manifest_difficulties = {entry["map_id"]: entry["difficulty"] for entry in test_manifest}
     for row in raw_rows:
         if row["map_id"] in manifest_difficulties and row["difficulty"] != manifest_difficulties[row["map_id"]]:
-            errors.append(f"Difficulty mismatch for {row['map_id']}: {row['difficulty']} != {manifest_difficulties[row['map_id']]}")
+            errors.append(
+                f"Difficulty mismatch for {row['map_id']}: {row['difficulty']} != {manifest_difficulties[row['map_id']]}"
+            )
 
     by_agent: dict[str, list[dict[str, str]]] = defaultdict(list)
     by_diff: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
