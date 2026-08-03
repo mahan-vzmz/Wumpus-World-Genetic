@@ -42,7 +42,8 @@ dev = [
     "build>=1.2,<2.0"
 ]
 docs = [
-    "weasyprint>=68,<69"
+    "weasyprint>=68,<69",
+    "pypdf>=5,<7"
 ]
 
 [project.scripts]

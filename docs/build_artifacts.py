@@ -98,6 +98,8 @@ def load_run_metadata() -> dict[str, Any]:
         "training_seed",
         "training_map_seed",
         "test_seed",
+        "training_map_source",
+        "training_map_manifest_sha256",
         "training_maps",
         "test_maps",
         "maps_per_difficulty",
@@ -110,7 +112,8 @@ def load_run_metadata() -> dict[str, Any]:
         "patience",
         "elite_count",
         "tournament_size",
-        "max_steps",
+        "training_max_steps",
+        "benchmark_max_steps",
         "timing_repeats",
         "weights_sha256",
         "best_fitness",
@@ -167,13 +170,19 @@ def load_project_info(path: Path | str | None = None) -> dict[str, str]:
     return info
 
 
-def report_fingerprint(html_text: str, assets: list[Path], info: dict[str, str]) -> str:
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    h.update(path.read_bytes())
+    return h.hexdigest()
+
+
+def report_fingerprint(html_text: str, asset_paths: list[Path], info: dict[str, str]) -> str:
     digest = hashlib.sha256()
     digest.update(html_text.encode("utf-8"))
     digest.update(json.dumps(info, sort_keys=True).encode("utf-8"))
     digest.update(PROJECT_VERSION.encode("utf-8"))
 
-    for asset in sorted(assets, key=lambda p: p.name):
+    for asset in sorted(asset_paths, key=lambda p: p.name):
         if asset.exists():
             digest.update(asset.name.encode("utf-8"))
             digest.update(asset.read_bytes())
@@ -181,7 +190,7 @@ def report_fingerprint(html_text: str, assets: list[Path], info: dict[str, str])
     return digest.hexdigest()
 
 
-def preflight_pdf(pdf_path: Path) -> None:
+def preflight_pdf(pdf_path: Path) -> int:
     if not pdf_path.exists() or pdf_path.stat().st_size == 0:
         raise ValueError(f"PDF report file is missing or empty: {pdf_path}")
 
@@ -192,14 +201,14 @@ def preflight_pdf(pdf_path: Path) -> None:
     if b"%%EOF" not in data[-2048:]:
         raise ValueError(f"PDF file trailer invalid (missing %%EOF marker): {pdf_path}")
 
-    try:
-        import pypdf
+    import pypdf
 
-        reader = pypdf.PdfReader(str(pdf_path))
-        if len(reader.pages) < 1:
-            raise ValueError("PDF report has 0 pages.")
-    except ImportError:
-        pass
+    reader = pypdf.PdfReader(str(pdf_path))
+    pages = len(reader.pages)
+    if pages < 1:
+        raise ValueError("PDF report has 0 pages.")
+    
+    return pages
 
 
 def build_report(info: dict[str, str], summary: list[dict[str, str]], asset_paths: list[Path]) -> Path:
@@ -380,17 +389,22 @@ ul {{ margin-right:20px; }}
         except Exception:
             pass
 
-    if html_path.exists() and pdf_path.exists() and manifest_data.get("fingerprint") == current_fp:
-        try:
-            preflight_pdf(pdf_path)
-            return pdf_path
-        except Exception:
-            pass
+    if html_path.exists() and pdf_path.exists():
+        cached_fp = manifest_data.get("source_fingerprint")
+        cached_pdf_hash = manifest_data.get("pdf_sha256")
+        if cached_fp == current_fp and cached_pdf_hash == sha256_file(pdf_path):
+            try:
+                preflight_pdf(pdf_path)
+                return pdf_path
+            except Exception:
+                pass
 
     pdf_path.unlink(missing_ok=True)
     errors: list[str] = []
 
     generated = False
+    renderer = "unknown"
+    page_count = 0
     try:
         import contextlib
         import io
@@ -400,8 +414,9 @@ ul {{ margin-right:20px; }}
 
             HTML(filename=str(html_path), base_url=str(REPORT_DIR)).write_pdf(str(pdf_path))
             if pdf_path.exists() and pdf_path.stat().st_size > 0:
-                preflight_pdf(pdf_path)
+                page_count = preflight_pdf(pdf_path)
                 generated = True
+                renderer = "weasyprint"
     except Exception as exc:
         errors.append(f"WeasyPrint: {exc}")
 
@@ -428,15 +443,22 @@ ul {{ margin-right:20px; }}
                 ]
                 subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 if pdf_path.exists() and pdf_path.stat().st_size > 0:
-                    preflight_pdf(pdf_path)
+                    page_count = preflight_pdf(pdf_path)
                     generated = True
+                    renderer = "browser"
         except Exception as exc:
             errors.append(f"Browser fallback: {exc}")
 
     if not generated:
         raise RuntimeError("Unable to generate PDF.\n" + "\n".join(errors))
 
-    manifest_data = {"fingerprint": current_fp, "version": PROJECT_VERSION}
+    manifest_data = {
+        "source_fingerprint": current_fp,
+        "pdf_sha256": sha256_file(pdf_path),
+        "version": PROJECT_VERSION,
+        "renderer": renderer,
+        "page_count": page_count,
+    }
     manifest_path.write_text(json.dumps(manifest_data, indent=2), encoding="utf-8")
     return pdf_path
 
